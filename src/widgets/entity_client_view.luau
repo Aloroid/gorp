@@ -93,6 +93,7 @@ return function()
 					local t = if result.ok == true
 						then { "Id", unpack(result.included_names) }
 						else { "Id" }
+					if #t == 1 then table.insert(t, "") end
 					return t
 				end,
 
