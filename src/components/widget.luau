@@ -30,7 +30,7 @@ type props = {
 	[any]: any,
 }
 
-local highest_display_order = 0
+local highest_display_order = 100000
 local RESIZE_RANGE = 8
 
 return function(props: props)
@@ -44,7 +44,10 @@ return function(props: props)
 	local x_position = source(100)
 	local y_position = source(56)
 
-	assert(widgets[props.widget_id] == nil, `{props.widget_id} already exists as a widget!`)
+	assert(
+		widgets[props.widget_id] == nil,
+		`{props.widget_id} already exists as a widget!`
+	)
 
 	props.closeable = nil
 	props.widget_id = nil
@@ -61,6 +64,7 @@ return function(props: props)
 	local can_resize_right = false
 	local can_resize_left = false
 	local resizing = source(false)
+	local ref = source()
 	local display_order = source(highest_display_order + 1)
 	highest_display_order += 1
 
@@ -70,7 +74,8 @@ return function(props: props)
 
 	return vide.root(function(destroy)
 		local gui = create "ScreenGui" {
-			Parent = if RunService:IsStudio() and not RunService:IsRunning()
+			Parent = if RunService:IsStudio()
+					and not RunService:IsRunning()
 				then game:GetService("CoreGui")
 				else Players.LocalPlayer:WaitForChild("PlayerGui"),
 
@@ -78,11 +83,17 @@ return function(props: props)
 
 			DisplayOrder = display_order,
 
+			vide.action(ref),
+
 			shadow {
 
-				Position = function() return UDim2.fromOffset(x_position(), y_position()) end,
+				Position = function()
+					return UDim2.fromOffset(x_position(), y_position())
+				end,
 
-				Size = function() return UDim2.fromOffset(x_size() + 6, y_size() + 6) end,
+				Size = function()
+					return UDim2.fromOffset(x_size() + 6, y_size() + 6)
+				end,
 
 				create "Frame" {
 
@@ -133,17 +144,24 @@ return function(props: props)
 							dragging(true)
 						end,
 
-						actions.cleanup(RunService.RenderStepped:Connect(function()
-							if dragging() == false then return end
-							if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-								dragging(false)
-								return
-							end
+						actions.cleanup(
+							RunService.RenderStepped:Connect(function()
+								if dragging() == false then return end
+								if
+									not UserInputService:IsMouseButtonPressed(
+										Enum.UserInputType.MouseButton1
+									)
+								then
+									dragging(false)
+									return
+								end
 
-							local position = UserInputService:GetMouseLocation()
-							x_position(position.X + offset.X)
-							y_position(position.Y + offset.Y)
-						end)),
+								local position =
+									UserInputService:GetMouseLocation()
+								x_position(position.X + offset.X)
+								y_position(position.Y + offset.Y)
+							end)
+						),
 
 						ZIndex = 1000,
 					},
@@ -175,21 +193,33 @@ return function(props: props)
 
 						can_resize_top = y < RESIZE_RANGE
 						can_resize_left = x < RESIZE_RANGE
-						can_resize_bottom = y > (absolute_size().Y - RESIZE_RANGE)
-						can_resize_right = x > (absolute_size().X - RESIZE_RANGE)
+						can_resize_bottom = y
+							> (absolute_size().Y - RESIZE_RANGE)
+						can_resize_right = x
+							> (absolute_size().X - RESIZE_RANGE)
 
 						if RunService:IsRunning() == false then return end
 						if normal then UserInputService.MouseIcon = normal end
 						normal = UserInputService.MouseIcon
 
-						if (can_resize_top and can_resize_left) or (can_resize_bottom and can_resize_right) then
-							UserInputService.MouseIcon = "rbxasset://textures/StudioUIEditor/icon_resize3.png"
-						elseif (can_resize_top and can_resize_right) or (can_resize_bottom and can_resize_left) then
-							UserInputService.MouseIcon = "rbxasset://textures/StudioUIEditor/icon_resize1.png"
+						if
+							(can_resize_top and can_resize_left)
+							or (can_resize_bottom and can_resize_right)
+						then
+							UserInputService.MouseIcon =
+								"rbxasset://textures/StudioUIEditor/icon_resize3.png"
+						elseif
+							(can_resize_top and can_resize_right)
+							or (can_resize_bottom and can_resize_left)
+						then
+							UserInputService.MouseIcon =
+								"rbxasset://textures/StudioUIEditor/icon_resize1.png"
 						elseif can_resize_top or can_resize_bottom then
-							UserInputService.MouseIcon = "rbxasset://textures/StudioUIEditor/icon_resize4.png"
+							UserInputService.MouseIcon =
+								"rbxasset://textures/StudioUIEditor/icon_resize4.png"
 						elseif can_resize_left or can_resize_right then
-							UserInputService.MouseIcon = "rbxasset://textures/StudioUIEditor/icon_resize2.png"
+							UserInputService.MouseIcon =
+								"rbxasset://textures/StudioUIEditor/icon_resize2.png"
 						end
 					end,
 
@@ -200,28 +230,41 @@ return function(props: props)
 					end,
 
 					InputBegan = function(input: InputObject)
-						if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
-						display_order(highest_display_order + 1)
-						highest_display_order += 1
+						if
+							input.UserInputType
+							~= Enum.UserInputType.MouseButton1
+						then
+							return
+						end
+
 						resizing(true)
 						top = absolute_position()
 						bottom = absolute_position() + absolute_size()
 					end,
 
-					actions.cleanup(RunService.RenderStepped:Connect(function()
+					cleanup(RunService.RenderStepped:Connect(function()
 						local mposition = UserInputService:GetMouseLocation()
 						local top_inset, bottom_inset = GuiService:GetGuiInset()
 						mposition -= top_inset + bottom_inset
 						local x, y = mposition.X, mposition.Y
 
 						resizing(
-							resizing() and (UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1))
+							resizing()
+								and (
+									UserInputService:IsMouseButtonPressed(
+										Enum.UserInputType.MouseButton1
+									)
+								)
 						)
 
 						if not resizing() then return end
 
-						if can_resize_bottom then y_size(math.max(y - top.Y, min_size.Y)) end
-						if can_resize_right then x_size(math.max(x - top.X, min_size.X)) end
+						if can_resize_bottom then
+							y_size(math.max(y - top.Y, min_size.Y))
+						end
+						if can_resize_right then
+							x_size(math.max(x - top.X, min_size.X))
+						end
 						if can_resize_top then
 							y_size(math.max(bottom.Y - y, min_size.Y))
 							y_position(math.min(y, bottom.Y - min_size.Y))
@@ -231,11 +274,26 @@ return function(props: props)
 							x_position(math.min(x, bottom.X - min_size.X))
 						end
 					end)),
+
+					cleanup(UserInputService.InputBegan:Connect(function(input)
+						local player_gui = Players.LocalPlayer:WaitForChild(
+							"PlayerGui"
+						) :: PlayerGui
+						local objects = player_gui:GetGuiObjectsAtPosition(
+							input.Position.X,
+							input.Position.Y
+						)
+						if #objects == 0 then return end
+						if not objects[1]:IsDescendantOf(ref()) then return end
+
+						display_order(highest_display_order + 1)
+						highest_display_order += 1
+					end)),
 				},
 			},
 		}
 
-		cleanup(function() gui:Destroy() end)
+		cleanup(gui)
 
 		return gui
 	end)
