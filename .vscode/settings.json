@@ -1,0 +1,4 @@
+{
+	"editor.formatOnSave": true,
+	"luau-lsp.sourcemap.rojoProjectFile": "export.project.json"
+}

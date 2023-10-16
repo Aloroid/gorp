@@ -1,0 +1,12 @@
+{
+	"name": "gorp",
+
+	"tree": {
+		"$path": "Packages",
+
+		"gorp": {
+			"$path": "src"
+		}
+
+	}
+}

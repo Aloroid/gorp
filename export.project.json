@@ -1,0 +1,34 @@
+{
+	"name": "gorp",
+
+	"tree": {
+		"$className": "DataModel",
+
+		"ReplicatedStorage": {
+			"Packages": {
+				"$path": "Packages",
+
+				"gorp": {
+					"$path": "src"
+				}
+			},
+			"Shared": {
+				"$path": "example/shared"
+			}
+		},
+
+		"ServerScriptService": {
+			"Server": {
+				"$path": "example/server"
+			}
+		},
+
+		"StarterPlayer": {
+			"StarterPlayerScripts": {
+				"Client": {
+					"$path": "example/client"
+				}
+			}
+		}
+	}
+}

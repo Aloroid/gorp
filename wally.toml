@@ -1,0 +1,10 @@
+[package]
+name = "aloroid/gorp"
+description = "ecr debugger new"
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[dependencies]
+vide = "centau/vide@0.1"
+ecr = "centau/ecr@0.7"
