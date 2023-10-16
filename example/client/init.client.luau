@@ -11,11 +11,12 @@ for i = 1, 100 do
 end
 
 gorp.add_world(world, "client")
+gorp.spawn_widget("registry_selector", {
+	world = world,
+})
 
 UserInputService.InputBegan:Connect(function(input)
 	if input.KeyCode == Enum.KeyCode.F2 then
-		gorp.spawn_widget("entity_client_view", {
-			world = world,
-		})
+		gorp.enabled(not gorp.enabled())
 	end
 end)

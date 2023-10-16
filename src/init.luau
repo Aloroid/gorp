@@ -27,7 +27,7 @@ local function check_if_user_allowed(callback: (player: Player) -> boolean)
 end
 
 -- spawns a new widget
-type widgets = "entity_client_view"
+type widgets = "entity_client_view" | "registry_selector"
 local function spawn_widget(name: widgets, props: { [any]: any })
 	local widget = (require :: any)(script.widgets:FindFirstChild(name))
 
@@ -57,4 +57,5 @@ return {
 	spawn_widget = spawn_widget,
 
 	compat_set_cts = compat_set_cts,
+	enabled = state.enabled,
 }

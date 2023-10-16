@@ -18,5 +18,6 @@ return vide.root(function()
 		end,
 
 		current_client_world = source({} :: { world: rts.Registry, name: string }),
+		enabled = source(false),
 	}
 end)

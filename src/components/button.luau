@@ -63,6 +63,8 @@ local function button(props: Button)
 			create "TextLabel" {
 
 				AutomaticSize = Enum.AutomaticSize.XY,
+				Position = UDim2.fromScale(0, 0.5),
+				AnchorPoint = Vector2.new(0, 0.5),
 
 				BackgroundTransparency = 1,
 
