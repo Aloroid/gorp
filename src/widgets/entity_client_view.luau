@@ -16,6 +16,7 @@ local dynamic_ecs_query = require(script.Parent.Parent.dynamic_ecs_query)
 
 local background = require(script.Parent.Parent.components.background)
 local layout = require(script.Parent.Parent.components.layout)
+local state = require(script.Parent.Parent.state)
 local table_ui = require(script.Parent.Parent.components.table)
 local text = require(script.Parent.Parent.components.text)
 local text_input = require(script.Parent.Parent.components.text_input)
@@ -23,8 +24,9 @@ local text_input = require(script.Parent.Parent.components.text_input)
 local source = vide.source
 local effect = vide.effect
 
-return function(props: { world: ecr.Registry, name: string })
-	local world = props.world
+return function()
+	local entry = state.current_client_world()
+	local world = entry.world
 
 	local raw_text = source("")
 	local unparsed_query = source("")
@@ -50,7 +52,7 @@ return function(props: { world: ecr.Registry, name: string })
 
 	return widget {
 
-		title = props.name,
+		title = `Registry Explorer: {entry.name}`,
 		min_size = Vector2.new(250, 400),
 		closeable = true,
 
@@ -91,7 +93,6 @@ return function(props: { world: ecr.Registry, name: string })
 					local t = if result.ok == true
 						then { "Id", unpack(result.included_names) }
 						else { "Id" }
-					if #t == 1 then table.insert(t, "") end
 					return t
 				end,
 

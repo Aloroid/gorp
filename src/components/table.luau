@@ -1,16 +1,13 @@
-local debugger = script.Parent.Parent
-local packages = debugger.Parent.Parent
-
 local container = require(script.Parent.container)
-local style = require(debugger.style)
+local style = require(script.Parent.Parent.style)
 local vide = require(script.Parent.Parent.Parent.vide)
 
-local background = require(debugger.components.background)
-local border = require(debugger.components.border)
-local layout = require(debugger.components.layout)
-local resizeable_bar = require(debugger.components.resizeable_bar)
-local scroller = require(debugger.components.scroller)
-local text = require(debugger.components.text)
+local background = require(script.Parent.background)
+local border = require(script.Parent.border)
+local layout = require(script.Parent.layout)
+local resizeable_bar = require(script.Parent.resizeable_bar)
+local scroller = require(script.Parent.scroller)
+local text = require(script.Parent.text)
 
 local create = vide.create
 local source = vide.source
@@ -48,6 +45,7 @@ return function(props: Table)
 		end
 
 	local sizes = source({})
+	local splits = source({})
 
 	local display = props.display
 		or function(value)
@@ -55,6 +53,14 @@ return function(props: Table)
 				text = function() return tostring(value()) end,
 			}
 		end :: never
+
+	local function get_size(index: number)
+		local split_before = splits()[index - 1] or source(0) :: never
+		local split_after = splits()[index] or source(1) :: never
+
+		local size = split_after() - split_before()
+		return size
+	end
 
 	return background {
 
@@ -67,6 +73,8 @@ return function(props: Table)
 		resizeable_bar({
 			meaning = meaning,
 			sizes = sizes,
+
+			splits = splits,
 		}),
 
 		scroller {
@@ -77,7 +85,6 @@ return function(props: Table)
 						return table.create(#meaning(), true)
 					end
 					assert(rows ~= nil, "rows is nil")
-
 					local value = rows()[row_index()]
 					return value and value() or {}
 				end)
@@ -91,13 +98,8 @@ return function(props: Table)
 						return container {
 
 							Size = function()
-								print("update")
-								return UDim2.fromScale(
-									if sizes()[index]
-										then sizes()[index]()
-										else 0,
-									1
-								)
+								--print("update size row", get_size(index))
+								return UDim2.fromScale(get_size(index), 1)
 							end,
 
 							BackgroundColor3 = style.background,

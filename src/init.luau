@@ -10,11 +10,12 @@ local cts = state.cts
 -- adds a world to the list of worlds.
 local function add_world(world: rts.Registry, name: string?)
 	local new_worlds = table.clone(worlds())
-
-	table.insert(
-		new_worlds,
+	local entry =
 		{ world = world, name = name or `Registry #{#new_worlds + 1}` }
-	)
+
+	table.insert(new_worlds, entry)
+
+	state.current_client_world(entry)
 
 	worlds(new_worlds)
 end
@@ -48,8 +49,6 @@ local function compat_set_cts(user_cts: { [string]: any })
 
 	return user_cts
 end
-
-vide.strict = false
 
 return {
 

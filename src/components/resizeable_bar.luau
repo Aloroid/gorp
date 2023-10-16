@@ -30,6 +30,8 @@ type ResizeableBar = {
 	meaning: vide.Source<{ string }>,
 	min_sizes: vide.Source<{ vide.Source<number>? }>?,
 	sizes: vide.Source<{ vide.Source<number> }>,
+
+	splits: vide.Source<{ vide.Source<number> }>?,
 }
 
 local function resizeable_bar(props: ResizeableBar)
@@ -43,16 +45,18 @@ local function resizeable_bar(props: ResizeableBar)
 	local total = derive(function() return #meaning() end)
 
 	local old_splits = {}
+	local splits_user = (props.splits :: never) or source({})
 	local splits = derive(function()
 		local splits = {}
-		print("total", total())
 
 		for i = 1, total() - 1 do
-			local old_split = i / total()
-			splits[i] = source(math.min(old_split, i / total()))
+			local old_split = vide.read(old_splits[i])
+			splits[i] = source(math.min(old_split or 1, i / total()))
+			old_splits[i] = splits[i]
 		end
 
 		old_splits = splits
+		splits_user(splits)
 		return splits
 	end)
 
@@ -61,7 +65,6 @@ local function resizeable_bar(props: ResizeableBar)
 		local split_after = splits()[index] or after :: never
 
 		local size = split_after() - split_before()
-		print(index, "new size", size)
 		return size
 	end
 
@@ -71,16 +74,20 @@ local function resizeable_bar(props: ResizeableBar)
 	end
 
 	effect(function()
-		sizes({})
+		local new = setmetatable(
+			{},
+			{ __index = function() return source(0) end }
+		)
 
 		for i = 1, total() do
 			min_sizes()[i] = min_sizes()[i] or source(0.01)
 
-			cleanup(vide.root(function(destroy)
-				sizes()[i] = derive(function() return get_size(i) end)
-				return destroy
+			cleanup(vide.mount(function()
+				new[i] = derive(function() return get_size(i) end)
 			end))
 		end
+
+		sizes(new :: any)
 	end)
 
 	local down = false
@@ -107,12 +114,6 @@ local function resizeable_bar(props: ResizeableBar)
 
 				Size = function()
 					local size = get_size(index)
-					--[[local size_source = sizes()[index]
-					if size_source then
-						size_source(size)
-					else
-						sizes()[index] = source(size)
-					end]]
 
 					return UDim2.new(size, 0, 1, 0)
 				end,

@@ -16,5 +16,7 @@ return vide.root(function()
 		can_use_debugger = function(player: Player)
 			return RunService:IsStudio()
 		end,
+
+		current_client_world = source({} :: { world: rts.Registry, name: string }),
 	}
 end)
