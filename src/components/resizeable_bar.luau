@@ -1,3 +1,5 @@
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 --[[
 
 	Provides a horizontal resizeable bar
@@ -156,9 +158,14 @@ local function resizeable_bar(props: ResizeableBar)
 
 		MouseButton1Up = function() down = false end,
 
-		MouseMoved = function(x: number)
+		cleanup(RunService.Heartbeat:Connect(function()
+			local x = UserInputService:GetMouseLocation().X
+
 			x -= absolute_position().X
 			if down == false then return end
+			down = UserInputService:IsMouseButtonPressed(
+				Enum.UserInputType.MouseButton1
+			) == true
 
 			local relative = x / absolute_size().X
 			local current = splits()[updating]()
@@ -194,7 +201,7 @@ local function resizeable_bar(props: ResizeableBar)
 					if left_to_move == 0 then break end
 				end
 			end
-		end,
+		end)),
 	}
 end
 
