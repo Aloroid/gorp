@@ -276,6 +276,13 @@ return function(props: props)
 					end)),
 
 					cleanup(UserInputService.InputBegan:Connect(function(input)
+						if
+							input.UserInputType
+							~= Enum.UserInputType.MouseButton1
+						then
+							return
+						end
+
 						local player_gui = Players.LocalPlayer:WaitForChild(
 							"PlayerGui"
 						) :: PlayerGui
