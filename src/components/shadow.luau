@@ -22,7 +22,6 @@ local function shadow(props: props)
 
 		Image = "rbxasset://textures/StudioSharedUI/dropShadow.png",
 		ImageColor3 = style.border,
-		ImageTransparency = 0.5,
 
 		ScaleType = Enum.ScaleType.Slice,
 		SliceCenter = Rect.new(8, 8, 8, 8),
