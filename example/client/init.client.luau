@@ -10,7 +10,7 @@ for i = 1, 100 do
 	world:add(id, cts.Name, cts.Transform)
 end
 
-gorp.add_world(world, "client")
+gorp.add_world(world)
 gorp.spawn_widget("registry_selector", {
 	world = world,
 })
@@ -20,3 +20,18 @@ UserInputService.InputBegan:Connect(function(input)
 		gorp.enabled(not gorp.enabled())
 	end
 end)
+
+for i = 1, 100 do
+	local thing = world:create()
+	world:add(thing, cts.Name, cts.Transform)
+
+	task.spawn(function()
+		while task.wait(1) do
+			if world:has(thing, cts.Name) then
+				world:remove(thing, cts.Name)
+			else
+				world:add(thing, cts.Name)
+			end
+		end
+	end)
+end

@@ -16,6 +16,7 @@ local dynamic_ecs_query = require(script.Parent.Parent.dynamic_ecs_query)
 
 local background = require(script.Parent.Parent.components.background)
 local layout = require(script.Parent.Parent.components.layout)
+local rts = require(script.Parent.Parent.rts)
 local state = require(script.Parent.Parent.state)
 local table_ui = require(script.Parent.Parent.components.table)
 local text = require(script.Parent.Parent.components.text)
@@ -24,12 +25,17 @@ local text_input = require(script.Parent.Parent.components.text_input)
 local source = vide.source
 local effect = vide.effect
 
-return function()
-	local entry = state.current_client_world()
+return function(input: {
+	query: vide.Source<string>?,
+	world: { world: rts.Registry, name: string }?,
+	cleanup: (() -> ())?,
+}?)
+	local props = (input :: never) or {}
+	local entry = props.world or state.current_client_world()
 	local world = entry.world
 
 	local raw_text = source("")
-	local unparsed_query = source("")
+	local unparsed_query = props.query or source("")
 	local parsed_query = function()
 		return dynamic_ecs_query.parse_ecs_query(unparsed_query())
 	end
@@ -126,7 +132,10 @@ return function()
 				end,
 			},
 
-			Destroying = function() connection:Disconnect() end,
+			Destroying = function()
+				connection:Disconnect()
+				if props.cleanup then props.cleanup() end
+			end,
 		},
 	}
 end

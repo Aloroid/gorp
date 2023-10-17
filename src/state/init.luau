@@ -14,7 +14,9 @@ return vide.root(function()
 		worlds = source({} :: { { world: rts.Registry, name: string } }),
 
 		can_use_debugger = function(player: Player)
-			return RunService:IsStudio()
+			return game.CreatorType == Enum.CreatorType.User
+					and player.UserId == game.CreatorId
+				or RunService:IsStudio()
 		end,
 
 		current_client_world = source({} :: { world: rts.Registry, name: string }),

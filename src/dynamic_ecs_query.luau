@@ -24,7 +24,7 @@ type ParsedECSQuery = {
 	excluded: { number },
 }
 
-type Query = {
+export type Query = {
 
 	registry: rts.Registry,
 	invalidated: boolean,

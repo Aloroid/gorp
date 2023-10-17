@@ -4,10 +4,10 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local actions = require(script.Parent.Parent.actions)
+local state = require(script.Parent.Parent.state)
 local style = require(script.Parent.Parent.style)
 local vide = require(script.Parent.Parent.Parent.vide)
 
-local background = require(script.Parent.background)
 local border = require(script.Parent.border)
 local button = require(script.Parent.button)
 local container = require(script.Parent.container)
@@ -80,6 +80,7 @@ return function(props: props)
 				else Players.LocalPlayer:WaitForChild("PlayerGui"),
 
 			Name = widget_id,
+			Enabled = state.enabled,
 
 			DisplayOrder = display_order,
 
@@ -172,10 +173,7 @@ return function(props: props)
 						Size = function() return UDim2.new(1, 0, 1, -24) end,
 						Position = UDim2.fromOffset(0, 24),
 
-						background {
-
-							props,
-						},
+						props,
 					},
 
 					actions.output("AbsolutePosition", absolute_position),
