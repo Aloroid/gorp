@@ -31,7 +31,7 @@ type props = {
 }
 
 local highest_display_order = 100000
-local RESIZE_RANGE = 8
+local RESIZE_RANGE = 10
 
 return function(props: props)
 	local widget_id = props.widget_id or props.title or ""
@@ -70,7 +70,6 @@ return function(props: props)
 
 	local top
 	local bottom
-	local normal
 
 	return vide.root(function(destroy)
 		local gui = create "ScreenGui" {
@@ -195,36 +194,11 @@ return function(props: props)
 							> (absolute_size().Y - RESIZE_RANGE)
 						can_resize_right = x
 							> (absolute_size().X - RESIZE_RANGE)
-
-						if RunService:IsRunning() == false then return end
-						if normal then UserInputService.MouseIcon = normal end
-						normal = UserInputService.MouseIcon
-
-						if
-							(can_resize_top and can_resize_left)
-							or (can_resize_bottom and can_resize_right)
-						then
-							UserInputService.MouseIcon =
-								"rbxasset://textures/StudioUIEditor/icon_resize3.png"
-						elseif
-							(can_resize_top and can_resize_right)
-							or (can_resize_bottom and can_resize_left)
-						then
-							UserInputService.MouseIcon =
-								"rbxasset://textures/StudioUIEditor/icon_resize1.png"
-						elseif can_resize_top or can_resize_bottom then
-							UserInputService.MouseIcon =
-								"rbxasset://textures/StudioUIEditor/icon_resize4.png"
-						elseif can_resize_left or can_resize_right then
-							UserInputService.MouseIcon =
-								"rbxasset://textures/StudioUIEditor/icon_resize2.png"
-						end
 					end,
 
 					MouseLeave = function()
 						if resizing() then return end
 						if RunService:IsRunning() == false then return end
-						if normal then UserInputService.MouseIcon = normal end
 					end,
 
 					InputBegan = function(input: InputObject)
