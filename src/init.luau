@@ -180,6 +180,8 @@ if RunService:IsServer() then
 		return ids, values
 	end
 
+	require(script.server)
+
 	Players.PlayerRemoving:Connect(function(player)
 		-- do something here to cleanup
 		if set_queries[player] == nil then return end

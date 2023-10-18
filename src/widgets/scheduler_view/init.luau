@@ -24,7 +24,7 @@ local function get_color(n: number)
 	return Color3.fromHSV((n - 1) * 0.15 % 1, 1, 1)
 end
 
-return function(scheduler: rts.Scheduler)
+return function(scheduler: rts.Scheduler, cleanup: (() -> ())?)
 	local heartbeat = source(0)
 	local subtick = source(0)
 
@@ -192,6 +192,9 @@ return function(scheduler: rts.Scheduler)
 			layout {},
 		},
 
-		Destroying = function() connection:Disconnect() end,
+		Destroying = function()
+			connection:Disconnect()
+			if cleanup then cleanup() end
+		end,
 	}
 end

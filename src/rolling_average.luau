@@ -1,12 +1,13 @@
 local rolling_average = {}
 
-function rolling_average.new()
-	local n = table.create(51)
+function rolling_average.new(max: number?)
+	local last = max or 50
+	local n = table.create(last + 1)
 	local self = { values = n }
 
 	function self:add(value: number)
 		table.insert(n, 1, value)
-		table.remove(n, 51)
+		table.remove(n, last + 1)
 	end
 
 	function self:average()
@@ -16,7 +17,7 @@ function rolling_average.new()
 			total += n
 		end
 
-		return total / 50
+		return total / last
 	end
 
 	return self

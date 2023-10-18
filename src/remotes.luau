@@ -63,4 +63,9 @@ return {
 		({ number }, { { string } })
 	>,
 	query_updated = get_remote_event("updated_query") :: Event<number, number, { string }?>,
+
+	get_server_schedulers = get_remote_function("get_schedulers") :: Function<(), ({ string })>,
+	subscribe_scheduler_data = get_remote_function("subscribe_scheduler") :: Function<(number), ({ string })>,
+	unsubscribe_scheduler_data = get_remote_function("unsubscribe_scheduler") :: Function<(number)>,
+	update_scheduler_data = get_remote_event("update_scheduler") :: Event<{ string }>,
 }

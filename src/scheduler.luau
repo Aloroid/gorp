@@ -11,7 +11,7 @@ local state = require(script.Parent.state)
 local scheduler = {}
 
 local total = 0
-function scheduler.new(scheduler_name: string?)
+function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 	local systems = {}
 	total += 1
 
@@ -35,7 +35,7 @@ function scheduler.new(scheduler_name: string?)
 		name = given_name
 
 		systems[i] = systems[i]
-			or { time = rolling_average.new(), name = given_name }
+			or { time = rolling_average.new(max), name = given_name }
 
 		for callback in before do
 			callback()
@@ -44,12 +44,12 @@ function scheduler.new(scheduler_name: string?)
 
 	-- this should be called after a system runs.
 	-- we'll automatically infer context based on the first call.
-	function self:after()
+	function self:after(_custom_time: number?)
 		for callback in after do
 			callback()
 		end
 
-		systems[i].time:add(os.clock() - begin)
+		systems[i].time:add(_custom_time or os.clock() - begin)
 		systems[i].name = name
 	end
 
@@ -71,6 +71,8 @@ function scheduler.new(scheduler_name: string?)
 	end
 
 	-- add the scheduler to the state
+	if hide then return self end
+
 	local schedulers = state.schedulers()
 	table.insert(schedulers, self)
 	state.schedulers(schedulers)

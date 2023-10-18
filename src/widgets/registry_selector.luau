@@ -9,6 +9,7 @@ local layout = require(script.Parent.Parent.components.layout)
 local padding = require(script.Parent.Parent.components.padding)
 local pane = require(script.Parent.Parent.components.pane)
 local remotes = require(script.Parent.Parent.remotes)
+local scheduler_server_view = require(script.Parent.scheduler_server_view)
 local scheduler_view = require(script.Parent.scheduler_view)
 local scrolling_frame = require(script.Parent.Parent.components.scrolling_frame)
 local widget = require(script.Parent.Parent.components.widget)
@@ -62,8 +63,8 @@ return function()
 
 	return widget {
 
-		title = "Registry Selector",
-		min_size = Vector2.new(150, 100),
+		title = "View Selector",
+		min_size = Vector2.new(150, 150),
 		closeable = false,
 
 		scrolling_frame {
@@ -141,6 +142,30 @@ return function()
 						end,
 					}
 				end),
+
+				values(
+					source(remotes.get_server_schedulers:InvokeServer()),
+					function(value, key)
+						return entry {
+							value = { name = value },
+							key = key,
+							image = "rbxasset://textures/debugger/breakpoints/server.png",
+							activated = function()
+								table.insert(
+									to_cleanup,
+									vide.mount(
+										function()
+											return scheduler_server_view(
+												value,
+												key()
+											)
+										end
+									)
+								)
+							end,
+						}
+					end
+				),
 			},
 
 			cleanup(function()
