@@ -12,14 +12,15 @@ return vide.root(function()
 
 		cts = cts,
 		worlds = source({} :: { { world: rts.Registry, name: string } }),
+		schedulers = source({} :: { rts.Scheduler }),
+
+		current_client_world = source({} :: { world: rts.Registry, name: string }),
+		enabled = source(false),
 
 		can_use_debugger = function(player: Player)
 			return game.CreatorType == Enum.CreatorType.User
 					and player.UserId == game.CreatorId
 				or RunService:IsStudio()
 		end,
-
-		current_client_world = source({} :: { world: rts.Registry, name: string }),
-		enabled = source(false),
 	}
 end)

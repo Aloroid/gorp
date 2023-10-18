@@ -9,6 +9,7 @@ local function scrolling_frame(props: props)
 	return create "ScrollingFrame" {
 
 		Size = UDim2.fromScale(1, 1),
+		CanvasSize = UDim2.fromScale(0, 0),
 
 		BackgroundColor3 = style.background,
 

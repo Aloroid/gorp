@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local cts = require(ReplicatedStorage.Shared.cts)
@@ -35,3 +36,16 @@ for i = 1, 100 do
 		end
 	end)
 end
+
+local scheduler = gorp.scheduler.new()
+
+RunService.Heartbeat:Connect(function()
+	for i = 1, 25 do
+		scheduler:before(`system {i}`)
+		for id, transform in world:view(cts.Transform) do
+			world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
+		end
+		scheduler:after()
+	end
+	scheduler:finish()
+end)

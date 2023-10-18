@@ -10,6 +10,8 @@ local function padding(props)
 		PaddingLeft = style.padding,
 		PaddingRight = style.padding,
 		PaddingBottom = style.padding,
+
+		props,
 	}
 end
 

@@ -4,6 +4,7 @@ local RunService = game:GetService("RunService")
 local dynamic_ecs_query = require(script.dynamic_ecs_query)
 local remotes = require(script.remotes)
 local rts = require(script.rts)
+local scheduler = require(script.scheduler)
 local state = require(script.state)
 local vide = require(script.Parent.vide)
 
@@ -32,6 +33,7 @@ end
 -- spawns a new widget
 type widgets = "entity_client_view" | "registry_selector"
 local function spawn_widget(name: widgets, props: { [any]: any })
+	if state.can_use_debugger(Players.LocalPlayer) == false then return end
 	local widget = (require :: any)(script.widgets:FindFirstChild(name))
 
 	vide.mount(
@@ -197,4 +199,5 @@ return {
 
 	compat_set_cts = compat_set_cts,
 	enabled = state.enabled,
+	scheduler = scheduler,
 }

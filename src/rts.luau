@@ -12,4 +12,16 @@ export type Registry = ecr.Registry
 export type Queue<T...> = ecr.Queue<T...>
 export type Source<T> = vide.Source<T>
 
+export type Scheduler = {
+
+	name: string,
+
+	systems: {
+		{
+			name: string,
+			time: { add: (any, number) -> (), average: (any) -> number },
+		}
+	},
+}
+
 return nil
