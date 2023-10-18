@@ -2,7 +2,6 @@ local container = require(script.Parent.container)
 local style = require(script.Parent.Parent.style)
 local vide = require(script.Parent.Parent.Parent.vide)
 
-local background = require(script.Parent.background)
 local border = require(script.Parent.border)
 local layout = require(script.Parent.layout)
 local resizeable_bar = require(script.Parent.resizeable_bar)
@@ -62,7 +61,7 @@ return function(props: Table)
 		return size
 	end
 
-	return background {
+	return container {
 
 		props.layout,
 
