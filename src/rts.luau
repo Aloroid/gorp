@@ -19,7 +19,11 @@ export type Scheduler = {
 	systems: {
 		{
 			name: string,
-			time: { add: (any, number) -> (), average: (any) -> number },
+			time: {
+				add: (any, number) -> (),
+				average: (any) -> number,
+				values: { number },
+			},
 		}
 	},
 }

@@ -1,8 +1,8 @@
 local rolling_average = {}
 
 function rolling_average.new()
-	local self = {}
 	local n = table.create(51)
+	local self = { values = n }
 
 	function self:add(value: number)
 		table.insert(n, 1, value)
