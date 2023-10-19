@@ -30,12 +30,16 @@ end
 local scheduler = gorp.scheduler.new()
 
 RunService.Heartbeat:Connect(function()
-	for i = 1, 25 do
-		scheduler:before(`system server {i}`)
-		for id, transform in world:view(cts.Transform) do
-			world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
-		end
-		scheduler:after()
+	scheduler:before("double query")
+	for id, transform in world:view(cts.Transform, cts.Name) do
+		world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
 	end
+	scheduler:after()
+
+	scheduler:before("single")
+	for id, transform in world:view(cts.Transform) do
+		world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
+	end
+	scheduler:after()
 	scheduler:finish()
 end)

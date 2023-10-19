@@ -12,6 +12,7 @@ local graph = require(script.graph)
 local padding = require(script.Parent.Parent.components.padding)
 local pane = require(script.Parent.Parent.components.pane)
 local scrolling_frame = require(script.Parent.Parent.components.scrolling_frame)
+local system_view = require(script.Parent.system_view)
 local text = require(script.Parent.Parent.components.text)
 local widget = require(script.Parent.Parent.components.widget)
 
@@ -24,7 +25,11 @@ local function get_color(n: number)
 	return Color3.fromHSV((n - 1) * 0.15 % 1, 1, 1)
 end
 
-return function(scheduler: rts.Scheduler, cleanup: (() -> ())?)
+return function(
+	scheduler: rts.Scheduler,
+	cleanup: (() -> ())?,
+	is_server: boolean?
+)
 	local heartbeat = source(0)
 	local subtick = source(0)
 
@@ -128,7 +133,7 @@ return function(scheduler: rts.Scheduler, cleanup: (() -> ())?)
 
 				indexes(systems, function(value, key)
 					return button {
-						text = value().name,
+						text = function() return value().name end,
 
 						child = {
 
@@ -178,6 +183,13 @@ return function(scheduler: rts.Scheduler, cleanup: (() -> ())?)
 								text_size = 14,
 							},
 						},
+
+						activated = function()
+							if is_server then return end
+							vide.mount(
+								function() system_view(scheduler, key) end
+							)
+						end,
 					}
 				end),
 

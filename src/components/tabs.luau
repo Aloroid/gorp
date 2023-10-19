@@ -12,19 +12,20 @@ local source = vide.source
 local indexes = vide.indexes
 
 export type tabs = {
-	tabs: vide.Source<{
-		[number]: {
-			name: string,
-			child: () -> Instance | { Instance },
-		},
-	}>,
+	{
+		name: string,
+		child: () -> Instance,
+	}
 }
 
-local function tabs(props: tabs)
+local function tabs(tabs: tabs)
 	local selected = source(1)
+	local ref = source()
+	local cleanup = function() end
+
+	vide.cleanup(cleanup)
 
 	return create "Frame" {
-		Parent = (props :: any).parent,
 
 		Size = UDim2.fromScale(1, 1),
 
@@ -37,16 +38,19 @@ local function tabs(props: tabs)
 			Size = UDim2.new(1, 0, 1, -19),
 
 			function()
-				local child = props.tabs()[selected()].child()
-				if typeof(child) == "Instance" then
-					return { child }
-				else
-					return child
-				end
+				cleanup()
+				local current = selected()
+				cleanup = vide.mount(function()
+					local object = tabs[current].child()
+					vide.cleanup(object)
+					return object
+				end, ref())
 			end,
 
 			border {},
 			layout {},
+
+			vide.action(ref),
 		},
 
 		create "Frame" {
@@ -59,7 +63,7 @@ local function tabs(props: tabs)
 				FillDirection = Enum.FillDirection.Horizontal,
 			},
 
-			indexes(props.tabs, function(value, index)
+			indexes(source(tabs), function(value, index)
 				local hovering = source(false)
 
 				return create "TextButton" {

@@ -23,5 +23,14 @@ return vide.root(function()
 				and player.UserId == game.CreatorId
 			) or RunService:IsStudio()
 		end,
+
+		iterating_groups = nil :: {
+			{
+				s: number,
+				ent: number,
+				includes: { number },
+				is_group: true,
+			}
+		}?,
 	}
 end)

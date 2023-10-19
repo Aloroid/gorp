@@ -38,16 +38,77 @@ for i = 1, 100 do
 	end)
 end
 
+for i = 1, 300 do
+	local id = world:create()
+
+	if math.random() > 0.5 then world:set(id, cts.A, true) end
+
+	if math.random() > 0.5 then world:set(id, cts.B, true) end
+
+	if math.random() > 0.5 then world:set(id, cts.C, true) end
+
+	if math.random() > 0.5 then world:set(id, cts.D, true) end
+end
+
+for i = 1, 100 do
+	local id = world:create()
+	world:add(id, cts.Position, cts.Velocity)
+end
+
+local group = world:group(cts.A, cts.B, cts.C, cts.D)
+
 print("added scheduler")
 local scheduler = gorp.scheduler.new()
 
 RunService.Heartbeat:Connect(function()
-	for i = 1, 25 do
-		scheduler:before(`system {i}`)
-		for id, transform in world:view(cts.Transform) do
-			world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
-		end
-		scheduler:after()
+	scheduler:before("double query")
+	for id, transform in world:view(cts.Transform, cts.Name) do
+		world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
 	end
+	scheduler:after()
+
+	scheduler:before("single")
+	for id, transform in world:view(cts.Transform) do
+		world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
+	end
+	scheduler:after()
+
+	scheduler:before("update position")
+	for id, position, velocity in world:group(cts.Position, cts.Velocity) do
+		world:set(id, cts.Position, position + velocity)
+	end
+	scheduler:after()
+
+	scheduler:before("query A")
+	for id in world:view(cts.A) do
+	end
+	scheduler:after()
+
+	scheduler:before("query AB")
+	for id, transform in world:view(cts.A, cts.B) do
+	end
+	scheduler:after()
+
+	scheduler:before("view ABCD")
+	for id, transform in world:view(cts.A, cts.B, cts.C, cts.D) do
+	end
+	scheduler:after()
+
+	scheduler:before("group ABCD")
+	for id, transform in group do
+	end
+	scheduler:after()
+
+	scheduler:before("multiple queries")
+	for id in world:view(cts.A) do
+	end
+
+	for id, transform in world:view(cts.A, cts.B) do
+	end
+
+	for id, transform in world:view(cts.A, cts.B, cts.C) do
+	end
+	scheduler:after()
+
 	scheduler:finish()
 end)

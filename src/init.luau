@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
+local group_hook = require(script.group_hook)
 local remotes = require(script.remotes)
 local rts = require(script.rts)
 local scheduler = require(script.scheduler)
@@ -19,6 +20,7 @@ local function add_world(world: rts.Registry, name: string?)
 	table.insert(new_worlds, entry)
 
 	state.current_client_world(entry)
+	group_hook(world)
 
 	worlds(new_worlds)
 end

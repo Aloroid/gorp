@@ -24,8 +24,28 @@ export type Scheduler = {
 				average: (any) -> number,
 				values: { number },
 			},
+
+			_before: any,
+			_after: any,
 		}
 	},
+
+	before: (Scheduler, given_name: string) -> (),
+	after: (Scheduler) -> (),
+	finish: (Scheduler) -> (),
+
+	_hook_before_system: (
+		Scheduler,
+		index: number,
+		callback: () -> (),
+		cleanup: (() -> ())?
+	) -> () -> (),
+	_hook_after_system: (
+		Scheduler,
+		index: number,
+		callback: () -> (),
+		cleanup: (() -> ())?
+	) -> () -> (),
 }
 
 return nil

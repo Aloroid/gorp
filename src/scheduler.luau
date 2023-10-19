@@ -31,25 +31,39 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 	function self:before(given_name: string)
 		i += 1
 
-		begin = os.clock()
 		name = given_name
 
 		systems[i] = systems[i]
-			or { time = rolling_average.new(max), name = given_name }
+			or {
+				time = rolling_average.new(max),
+				name = given_name,
+
+				_before = {} :: { [() -> ()]: true },
+				_after = {} :: { [() -> ()]: true },
+			}
 
 		for callback in before do
 			callback()
 		end
+
+		for callback in systems[i]._before do
+			callback()
+		end
+		begin = os.clock()
 	end
 
 	-- this should be called after a system runs.
 	-- we'll automatically infer context based on the first call.
 	function self:after(_custom_time: number?)
+		systems[i].time:add(_custom_time or os.clock() - begin)
 		for callback in after do
 			callback()
 		end
 
-		systems[i].time:add(_custom_time or os.clock() - begin)
+		for callback in systems[i]._after do
+			callback()
+		end
+
 		systems[i].name = name
 	end
 
@@ -58,16 +72,32 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 	-- internal
 
 	--
-	function self:_hook_before(callback: () -> ())
-		before[callback] = true
+	function self:_hook_before_system(
+		index: number,
+		callback: () -> (),
+		cleanup: (() -> ())?
+	)
+		local before_system = systems[index]._before
+		before_system[callback] = true
 
-		return function() before[callback] = nil end
+		return function()
+			if cleanup then cleanup() end
+			before_system[callback] = nil
+		end
 	end
 
-	function self:_hook_after(callback: () -> ())
-		after[callback] = true
+	function self:_hook_after_system(
+		index: number,
+		callback: () -> (),
+		cleanup: (() -> ())?
+	)
+		local after_system = systems[index]._after
+		after_system[callback] = true
 
-		return function() after[callback] = nil end
+		return function()
+			if cleanup then cleanup() end
+			after_system[callback] = nil
+		end
 	end
 
 	-- add the scheduler to the state
