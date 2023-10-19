@@ -2,12 +2,16 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local cts = require(ReplicatedStorage.Shared.cts)
+local ecr = require(ReplicatedStorage.Packages.ecr)
 local gorp = require(ReplicatedStorage.Packages.gorp)
 local world = require(ReplicatedStorage.Shared.registry)
 
+local new = ecr.component(function() return true end)
+gorp.compat_set_cts({ test = new })
+
 for i = 1, 100 do
 	local id = world:create()
-	world:add(id, cts.Name, cts.Transform)
+	world:add(id, cts.Name, cts.Transform, new)
 end
 
 gorp.add_world(world)

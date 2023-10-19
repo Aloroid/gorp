@@ -3,6 +3,7 @@ local vide = require(script.Parent.Parent.Parent.vide)
 local source = vide.source
 local derive = vide.derive
 
+local map = source({} :: { [number]: number })
 local ids = source({} :: { [any]: string })
 local keys = derive(function()
 	local t = {}
@@ -15,6 +16,7 @@ local keys = derive(function()
 end)
 
 return {
+	map = map,
 	ids = ids,
 	keys = keys,
 }

@@ -56,7 +56,8 @@ return {
 
 	check_if_permission = get_remote_function("check_if_permission") :: Function<(), (boolean)>,
 	get_server_registries = get_remote_function("get_server_registries") :: Function<(), ({ string })>,
-	get_server_cts = get_remote_function("get_server_cts") :: Function<(), ({ [number]: string })>,
+	get_server_cts = get_remote_function("get_server_cts") :: Function<(), ({ [string]: number })>,
+	update_server_cts = get_remote_event("update_server_cts") :: Event<{ [string]: number }>,
 
 	set_query = get_remote_function("set_query") :: Function<
 		(number, number, string),
@@ -68,4 +69,15 @@ return {
 	subscribe_scheduler_data = get_remote_function("subscribe_scheduler") :: Function<(number), ({ string })>,
 	unsubscribe_scheduler_data = get_remote_function("unsubscribe_scheduler") :: Function<(number)>,
 	update_scheduler_data = get_remote_event("update_scheduler") :: Event<{ string }>,
+
+	get_system_performance_data = get_remote_function("get_system_data") :: Function<(number, number), ({
+		profiler: { number },
+		queries: { { number } },
+	})>,
+	update_system_performance_data = get_remote_event(
+		"update_system_performance_data"
+	) :: Event<{ any }>,
+	stop_flow_system_performance_data = get_remote_event(
+		"stop_flow_system_performance"
+	) :: Event<number, number>,
 }

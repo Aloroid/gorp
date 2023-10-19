@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
+local ecr = require(script.Parent.ecr)
 local group_hook = require(script.group_hook)
 local remotes = require(script.remotes)
 local rts = require(script.rts)
@@ -58,9 +59,34 @@ local function compat_set_cts<T>(user_cts: T & { [string]: any }): T
 end
 
 if RunService:IsServer() then
-	remotes.check_if_permission.OnServerInvoke = state.can_use_debugger
+	remotes.check_if_permission.OnServerInvoke = function(player)
+		return state.can_use_debugger(player)
+	end
 
 	require(script.server)
+end
+
+if RunService:IsClient() then
+	-- get server cts
+	local function update_cts(names)
+		local map = state.cts.map()
+		local ids = state.cts.ids()
+		local keys = state.cts.keys()
+
+		for name, server_ctype in names do
+			local ctype = if keys[name] then keys[name] else ecr.component()
+			map[server_ctype] = ctype
+			ids[ctype] = name
+		end
+
+		state.cts.map(map)
+		state.cts.ids(ids)
+	end
+
+	task.spawn(function()
+		update_cts(remotes.get_server_cts:InvokeServer())
+		remotes.update_server_cts.OnClientEvent:Connect(update_cts)
+	end)
 end
 
 return {
