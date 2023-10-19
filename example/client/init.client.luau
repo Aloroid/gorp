@@ -11,10 +11,11 @@ for i = 1, 100 do
 	world:add(id, cts.Name, cts.Transform)
 end
 
+print("hi")
 gorp.add_world(world)
-gorp.spawn_widget("registry_selector", {
-	world = world,
-})
+print("boop")
+gorp.spawn_widget("registry_selector")
+print("?")
 
 UserInputService.InputBegan:Connect(function(input)
 	if input.KeyCode == Enum.KeyCode.F2 then
@@ -37,6 +38,7 @@ for i = 1, 100 do
 	end)
 end
 
+print("added scheduler")
 local scheduler = gorp.scheduler.new()
 
 RunService.Heartbeat:Connect(function()

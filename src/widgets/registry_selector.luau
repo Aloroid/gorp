@@ -1,18 +1,18 @@
 local state = require(script.Parent.Parent.state)
 local vide = require(script.Parent.Parent.Parent.vide)
 
-local entity_client_view = require(script.Parent.entity_client_view)
-
 local button = require(script.Parent.Parent.components.button)
-local entity_server_view = require(script.Parent.entity_server_view)
 local layout = require(script.Parent.Parent.components.layout)
 local padding = require(script.Parent.Parent.components.padding)
 local pane = require(script.Parent.Parent.components.pane)
 local remotes = require(script.Parent.Parent.remotes)
-local scheduler_server_view = require(script.Parent.scheduler_server_view)
-local scheduler_view = require(script.Parent.scheduler_view)
 local scrolling_frame = require(script.Parent.Parent.components.scrolling_frame)
 local widget = require(script.Parent.Parent.components.widget)
+
+local entity_client_view = require(script.Parent.entity_client_view)
+local entity_server_view = require(script.Parent.entity_server_view)
+local scheduler_server_view = require(script.Parent.scheduler_server_view)
+local scheduler_view = require(script.Parent.scheduler_view)
 
 local create = vide.create
 local source = vide.source

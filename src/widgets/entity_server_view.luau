@@ -29,6 +29,38 @@ return function(name: string, registry: number)
 		function() return dynamic_ecs_query.parse_ecs_query(query()) end
 	)
 
+	local function update_world(changed, removing)
+		debug.profilebegin("updating world")
+		local query = parsed_query()
+		assert(query.ok)
+
+		for index, ctype_changed in changed do
+			local ctype = query.included[index]
+			if ctype == nil then
+				warn("old packet?")
+				continue
+			end -- old packet
+
+			if ecr.is_tag(ctype) then
+				for change_index, id in ctype_changed[1] do
+					if world:contains(id) == false then world:create(id) end
+					world:add(id, ctype)
+				end
+			else
+				for change_index, id in ctype_changed[1] do
+					if world:contains(id) == false then world:create(id) end
+					world:set(id, ctype, ctype_changed[2][change_index])
+				end
+			end
+		end
+
+		for _, id in removing do
+			if world:contains(id) == false then continue end
+			world:destroy(id)
+		end
+		debug.profileend()
+	end
+
 	local destroy = vide.mount(function()
 		effect(function()
 			if parsed_query().ok == false then
@@ -41,45 +73,17 @@ return function(name: string, registry: number)
 
 			task.spawn(function()
 				world:clear()
-				local new_ids, new_values =
+				local changed, removing =
 					remotes.set_query:InvokeServer(id_query, registry, query())
-				local query = parsed_query()
-				assert(query.ok)
-
-				for index, values in new_values do
-					local id = new_ids[index]
-
-					if not world:contains(id) then world:create(id) end
-
-					for ctype_index, value in values do
-						local ctype = query.included_no_tags[ctype_index]
-						world:set(id, ctype, value)
-					end
-				end
+				update_world(changed, removing)
 			end)
 		end)
 	end)
 
-	local connection = remotes.query_updated.OnClientEvent:Connect(
-		function(server_query, id, data)
+	local query_changed = remotes.query_changed.OnClientEvent:Connect(
+		function(server_query, changed, removing)
 			if server_query ~= id_query then return end
-
-			if data and not world:contains(id) then
-				world:create(id)
-			elseif not data and world:contains(id) then
-				world:destroy(id)
-				return
-			end
-
-			if not data then return end
-
-			local query = parsed_query()
-			assert(query.ok)
-
-			for ctype_index, value in data do
-				local ctype = query.included_no_tags[ctype_index]
-				world:set(id, ctype, value)
-			end
+			update_world(changed, removing)
 		end
 	)
 
@@ -88,7 +92,7 @@ return function(name: string, registry: number)
 		query = query,
 		world = { world = world, name = `{name} (server)` },
 		cleanup = function()
-			connection:Disconnect()
+			query_changed:Disconnect()
 			remotes.set_query:InvokeServer(id_query, registry, "")
 			destroy()
 		end,

@@ -18,9 +18,10 @@ return vide.root(function()
 		enabled = source(false),
 
 		can_use_debugger = function(player: Player)
-			return game.CreatorType == Enum.CreatorType.User
-					and player.UserId == game.CreatorId
-				or RunService:IsStudio()
+			return (
+				game.CreatorType == Enum.CreatorType.User
+				and player.UserId == game.CreatorId
+			) or RunService:IsStudio()
 		end,
 	}
 end)

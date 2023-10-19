@@ -62,7 +62,7 @@ return {
 		(number, number, string),
 		({ number }, { { string } })
 	>,
-	query_updated = get_remote_event("updated_query") :: Event<number, number, { string }?>,
+	query_changed = get_remote_event("query_changed") :: Event<number, { { any } }, { number }>,
 
 	get_server_schedulers = get_remote_function("get_schedulers") :: Function<(), ({ string })>,
 	subscribe_scheduler_data = get_remote_function("subscribe_scheduler") :: Function<(number), ({ string })>,
