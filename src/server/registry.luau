@@ -1,16 +1,14 @@
 local RunService = game:GetService("RunService")
 
 local dynamic_ecs_query = require(script.Parent.Parent.dynamic_ecs_query)
-local ecr = require(script.Parent.Parent.Parent.ecr)
 local remotes = require(script.Parent.Parent.remotes)
 local state = require(script.Parent.Parent.state)
 
 -- whitelisted datatypes that can be sent over network raw.
 local whitelisted_datatypes = {
 	"Instance",
-	"CFrame",
 	"EnumItem",
-	"Boolean",
+	"boolean",
 	"number",
 	"UDim",
 	"UDim2",
@@ -29,6 +27,10 @@ local whitelisted_datatypes = {
 	"NumberRange",
 	"Rect",
 	"PhysicalProperties",
+
+	"CFrame",
+	"NumberSequence",
+	"ColorSequence",
 }
 
 local function get_server_registries(player)
@@ -55,6 +57,8 @@ end
 local function transform(value: any)
 	if table.find(whitelisted_datatypes, typeof(value)) then
 		return value
+	elseif type(value) == "string" then
+		return `"{value}"`
 	else
 		return tostring(value)
 	end
