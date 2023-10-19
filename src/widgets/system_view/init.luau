@@ -1,6 +1,7 @@
 local rts = require(script.Parent.Parent.rts)
 
 local performance = require(script.performance)
+local system_query_hook = require(script.Parent.Parent.system_query_hook)
 local tabs = require(script.Parent.Parent.components.tabs)
 local text = require(script.Parent.Parent.components.text)
 local widget = require(script.Parent.Parent.components.widget)
@@ -17,7 +18,15 @@ return function(scheduler: rts.Scheduler, index: number)
 		tabs {
 			{
 				name = "Performance",
-				child = function() return performance(scheduler, index) end,
+				child = function()
+					local hook = system_query_hook.new(scheduler, index)
+
+					return performance(
+						system.time,
+						hook.views :: any,
+						hook:enable()
+					)
+				end,
 			},
 			{
 				name = "Watch",

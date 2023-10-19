@@ -4,7 +4,8 @@ local RunService = game:GetService("RunService")
 
 local border = require(script.Parent.Parent.Parent.components.border)
 local button = require(script.Parent.Parent.Parent.components.button)
-local rts = require(script.Parent.Parent.Parent.rts)
+local rolling_average = require(script.Parent.Parent.Parent.rolling_average)
+local state = require(script.Parent.Parent.Parent.state)
 local style = require(script.Parent.Parent.Parent.style)
 local vide = require(script.Parent.Parent.Parent.Parent.vide)
 
@@ -13,11 +14,8 @@ local convert_scale = require(script.Parent.Parent.Parent.convert_scale)
 local layout = require(script.Parent.Parent.Parent.components.layout)
 local padding = require(script.Parent.Parent.Parent.components.padding)
 local pane = require(script.Parent.Parent.Parent.components.pane)
-local rolling_average = require(script.Parent.Parent.Parent.rolling_average)
 local scrolling_frame =
 	require(script.Parent.Parent.Parent.components.scrolling_frame)
-local state = require(script.Parent.Parent.Parent.state)
-local system_query_hook = require(script.Parent.Parent.Parent.system_query_hook)
 local text = require(script.Parent.Parent.Parent.components.text)
 
 local create = vide.create
@@ -34,14 +32,28 @@ local ENABLE_LINES = false
 
 local function transform(n: number) return convert_scale(n, "s") end
 
-return function(scheduler: rts.Scheduler, index: number)
-	local system = scheduler.systems[index]
-	local values = system.time.values
-
+return function(
+	time: {
+		values: { number },
+		average: (any) -> number,
+		add: (any, number) -> (),
+	},
+	views: vide.Source<{
+		{
+			ent: number,
+			t: number,
+			s: number,
+			is_group: number,
+			includes: { number },
+			excludes: { number }?,
+		}
+	}>,
+	disable: () -> ()
+)
 	local heartbeat = source(0)
 	local budget = derive(function()
 		heartbeat()
-		local average = system.time:average()
+		local average = time:average()
 
 		return average > 0.004 and 0.010
 			or average > 0.001 and 0.004
@@ -50,21 +62,19 @@ return function(scheduler: rts.Scheduler, index: number)
 	end)
 	local max = derive(function()
 		heartbeat()
-		return math.max(unpack(system.time.values))
+		return math.max(unpack(time.values))
 	end)
 	local min = derive(function()
 		heartbeat()
-		return math.min(unpack(system.time.values))
+		return math.min(unpack(time.values))
 	end)
 
-	cleanup(RunService.Heartbeat:Connect(heartbeat))
+	local connection = RunService.Heartbeat:Connect(heartbeat)
+	cleanup(function() connection:Disconnect() end)
 
 	-- track queries.
 	-- we inject a call into every single world and modify their :view call so
 	-- that we can trace it.
-	local hook = system_query_hook.new(scheduler, index)
-	local disable = hook:enable()
-	local views = hook.views
 
 	return container {
 
@@ -84,18 +94,21 @@ return function(scheduler: rts.Scheduler, index: number)
 
 				indexes(function()
 					heartbeat()
-					return values
+					return time.values
 				end, function(value, key)
 					return container {
 
 						Size = function()
 							return UDim2.fromScale(
-								1 / #values,
+								1 / #time.values,
 								value() / budget()
 							)
 						end,
 						Position = function()
-							return UDim2.fromScale(1 / #values * (key - 1), 1)
+							return UDim2.fromScale(
+								1 / #time.values * (key - 1),
+								1
+							)
 						end,
 						AnchorPoint = Vector2.new(0, 1),
 
@@ -124,7 +137,7 @@ return function(scheduler: rts.Scheduler, index: number)
 								heartbeat()
 								return UDim2.fromScale(
 									0,
-									1 - (system.time:average() / budget())
+									1 - (time:average() / budget())
 								)
 							end,
 
@@ -172,7 +185,7 @@ return function(scheduler: rts.Scheduler, index: number)
 				text = function()
 					heartbeat()
 					return `budget: {transform(budget())}\tmax: {transform(min())}\tmin: {transform(max())}\taverage: {transform(
-						system.time:average()
+						time:average()
 					)}`
 				end,
 

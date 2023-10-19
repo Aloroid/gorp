@@ -9,12 +9,9 @@ local scheduler = require(script.scheduler)
 local state = require(script.state)
 local vide = require(script.Parent.vide)
 
-local worlds = state.worlds
-local cts = state.cts
-
 -- adds a world to the list of worlds.
 local function add_world(world: rts.Registry, name: string?)
-	local new_worlds = table.clone(worlds())
+	local new_worlds = table.clone(state.worlds())
 	local entry =
 		{ world = world, name = name or `Registry #{#new_worlds + 1}` }
 
@@ -23,7 +20,7 @@ local function add_world(world: rts.Registry, name: string?)
 	state.current_client_world(entry)
 	group_hook(world)
 
-	worlds(new_worlds)
+	state.worlds(new_worlds)
 end
 
 -- allows the user to add a callback which would check if a user can or can't use the debugger.
@@ -47,13 +44,17 @@ end
 
 -- compatibility for ecr versions that didn't have ecr.get_names()
 local function compat_set_cts<T>(user_cts: T & { [string]: any }): T
-	local clone = table.clone(cts.ids())
+	local ids = state.cts.ids()
+	local map = state.cts.map()
+	local keys = state.cts.keys()
+	local reverse = state.cts.reverse()
 
-	for name, id in user_cts :: any do
-		clone[id] = name
+	for name, id in user_cts :: { [string]: any } do
+		if keys[name] then map[reverse[keys[name]]] = id end
+		ids[id] = name
 	end
 
-	cts.ids(clone)
+	state.cts.ids(ids)
 
 	return user_cts
 end

@@ -70,13 +70,18 @@ return {
 	unsubscribe_scheduler_data = get_remote_function("unsubscribe_scheduler") :: Function<(number)>,
 	update_scheduler_data = get_remote_event("update_scheduler") :: Event<{ string }>,
 
-	get_system_performance_data = get_remote_function("get_system_data") :: Function<(number, number), ({
-		profiler: { number },
-		queries: { { number } },
-	})>,
+	get_system_performance_data = get_remote_function("get_system_data") :: Function<
+		(number, number),
+		({ number }, { { any } })
+	>,
 	update_system_performance_data = get_remote_event(
 		"update_system_performance_data"
-	) :: Event<{ any }>,
+	) :: Event<
+		number,
+		number,
+		number,
+		{ { any } }
+	>,
 	stop_flow_system_performance_data = get_remote_event(
 		"stop_flow_system_performance"
 	) :: Event<number, number>,

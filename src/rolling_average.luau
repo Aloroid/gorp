@@ -6,8 +6,8 @@ function rolling_average.new(max: number?)
 	local self = { values = n }
 
 	function self:add(value: number)
-		table.insert(n, 1, value)
-		table.remove(n, last + 1)
+		table.insert(self.values, 1, value)
+		table.remove(self.values, last + 1)
 	end
 
 	function self:average()

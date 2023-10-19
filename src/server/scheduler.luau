@@ -43,6 +43,7 @@ local function subscribe_scheduler_data(player: Player, index: number)
 		do
 			remotes.update_scheduler_data:FireClient(player, get_packet())
 		end
+		if subscribed[player] == nil then return end
 		subscribed[player][index] = nil
 	end)
 

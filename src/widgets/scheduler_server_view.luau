@@ -21,5 +21,5 @@ return function(name, index)
 	return scheduler_view(scheduler, function()
 		connection:Disconnect()
 		remotes.unsubscribe_scheduler_data:InvokeServer(index)
-	end, true)
+	end, index)
 end

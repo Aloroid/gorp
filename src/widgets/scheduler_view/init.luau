@@ -12,6 +12,7 @@ local graph = require(script.graph)
 local padding = require(script.Parent.Parent.components.padding)
 local pane = require(script.Parent.Parent.components.pane)
 local scrolling_frame = require(script.Parent.Parent.components.scrolling_frame)
+local system_server_view = require(script.Parent.system_server_view)
 local system_view = require(script.Parent.system_view)
 local text = require(script.Parent.Parent.components.text)
 local widget = require(script.Parent.Parent.components.widget)
@@ -28,7 +29,7 @@ end
 return function(
 	scheduler: rts.Scheduler,
 	cleanup: (() -> ())?,
-	is_server: boolean?
+	server_scheduler_id: number?
 )
 	local heartbeat = source(0)
 	local subtick = source(0)
@@ -185,7 +186,18 @@ return function(
 						},
 
 						activated = function()
-							if is_server then return end
+							if server_scheduler_id then
+								vide.mount(
+									function()
+										system_server_view(
+											server_scheduler_id,
+											key,
+											value().name
+										)
+									end
+								)
+								return
+							end
 							vide.mount(
 								function() system_view(scheduler, key) end
 							)
