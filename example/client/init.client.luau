@@ -122,3 +122,15 @@ RunService.Heartbeat:Connect(function()
 
 	scheduler:finish()
 end)
+
+gorp.register_custom_widget(
+	"Guide",
+	"none",
+	function()
+		return gorp.components.widget {
+			title = "Guide",
+			min_size = Vector2.new(200, 200),
+			closeable = true,
+		}
+	end
+)

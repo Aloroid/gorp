@@ -3,6 +3,7 @@ local RunService = game:GetService("RunService")
 
 local ecr = require(script.Parent.ecr)
 local group_hook = require(script.group_hook)
+local register_custom_widget = require(script.register_custom_widget)
 local remotes = require(script.remotes)
 local rts = require(script.rts)
 local scheduler = require(script.scheduler)
@@ -101,4 +102,29 @@ return {
 	compat_set_cts = compat_set_cts,
 	enabled = state.enabled,
 	scheduler = scheduler,
+
+	register_custom_widget = register_custom_widget,
+
+	state = state,
+	components = {
+
+		background = require(script.components.background),
+		border = require(script.components.border),
+		button = require(script.components.button),
+		container = require(script.components.container),
+		corner = require(script.components.corner),
+		foreground = require(script.components.foreground),
+		gap = require(script.components.gap),
+		layout = require(script.components.layout),
+		padding = require(script.components.padding),
+		pane = require(script.components.pane),
+		resizeable_bar = require(script.components.resizeable_bar),
+		scroller = require(script.components.scroller),
+		scrolling_frame = require(script.components.scrolling_frame),
+		shadow = require(script.components.shadow),
+		tabs = require(script.components.tabs),
+		text = require(script.components.text),
+		text_input = require(script.components.text_input),
+		widget = require(script.components.widget),
+	},
 }

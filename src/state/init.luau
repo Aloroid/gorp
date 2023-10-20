@@ -17,6 +17,14 @@ return vide.root(function()
 		current_client_world = source({} :: { world: rts.Registry, name: string }),
 		enabled = source(false),
 
+		custom_widgets = source({} :: {
+			{
+				name: string,
+				type: "server" | "client" | "none",
+				callback: () -> (),
+			}
+		}),
+
 		can_use_debugger = function(player: Player)
 			return (
 				game.CreatorType == Enum.CreatorType.User

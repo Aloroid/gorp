@@ -17,7 +17,9 @@ local scheduler_view = require(script.Parent.scheduler_view)
 local create = vide.create
 local source = vide.source
 local values = vide.values
-local cleanup = vide.cleanup
+
+local SERVER = "rbxasset://textures/debugger/breakpoints/server.png"
+local CLIENT = "rbxasset://textures/debugger/breakpoints/client.png"
 
 local function entry(props: {
 	value: { name: string },
@@ -59,8 +61,6 @@ local function entry(props: {
 end
 
 return function()
-	local to_cleanup = {}
-
 	return widget {
 
 		title = "View Selector",
@@ -86,13 +86,10 @@ return function()
 					return entry {
 						value = value,
 						key = key,
-						image = "rbxasset://textures/debugger/breakpoints/client.png",
+						image = CLIENT,
 						activated = function()
 							state.current_client_world(value)
-							table.insert(
-								to_cleanup,
-								vide.mount(entity_client_view)
-							)
+							vide.mount(entity_client_view)
 						end,
 					}
 				end),
@@ -103,18 +100,12 @@ return function()
 						return entry {
 							value = { name = value },
 							key = key,
-							image = "rbxasset://textures/debugger/breakpoints/server.png",
+							image = SERVER,
 							activated = function()
-								table.insert(
-									to_cleanup,
-									vide.mount(
-										function()
-											return entity_server_view(
-												value,
-												key()
-											)
-										end
-									)
+								vide.mount(
+									function()
+										return entity_server_view(value, key())
+									end
 								)
 							end,
 						}
@@ -131,13 +122,10 @@ return function()
 					return entry {
 						value = value,
 						key = key,
-						image = "rbxasset://textures/debugger/breakpoints/client.png",
+						image = CLIENT,
 						activated = function()
-							table.insert(
-								to_cleanup,
-								vide.mount(
-									function() return scheduler_view(value) end
-								)
+							vide.mount(
+								function() return scheduler_view(value) end
 							)
 						end,
 					}
@@ -149,18 +137,15 @@ return function()
 						return entry {
 							value = { name = value },
 							key = key,
-							image = "rbxasset://textures/debugger/breakpoints/server.png",
+							image = SERVER,
 							activated = function()
-								table.insert(
-									to_cleanup,
-									vide.mount(
-										function()
-											return scheduler_server_view(
-												value,
-												key()
-											)
-										end
-									)
+								vide.mount(
+									function()
+										return scheduler_server_view(
+											value,
+											key()
+										)
+									end
 								)
 							end,
 						}
@@ -168,11 +153,26 @@ return function()
 				),
 			},
 
-			cleanup(function()
-				for _, callback in to_cleanup do
-					callback()
-				end
-			end),
+			pane {
+				title = "custom",
+
+				layout {},
+
+				values(state.custom_widgets, function(value, key)
+					print(value, key())
+					return entry {
+						value = value,
+						key = key,
+						image = if value.type == "client"
+							then CLIENT
+							elseif value.type == "server" then SERVER
+							else "",
+						activated = function() vide.mount(value.callback) end,
+					}
+				end),
+
+				Visible = function() return #state.custom_widgets() > 0 end,
+			},
 		},
 	}
 end
