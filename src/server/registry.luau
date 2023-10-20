@@ -75,6 +75,7 @@ local function set_query(player, query_id, index, query)
 	local world = state.worlds()[index].world
 
 	assert(parsed.ok, "query is not valid")
+	local new_query = dynamic_ecs_query.convert_ecs_query(parsed, world)
 
 	-- contains everything that is changed
 	local changed = {}
@@ -103,9 +104,9 @@ local function set_query(player, query_id, index, query)
 			changing[index] = { {}, {} }
 		end
 
-		for id in
-			world:view(unpack(parsed.included)):exclude(unpack(parsed.excluded))
-		do
+		dynamic_ecs_query.invalidate_query(new_query)
+
+		for _, id in dynamic_ecs_query.resolve_query(new_query) do
 			new_replicated[id] = true
 
 			if currently_replicated[id] then

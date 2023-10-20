@@ -25,7 +25,7 @@ type ParsedECSQuery = {
 	included_no_tags: { number | any },
 	excluded: { number },
 	equal: { number },
-	equal_values: { any },
+	equal_values: { (value: unknown) -> boolean },
 }
 
 export type Query = {
@@ -56,16 +56,21 @@ local numbers = {
 }
 
 -- removes trailing whitespace
-local function reduce(input: string) return string.gsub(input, "%s*$", "") end
+local function reduce(input: string)
+	return string.gsub(string.gsub(input, "^%s*", ""), "%s*$", "")
+end
 
 local parse_value = function(query: string)
+	debug.profilebegin("parsing query")
 	local included = {}
 	local excluded = {}
 	local equal = {}
 	local equal_values = {}
 	local include_names = {}
 	local include_no_tags = {}
+
 	local already_used = {}
+	local already_equals = {}
 
 	local stack = {}
 	local func_call: false | { fn: (...any) -> any, tuple: { any } } = false
@@ -74,7 +79,8 @@ local parse_value = function(query: string)
 
 	local stored_equal_ctype_name: string?
 
-	local ctype_type: false | "include" | "exclude" | "equal" = false
+	local ctype_type: false | "include" | "exclude" | "equal" | "notequals" =
+		false
 
 	local is_number = false
 	local is_string: false | "'" | '"' = false
@@ -131,9 +137,45 @@ local parse_value = function(query: string)
 			table.insert(excluded, ctype)
 		elseif ctype_type == "equal" then
 			parse_num_or_bool()
-			if ctype == nil then croak(`"{name}" is not a component`) end
-			table.insert(equal_values, parsed_value)
+			if ctype == nil then
+				croak(`"{name}" is not a component`)
+				return
+			end
+			if already_equals[ctype] then
+				croak(`"{name}" is already being compared`)
+				return
+			end
 			table.insert(equal, ctype)
+			table.insert(
+				equal_values,
+				function(value: unknown) return parsed_value == value end
+			)
+
+			already_equals[ctype] = true
+
+			ctype_type = false
+			stored_equal_ctype_name = nil
+			stream:next_token()
+
+			if table.find(included, ctype) then return end
+			table.insert(included, ctype)
+		elseif ctype_type == "notequals" then
+			parse_num_or_bool()
+			if ctype == nil then
+				croak(`"{name}" is not a component`)
+				return
+			end
+			if already_equals[ctype] then
+				croak(`"{name}" is already being compared`)
+				return
+			end
+			table.insert(equal, ctype)
+			table.insert(
+				equal_values,
+				function(value: unknown) return parsed_value ~= value end
+			)
+
+			already_equals[ctype] = true
 
 			ctype_type = false
 			stored_equal_ctype_name = nil
@@ -160,16 +202,26 @@ local parse_value = function(query: string)
 				ctype_type = "exclude"
 				continue
 			elseif stream:peek() == "=" then
-				stored_equal_ctype_name = stream:next_token(1)
-				ctype_type = "equal"
+				stored_equal_ctype_name = stream:token(1)
+				if ctype_type == "include" then append() end
+
+				ctype_type = if ctype_type == "exclude"
+					then "notequals"
+					else "equal"
 				func_call = false
+				stream:next_token()
+				continue
+			elseif stream:peek() == " " then
+				append()
+				ctype_type = false
+				stream:next_token()
 				continue
 			end
 		end
 
 		-- starting from here, the component must find a matching value
 		-- first, we begin with checking if we have to stop with parsing somethinh
-		if ctype_type == "equal" then
+		if ctype_type == "equal" or ctype_type == "notequals" then
 			-- check if we're ending a string here
 			if
 				is_string
@@ -177,8 +229,18 @@ local parse_value = function(query: string)
 				and stream:last() ~= "\\"
 			then
 				parsed_value = stream:next_token(1)
+				is_string = false
+				continue
 			elseif is_string then
 				continue
+			end
+
+			if
+				stream:peek() == "'"
+				or stream:peek() == '"' and not is_string
+			then
+				is_string = stream:peek() :: "'" | '"'
+				stream:next_token()
 			end
 
 			-- check if the next character is a ,
@@ -231,10 +293,12 @@ local parse_value = function(query: string)
 		end
 	end
 
-	if not ok then return { ok = ok, err = err } end
-
 	parse_num_or_bool()
 	append()
+
+	debug.profileend()
+
+	if not ok then return { ok = false, err = err } end
 
 	return {
 		ok = true,
@@ -244,65 +308,6 @@ local parse_value = function(query: string)
 		equal_values = equal_values,
 		included_names = include_names,
 		included_no_tags = include_no_tags,
-	}
-end :: (query: string) -> ParsedECSQuery
-
-local parse_ecs_query = function(query: string)
-	local splitted = string.split(query, " ")
-
-	local already_used = {}
-	local included_names = {}
-	local included = {}
-	local included_no_tags = {}
-	local excluded = {}
-
-	for _, component_query in splitted do
-		local control_character = string.sub(component_query, 1, 1)
-		local component_name = string.sub(component_query, 2)
-		local component_id = untrack(cts.keys)[component_name]
-
-		-- Perform some checks and return a error about a query.
-		if component_query == "" then continue end
-		if component_id == nil then
-			return {
-				ok = false,
-				err = `"{component_name}" is not a valid component`,
-			}
-		end
-
-		if already_used[component_name] then
-			return {
-				ok = false,
-				err = `{component_name} is already earlier in the query.`,
-			}
-		end
-
-		already_used[component_name] = true
-
-		if control_character == "@" then
-			table.insert(included, component_id)
-			if ecr.is_tag(component_id) then continue end
-			table.insert(included_no_tags, component_id)
-			table.insert(included_names, component_name)
-		elseif control_character == "!" then
-			table.insert(excluded, component_id)
-		else
-			return {
-				ok = false,
-				err = `{control_character} is not a valid query controller.`,
-			}
-		end
-	end
-
-	return {
-		ok = true,
-
-		included = included,
-		included_no_tags = included_no_tags,
-		included_names = included_names,
-		excluded = excluded,
-		equal = {},
-		equal_values = {},
 	}
 end :: (query: string) -> ParsedECSQuery
 
@@ -335,7 +340,7 @@ local function get_entity_view(query: Query)
 end
 
 -- resolves the query and views all the ids inside
-local function resolve_query(query: Query)
+local function resolve_query(query: Query, ignore_heuristic: boolean?)
 	if query.invalidated == false then return query.ids end
 	assert(query.query.ok)
 
@@ -343,14 +348,23 @@ local function resolve_query(query: Query)
 	local world = query.registry
 	local equal, equal_values = query.query.equal, query.query.equal_values
 	query.ids = table.create(#view)
-	for id in view do
-		local fail = false
-		for i, ctype in equal do
-			fail = fail and world:get(id, ctype) == equal_values[i]
-			if fail then break end
+
+	if ignore_heuristic then
+		for id in view do
+			table.insert(query.ids, id)
 		end
-		if fail then continue end
-		table.insert(query.ids, id)
+	else
+		for id in view do
+			local fail = false
+			for i, ctype in equal do
+				if not equal_values[i](world:try_get(id, ctype)) then
+					fail = true
+					break
+				end
+			end
+			if fail then continue end
+			table.insert(query.ids, id)
+		end
 	end
 
 	return query.ids

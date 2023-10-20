@@ -90,6 +90,8 @@ if RunService:IsClient() then
 	end)
 end
 
+vide.strict = true
+
 return {
 
 	add_world = add_world,

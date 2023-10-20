@@ -96,5 +96,7 @@ return function(name: string, registry: number)
 			remotes.set_query:InvokeServer(id_query, registry, "")
 			destroy()
 		end,
+
+		_ignore_heuristic = true,
 	}
 end

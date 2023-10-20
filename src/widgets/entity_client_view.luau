@@ -24,11 +24,13 @@ local text_input = require(script.Parent.Parent.components.text_input)
 
 local source = vide.source
 local effect = vide.effect
+local derive = vide.derive
 
 return function(input: {
 	query: vide.Source<string>?,
 	world: { world: rts.Registry, name: string }?,
 	cleanup: (() -> ())?,
+	_ignore_heuristic: boolean,
 }?)
 	local props = (input :: never) or {}
 	local entry = props.world or state.current_client_world()
@@ -36,9 +38,9 @@ return function(input: {
 
 	local raw_text = source("")
 	local unparsed_query = props.query or source("")
-	local parsed_query = function()
-		return dynamic_ecs_query.parse_ecs_query(unparsed_query())
-	end
+	local parsed_query = derive(
+		function() return dynamic_ecs_query.parse_ecs_query(unparsed_query()) end
+	)
 	local ids = source({})
 	local query =
 		source(dynamic_ecs_query.convert_ecs_query(parsed_query(), world))
@@ -52,7 +54,7 @@ return function(input: {
 		debug.profilebegin("updating client view")
 		-- invalidates the old query, requiring it to update again
 		dynamic_ecs_query.invalidate_query(query())
-		ids(dynamic_ecs_query.resolve_query(query()))
+		ids(dynamic_ecs_query.resolve_query(query(), props._ignore_heuristic))
 		debug.profileend()
 	end)
 

@@ -9,14 +9,20 @@ local world = require(ReplicatedStorage.Shared.registry)
 local new = ecr.component(function() return true end)
 gorp.compat_set_cts({ test = new })
 
-for i = 1, 100 do
+for i = 1, 5 do
 	local id = world:create()
 	world:add(id, cts.Name, cts.Transform, new)
 end
 
+for i = 1, 5 do
+	local id = world:create()
+	world:add(id, cts.Name, cts.Transform, new)
+	world:set(id, cts.Name, "foo")
+end
+
 gorp.add_world(world)
 
-for i = 1, 100 do
+for i = 1, 5 do
 	local thing = world:create()
 	world:add(thing, cts.Name, cts.Transform)
 

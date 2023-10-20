@@ -38,6 +38,22 @@ for i = 1, 100 do
 	end)
 end
 
+for i = 1, 10 do
+	local id = world:create()
+	world:set(id, cts.Name, "foo")
+	world:add(id, cts.Transform)
+end
+
+for i = 1, 10 do
+	local id = world:create()
+	world:add(id, cts.Transform)
+end
+
+for i = 1, 10 do
+	local id = world:create()
+	world:set(id, cts.Transform, CFrame.new(Vector3.zero, Vector3.new(0, 5, 5)))
+end
+
 for i = 1, 300 do
 	local id = world:create()
 
@@ -63,12 +79,6 @@ local scheduler = gorp.scheduler.new()
 RunService.Heartbeat:Connect(function()
 	scheduler:before("double query")
 	for id, transform in world:view(cts.Transform, cts.Name) do
-		world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
-	end
-	scheduler:after()
-
-	scheduler:before("single")
-	for id, transform in world:view(cts.Transform) do
 		world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
 	end
 	scheduler:after()
