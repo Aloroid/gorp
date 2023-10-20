@@ -120,12 +120,17 @@ RunService.Heartbeat:Connect(function()
 	end
 	scheduler:after()
 
+	scheduler:before("none")
+	for id in world:view(cts.r) do
+	end
+	scheduler:after()
+
 	scheduler:finish()
 end)
 
 gorp.register_custom_widget(
 	"Guide",
-	"none",
+	"client",
 	function()
 		return gorp.components.widget {
 			title = "Guide",

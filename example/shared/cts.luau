@@ -14,6 +14,8 @@ return gorp.compat_set_cts(ecr.name({
 	Position = ecr.component(Vector3.new),
 	Velocity = primitive(Vector3.new(0, 0, 1)),
 
+	r = ecr.component(),
+
 	A = ecr.component(),
 	B = ecr.component(),
 	C = ecr.component(),

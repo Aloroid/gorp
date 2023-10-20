@@ -249,11 +249,15 @@ return function(
 
 							text = function()
 								local view = value()
-								average_s:add(view.s / view.ent)
+								average_s:add(
+									if view.ent == 0
+										then view.s
+										else view.s / view.ent
+								)
 								average_t:add(view.t)
 
-								return `{transform(average_t:average())}, {transform(average_s:average())}/ent, {view.ent} ent, {if view.is_group
-									then "group"
+								return `{transform(average_t:average())}, {transform(average_s:average())}/ent, {view.ent} ent {if view.is_group
+									then ", group"
 									else ""}`
 							end,
 							text_size = 14,
