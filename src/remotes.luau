@@ -85,4 +85,10 @@ return {
 	stop_flow_system_performance_data = get_remote_event(
 		"stop_flow_system_performance"
 	) :: Event<number, number>,
+
+	get_all_entity_values = get_remote_function("get_all_entity_values") :: Function<
+		(number, number),
+		({ number }, { any })
+	>,
+	update_entities = get_remote_event("update_value") :: Event<number, { { any } }, { { any } }>,
 }

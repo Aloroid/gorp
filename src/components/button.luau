@@ -34,6 +34,8 @@ local function button(props: Button)
 	local hovering = source(false)
 	local pressed = source(false)
 
+	local background = style.button
+
 	return create "TextButton" {
 
 		Size = UDim2.new(1, 0, 0, 24),
@@ -45,7 +47,7 @@ local function button(props: Button)
 			elseif hovering() then
 				return style.button_hovering
 			else
-				return style.button
+				return background
 			end
 		end,
 		AutoButtonColor = false,

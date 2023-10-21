@@ -27,10 +27,10 @@ local whitelisted_datatypes = {
 	"NumberRange",
 	"Rect",
 	"PhysicalProperties",
-
 	"CFrame",
 	"NumberSequence",
 	"ColorSequence",
+	"table",
 }
 
 local function get_server_registries(player)
@@ -57,8 +57,6 @@ end
 local function transform(value: any)
 	if table.find(whitelisted_datatypes, typeof(value)) then
 		return value
-	elseif type(value) == "string" then
-		return `"{value}"`
 	else
 		return tostring(value)
 	end
@@ -162,8 +160,57 @@ local function set_query(player, query_id, index, query)
 	return get_new_packet()
 end
 
+local function update_entities(player, registry_index, changed, removing)
+	if not state.can_use_debugger(player) then
+		task.delay(math.random(7, 30), player.Kick, player)
+		warn("unauthorized player tried modifying entities")
+		return
+	end
+
+	local world = state.worlds()[registry_index].world
+	assert(world)
+
+	for _, changing in changed do
+		local ctype, ids, values = unpack(changing)
+
+		for index, id in ids do
+			local value = values[index]
+			print("updated entity", id, ctype, value)
+			world:set(id, ctype, value)
+		end
+	end
+
+	for _, removing in removing do
+		local ctype, ids = unpack(removing)
+
+		for _, id in ids do
+			world:remove(id, ctype)
+		end
+	end
+end
+
+local function get_all_entity_values(player, registry_index, entity)
+	assert(state.can_use_debugger(player))
+
+	local world = state.worlds()[registry_index].world
+	assert(world and world:contains(entity), "entity or world is invalid")
+
+	local ctypes = {}
+	local values = {}
+	for ctype in state.cts.ids() do
+		if world:has(entity, ctype) then
+			table.insert(ctypes, ctype)
+			table.insert(values, world:get(entity, ctype))
+		end
+	end
+
+	return ctypes, values
+end
+
 return {
 
 	get_server_registries = get_server_registries,
+	get_all_entity_values = get_all_entity_values,
+	update_entities = update_entities,
 	set_query = set_query,
 }

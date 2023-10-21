@@ -27,6 +27,9 @@ remotes.stop_flow_system_performance_data.OnServerEvent:Connect(
 	system.disconnect
 )
 
+remotes.update_entities.OnServerEvent:Connect(registry.update_entities)
+remotes.get_all_entity_values.OnServerInvoke = registry.get_all_entity_values
+
 return {
 
 	registry = registry,

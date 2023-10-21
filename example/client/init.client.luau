@@ -71,6 +71,11 @@ for i = 1, 100 do
 	world:add(id, cts.Position, cts.Velocity)
 end
 
+for i = 1, 10 do
+	local id = world:create()
+	world:add(id, cts.Object)
+end
+
 local group = world:group(cts.A, cts.B, cts.C, cts.D)
 
 print("added scheduler")
