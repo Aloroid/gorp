@@ -4,13 +4,11 @@
 
 ]]
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local ecr = require(script.Parent.Parent.Parent.ecr)
 local style = require(script.Parent.Parent.style)
 local vide = require(script.Parent.Parent.Parent.vide)
-local widget = require(ReplicatedStorage.Packages.gorp.components.widget)
 
 local dynamic_ecs_query = require(script.Parent.Parent.dynamic_ecs_query)
 
@@ -24,6 +22,7 @@ local state = require(script.Parent.Parent.state)
 local table_ui = require(script.Parent.Parent.components.table)
 local text = require(script.Parent.Parent.components.text)
 local text_input = require(script.Parent.Parent.components.text_input)
+local widget = require(script.Parent.Parent.components.widget)
 
 local source = vide.source
 local effect = vide.effect

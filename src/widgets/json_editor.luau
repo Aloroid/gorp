@@ -1,16 +1,12 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local rbxjson = require(script.Parent.Parent.rbxjson)
+local vide = require(script.Parent.Parent.Parent.vide)
 
-local background =
-	require(ReplicatedStorage.Packages.gorp.components.background)
-local button = require(ReplicatedStorage.Packages.gorp.components.button)
-local layout = require(ReplicatedStorage.Packages.gorp.components.layout)
+local background = require(script.Parent.Parent.components.background)
+local button = require(script.Parent.Parent.components.button)
+local layout = require(script.Parent.Parent.components.layout)
 local scrolling_frame = require(script.Parent.Parent.components.scrolling_frame)
-local text_input =
-	require(ReplicatedStorage.Packages.gorp.components.text_input)
-
-local rbxjson = require(ReplicatedStorage.Packages.gorp.rbxjson)
-local vide = require(ReplicatedStorage.Packages.vide)
-local widget = require(ReplicatedStorage.Packages.gorp.components.widget)
+local text_input = require(script.Parent.Parent.components.text_input)
+local widget = require(script.Parent.Parent.components.widget)
 
 local source = vide.source
 local create = vide.create

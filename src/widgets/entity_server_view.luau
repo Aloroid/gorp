@@ -1,9 +1,10 @@
-local RunService = game:GetService("RunService")
 --[[
 
 	Displays a widget containing all the entities on the client.
 
 ]]
+
+local RunService = game:GetService("RunService")
 
 local ecr = require(script.Parent.Parent.Parent.ecr)
 local vide = require(script.Parent.Parent.Parent.vide)

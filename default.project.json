@@ -1,6 +1,6 @@
 {
-  "name": "gorp",
-  "tree": {
-    "src": "src"
-  }
+	"name": "gorp",
+	"tree": {
+		"$path": "src"
+	}
 }
