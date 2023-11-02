@@ -10,42 +10,7 @@ export type Observer<T...> = ecr.Observer<T...>
 export type Group<T...> = ecr.Group<T...>
 export type Registry = ecr.Registry
 export type Queue<T...> = ecr.Queue<T...>
+
 export type Source<T> = vide.Source<T>
-
-export type Scheduler = {
-
-	name: string,
-
-	systems: {
-		{
-			name: string,
-			time: {
-				add: (any, number) -> (),
-				average: (any) -> number,
-				values: { number },
-			},
-
-			_before: any,
-			_after: any,
-		}
-	},
-
-	before: (Scheduler, given_name: string) -> (),
-	after: (Scheduler) -> (),
-	finish: (Scheduler) -> (),
-
-	_hook_before_system: (
-		Scheduler,
-		index: number,
-		callback: () -> (),
-		cleanup: (() -> ())?
-	) -> () -> (),
-	_hook_after_system: (
-		Scheduler,
-		index: number,
-		callback: () -> (),
-		cleanup: (() -> ())?
-	) -> () -> (),
-}
 
 return nil
