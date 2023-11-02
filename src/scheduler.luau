@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 
 ]]
 
+local no_yield = require(script.Parent.no_yield)
 local rolling_average = require(script.Parent.rolling_average)
 local state = require(script.Parent.state)
 
@@ -51,6 +52,16 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 			callback()
 		end
 		begin = os.clock()
+	end
+
+	function self:system<T...>(name: string, system: (T...) -> (), ...: T...)
+		self:before(name)
+		local ok, thread, err = no_yield(system, ...)
+		self:after()
+
+		if ok == false and thread and err then
+			warn("system failed:", debug.traceback(thread, err))
+		end
 	end
 
 	-- this should be called after a system runs.
