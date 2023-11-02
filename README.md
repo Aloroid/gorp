@@ -12,14 +12,15 @@ gorp is a tool for [ecr](https://www.github.com/centau/ecr) that provides many f
 
 gorp provides the following features:
 
--   [x] Registry View
--   [x] Live Entity Editing
--   [x] Full Server & Client Support
--   [x] Scheduler View
--   [x] Automatic Profiling
--   [x] Per Query Profiling
--   [x] Live Game Support
--   [x] Player Authentication.
+-   [ ] Registry View
+-   [ ] Live Entity Editing
+-   [ ] Full Server & Client Support
+-   [ ] Scheduler View
+-   [ ] Automatic Profiling
+-   [ ] Per Query Profiling
+-   [ ] Live Game Support
+-   [ ] Player Authentication.
+-   [ ] Server-Client-Parallel Support
 -   [ ] Error Reporting
 -   [ ] Logging
 -   [ ] Defining custom UI from a system
