@@ -61,7 +61,7 @@ local function get_schedulers(player: Player)
 
 	local schedulers = {}
 
-	for i, scheduler in state.schedulers() do
+	for i, scheduler in state.all_schedulers.entries :: any do
 		table.insert(schedulers, scheduler.name)
 	end
 

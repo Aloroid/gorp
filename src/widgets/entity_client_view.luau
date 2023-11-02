@@ -191,7 +191,7 @@ return function(input: {
 
 											for name, value in result do
 												local ctype = cts_names[name]
-												print("set", id, name, value)
+												--print("set", id, name, value)
 												world:set(id, ctype, value)
 											end
 										end,

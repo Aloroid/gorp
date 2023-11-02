@@ -22,6 +22,19 @@ local function add_world(world: rts.Registry, name: string?)
 	group_hook(world)
 
 	state.worlds(new_worlds)
+
+	if RunService:IsServer() then
+		local id = SharedTable.increment(state.all_worlds, "size", 1)
+		local actor = state.actor_id
+
+		SharedTable.update(
+			state.all_worlds.entries,
+			id,
+			function()
+				return { name = name, index = #new_worlds, actor = actor }
+			end
+		)
+	end
 end
 
 -- allows the user to add a callback which would check if a user can or can't use the debugger.
@@ -36,7 +49,6 @@ local function spawn_widget(name: widgets)
 	if state.can_use_debugger(Players.LocalPlayer) == false then return end
 	local widget = (require :: any)(script.widgets:FindFirstChild(name))
 
-	print("mounting", widget)
 	vide.mount(
 		function() return widget() end,
 		Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -60,12 +72,19 @@ local function compat_set_cts<T>(user_cts: T & { [string]: any }): T
 	return user_cts
 end
 
-if RunService:IsServer() then
-	remotes.check_if_permission.OnServerInvoke = function(player)
-		return state.can_use_debugger(player)
-	end
+local function using_actor(actor: Actor?)
+	state.actor = actor
+	state.actor_id = SharedTable.increment(state.actors, "size", 1)
 
-	require(script.server)
+	if RunService:IsServer() then
+		if not actor then
+			remotes.check_if_permission.OnServerInvoke = function(player)
+				return state.can_use_debugger(player)
+			end
+		end
+
+		require(script.server)
+	end
 end
 
 if RunService:IsClient() then
@@ -98,6 +117,8 @@ return {
 	add_world = add_world,
 	check_if_user_allowed = check_if_user_allowed,
 	spawn_widget = spawn_widget,
+
+	server_init = using_actor,
 
 	compat_set_cts = compat_set_cts,
 	enabled = state.enabled,

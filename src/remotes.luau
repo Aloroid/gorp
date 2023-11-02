@@ -2,7 +2,7 @@
 
 	A basic remote event wrapper to handle basic networking tasks.
 
-	We opted to use a basic solution rather than a full one as it's much easier.
+	We opted to use a basic solution rather than something like BridgeNet as it's much simpler.
 
 ]]
 
@@ -10,18 +10,36 @@ local RunService = game:GetService("RunService")
 
 type Event<T...> = {
 
+	Name: string,
+
 	OnServerEvent: RBXScriptSignal<(Player, T...)>,
 	OnClientEvent: RBXScriptSignal<T...>,
 
 	FireServer: (any, T...) -> (),
 	FireClient: (any, player: Player, T...) -> (),
+
+	actor: {
+		Fire: (any, Actor, T...) -> (),
+		Event: RBXScriptSignal<(Actor, T...)>,
+	},
 }
 
 type Function<T..., U...> = {
+	Name: string,
 
 	OnServerInvoke: (Player: Player, T...) -> U...,
 
 	InvokeServer: (any, T...) -> U...,
+
+	actor: {
+		Fire: (any, Actor, number, T...) -> (),
+		Event: RBXScriptSignal<(Actor, number, T...)>,
+	},
+
+	ReturnData: {
+		Fire: (any, number, U...) -> (),
+		Event: RBXScriptSignal<(number, U...)>,
+	},
 }
 
 local function get_remote_event(name: string): any
@@ -31,6 +49,10 @@ local function get_remote_event(name: string): any
 				local remote = Instance.new("RemoteEvent")
 				remote.Name = name
 				remote.Parent = script
+
+				local fire_actor = Instance.new("BindableEvent")
+				fire_actor.Name = "actor"
+				fire_actor.Parent = remote
 				return remote
 			end)()
 	else
@@ -45,6 +67,14 @@ local function get_remote_function(name: string): any
 				local remote = Instance.new("RemoteFunction")
 				remote.Name = name
 				remote.Parent = script
+
+				local bindable_event = Instance.new("BindableEvent")
+				bindable_event.Name = "ReturnData"
+				bindable_event.Parent = remote
+
+				local fire_actor = Instance.new("BindableEvent")
+				fire_actor.Name = "actor"
+				fire_actor.Parent = remote
 				return remote
 			end)()
 	else

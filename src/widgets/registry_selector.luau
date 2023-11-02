@@ -159,7 +159,7 @@ return function()
 				layout {},
 
 				values(state.custom_widgets, function(value, key)
-					print(value, key())
+					--print(value, key())
 					return entry {
 						value = value,
 						key = key,

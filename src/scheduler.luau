@@ -1,3 +1,4 @@
+local RunService = game:GetService("RunService")
 --[[
 
 	used to hook into schedulers.
@@ -106,6 +107,25 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 	local schedulers = state.schedulers()
 	table.insert(schedulers, self)
 	state.schedulers(schedulers)
+
+	if RunService:IsServer() then
+		local index = #schedulers
+		local id = SharedTable.increment(state.all_schedulers, "size", 1)
+
+		if scheduler_name == nil then self.name = `Scheduler #{id}` end
+
+		SharedTable.update(
+			state.all_schedulers.entries,
+			id,
+			function()
+				return {
+					name = self.name,
+					index = index,
+					actor = state.actor_id,
+				}
+			end
+		)
+	end
 
 	return self
 end

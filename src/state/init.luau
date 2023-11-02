@@ -1,4 +1,5 @@
 local RunService = game:GetService("RunService")
+local SharedTableRegistry = game:GetService("SharedTableRegistry")
 
 local rts = require(script.Parent.rts)
 local vide = require(script.Parent.Parent.vide)
@@ -8,7 +9,35 @@ local source = vide.source
 return vide.root(function()
 	local cts = require(script.cts)
 
+	local actors = SharedTableRegistry:GetSharedTable("_actors")
+	local all_worlds =
+		SharedTableRegistry:GetSharedTable("_gorp_server_worlds_entries")
+	local all_schedulers =
+		SharedTableRegistry:GetSharedTable("_gorp_server_schedulers_entries")
+	local using_actors =
+		SharedTableRegistry:GetSharedTable("_gorp_server_actors")
+
+	all_worlds.size = all_worlds.size or 1
+	all_schedulers.size = all_schedulers.size or 1
+	all_worlds.entries = all_worlds.entries or {}
+	all_schedulers.entries = all_schedulers.entries or {}
+	actors.size = actors.size or 0
+
 	return {
+
+		actor = nil :: Actor?,
+		actor_id = nil :: number?,
+
+		actors = actors :: { size: number } & SharedTable,
+		all_worlds = all_worlds :: {
+			size: number,
+			entries: { { name: string, index: number, actor: Actor? } },
+		} & SharedTable,
+		all_schedulers = all_schedulers :: {
+			size: number,
+			entries: { { name: string, actor: Actor? } },
+		} & SharedTable,
+		using_actors = using_actors :: { Actor } & SharedTable,
 
 		cts = cts,
 		worlds = source({} :: { { world: rts.Registry, name: string } }),

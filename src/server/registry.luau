@@ -37,9 +37,10 @@ local function get_server_registries(player)
 	if not state.can_use_debugger(player) then return {} end
 
 	local keys = {}
-	for _, entry in state.worlds() do
+	for _, entry in state.all_worlds.entries :: any do
 		table.insert(keys, entry.name)
 	end
+
 	return keys
 end
 
@@ -175,7 +176,7 @@ local function update_entities(player, registry_index, changed, removing)
 
 		for index, id in ids do
 			local value = values[index]
-			print("updated entity", id, ctype, value)
+			--print("updated entity", id, ctype, value)
 			world:set(id, ctype, value)
 		end
 	end

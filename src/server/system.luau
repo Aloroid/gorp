@@ -51,7 +51,7 @@ local function get_system_performance_data(
 	if active[player][scheduler][system_id].n > 1 then
 		return system.time.values, get_packet()
 	end
-	print("creating new connection")
+	--print("creating new connection")
 
 	active[player][scheduler][system_id].disable = hook:enable()
 	active[player][scheduler][system_id].connection = RunService.Heartbeat:Connect(
@@ -73,7 +73,7 @@ local function disconnect_all(player: Player) active[player] = nil end
 
 local function disconnect(player: Player, scheduler_id, system)
 	assert(state.can_use_debugger(player), "cannot use debugger")
-	print("disconnected")
+	--print("disconnected")
 
 	local scheduler = state.schedulers()[scheduler_id]
 
