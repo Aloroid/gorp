@@ -1,4 +1,5 @@
 {
 	"editor.formatOnSave": true,
-	"luau-lsp.sourcemap.rojoProjectFile": "export.project.json"
+	"luau-lsp.sourcemap.rojoProjectFile": "export.project.json",
+	"luau-lsp.completion.imports.requireStyle": "alwaysRelative"
 }
