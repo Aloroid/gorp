@@ -63,7 +63,14 @@ local function compat_set_cts<T>(user_cts: T & { [string]: any }): T
 	local reverse = state.cts.reverse()
 
 	for name, id in user_cts :: { [string]: any } do
-		if keys[name] then map[reverse[keys[name]]] = id end
+		-- replace the server_ctype
+		if keys[name] then
+			local ctype = keys[name]
+			local server_ctype = reverse[ctype]
+			map[server_ctype] = id
+			ids[ctype] = nil
+		end
+
 		ids[id] = name
 	end
 
