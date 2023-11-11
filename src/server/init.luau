@@ -12,6 +12,8 @@ local components = require(script.components)
 local cts = require(script.cts)
 local events = require(script.Parent.events)
 local registry = require(script.registry)
+local replicate_components =
+	require(script.Parent.client.systems.replicate_components)
 local replicate_core = require(script.systems.replicate_core)
 local rts = require(script.Parent.rts)
 local scheduler = require(script.scheduler)
@@ -35,6 +37,7 @@ local server_scheduler = scheduler(`gorpserver:{common_actor_id}`)
 
 RunService.Heartbeat:Connect(function()
 	server_scheduler:system("replicate_core", replicate_core)
+	server_scheduler:system("replicate_components", replicate_components)
 	server_scheduler:finish()
 end)
 

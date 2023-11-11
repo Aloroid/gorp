@@ -10,4 +10,6 @@ local server = require(script.server)
 return {
 
 	add_world = server.add_world,
+	scheduler = server.scheduler,
+	names = server.names,
 }
