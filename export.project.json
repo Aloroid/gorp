@@ -6,27 +6,11 @@
 
 		"ReplicatedStorage": {
 			"Packages": {
+				"$ignoreUnknownInstances": true,
 				"$path": "Packages",
 
-				"gorp": {
+				"gorp2": {
 					"$path": "src"
-				}
-			},
-			"Shared": {
-				"$path": "example/shared"
-			}
-		},
-
-		"ServerScriptService": {
-			"Server": {
-				"$path": "example/server"
-			}
-		},
-
-		"StarterPlayer": {
-			"StarterPlayerScripts": {
-				"Client": {
-					"$path": "example/client"
 				}
 			}
 		}

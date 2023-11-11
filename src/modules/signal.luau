@@ -8,7 +8,7 @@ local signal = {}
 signal.__index = signal
 
 type Connection = { disconnect: (any?) -> (), reconnect: (any?) -> () }
-export type Signal<T...> = {
+export type Signal<T... = ...unknown> = {
 
 	class_name: "Signal",
 
@@ -17,6 +17,9 @@ export type Signal<T...> = {
 	once: (Signal<T...>, callback: (T...) -> ()) -> Connection,
 
 	callbacks: { [(T...) -> ()]: true },
+}
+export type SignalInternal<T... = ...unknown> = Signal<T...> & {
+	fire: (SignalInternal<T...>, T...) -> (),
 }
 
 function signal.connect<T...>(self: Signal<T...>, callback: (T...) -> ())

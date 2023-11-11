@@ -32,7 +32,7 @@ end
 local function result_handler<T...>(
 	ok: boolean,
 	...: T...
-): (boolean, thread?, string?)
+): (boolean, thread, string?)
 	if ok == false then
 		local thread = thread
 		local err = ...
@@ -53,13 +53,13 @@ local function result_handler<T...>(
 		return ok, thread, "attempted to yield inside the scheduler"
 	end
 
-	return true
+	return true, thread
 end
 
 local function no_yield<T...>(
 	callback: (T...) -> (),
 	...: T...
-): (boolean, thread?, string?)
+): (boolean, thread, string?)
 	assert(is_running == false, "cannot call no_yield inside no_yield")
 
 	return result_handler(coroutine.resume(thread, callback, ...))
