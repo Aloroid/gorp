@@ -15,7 +15,7 @@ local stop_multi_require = require(script.Parent.modules.stop_multi_require)
 
 stop_multi_require()
 
-events.request_servers:Fire()
+events.request_servers:Fire(true)
 
 -- create all the connections necessary
 events.new_server.Event:Connect(add_local_server)

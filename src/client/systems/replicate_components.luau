@@ -1,7 +1,6 @@
 local cts = require(script.Parent.Parent.cts)
 local ecr = require(script.Parent.Parent.Parent.Parent.ecr)
 local events = require(script.Parent.Parent.Parent.events)
-local get_entity = require(script.Parent.Parent.get_entity)
 local registry = require(script.Parent.Parent.registry)
 local servers = require(script.Parent.Parent.servers)
 

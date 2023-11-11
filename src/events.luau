@@ -26,5 +26,5 @@ return {
 	replicate_components = client_event("replicate_components") :: ClientEvent<number, { [string]: number }>,
 
 	new_server = client_event("new_server") :: ClientEvent<number, { [string]: any }, number>,
-	request_servers = client_event("request_servers") :: ClientEvent<>,
+	request_servers = client_event("request_servers") :: ClientEvent<true>,
 }

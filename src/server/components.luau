@@ -1,21 +1,22 @@
-local icts = require(script.Parent.cts)
+local cts = require(script.Parent.cts)
 local registry = require(script.Parent.registry)
 
-registry:context():set(icts.Components, {})
+registry:context():set(cts.Components, {})
 
 local cts_names = {}
 
-local function names<T>(cts: T & { [string]: any }): T
-	for name, ctype in cts :: { [string]: any } do
-		registry:context():get(icts.Components)[ctype] = name
+local function names<T>(components: T & { [string]: any }): T
+	for name, ctype in components :: { [string]: any } do
+		registry:context():get(cts.Components)[ctype] = name
 		cts_names[name] = ctype
 	end
 
-	registry
-		:context()
-		:set(icts.Components, registry:context():get(icts.Components))
+	local ent = registry:context().entity
 
-	return cts
+	registry:set(ent, cts.Components, registry:get(ent, cts.Components))
+
+	print("assigned components yay")
+	return components
 end
 
 return {
