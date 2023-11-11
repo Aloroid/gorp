@@ -18,17 +18,12 @@ type Array<T = unknown> = { T }
 
 return {
 
-	general_replication = client_event("general_replication") :: ClientEvent<
+	replicate_core_data = client_event("replicate_core_data") :: ClientEvent<
 		number,
-		Array<Array<number>>,
-		Array<Array>,
-		Array<Array<number>>,
-		Array<number>
+		{ { name: string, id: number } }, -- registries
+		{ { name: string, id: number } } -- schedulers
 	>,
-	get_initial_state = server_func("get_initial_state") :: ServerFunc<
-		(),
-		(Array<Array<number>>, Array<Array>)
-	>,
+	replicate_components = client_event("replicate_components") :: ClientEvent<number, { [string]: number }>,
 
 	new_server = client_event("new_server") :: ClientEvent<number, { [string]: any }, number>,
 	request_servers = client_event("request_servers") :: ClientEvent<>,

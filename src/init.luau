@@ -7,4 +7,7 @@
 local client = require(script.client)
 local server = require(script.server)
 
-return {}
+return {
+
+	add_world = server.add_world,
+}

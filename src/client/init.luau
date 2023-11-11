@@ -4,9 +4,12 @@
 
 ]]
 
+local RunService = game:GetService("RunService")
+
 local add_local_server = require(script.add_local_server)
 local events = require(script.Parent.events)
-local general_replication = require(script.general_replication)
+local new_scheduler = require(script.Parent.server.scheduler)
+local replicate_core = require(script.systems.replicate_core)
 local stop_multi_require = require(script.Parent.modules.stop_multi_require)
 
 stop_multi_require()
@@ -15,10 +18,11 @@ events.request_servers:Fire()
 
 -- create all the connections necessary
 events.new_server.Event:Connect(add_local_server)
-events.general_replication.Event:Connect(
-	function(actor, ent, val, rem, des)
-		general_replication(actor, "client", ent, val, rem, des)
-	end
-)
+
+local scheduler = new_scheduler("gorpclient")
+RunService.Heartbeat:Connect(function()
+	scheduler:system("replicate_core", replicate_core)
+	scheduler:finish()
+end)
 
 return {}

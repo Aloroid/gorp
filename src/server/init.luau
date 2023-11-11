@@ -12,10 +12,9 @@ local components = require(script.components)
 local cts = require(script.cts)
 local events = require(script.Parent.events)
 local registry = require(script.registry)
+local replicate_core = require(script.systems.replicate_core)
 local rts = require(script.Parent.rts)
 local scheduler = require(script.scheduler)
-
-local general_replication = require(script.systems.general_replication)
 
 local function add_world(world: rts.Registry, name: string?)
 	local ent = registry:create()
@@ -35,7 +34,7 @@ local server = {
 local server_scheduler = scheduler(`gorpserver:{common_actor_id}`)
 
 RunService.Heartbeat:Connect(function()
-	server_scheduler:system("general_replication", general_replication)
+	server_scheduler:system("replicate_core", replicate_core)
 	server_scheduler:finish()
 end)
 
@@ -45,7 +44,5 @@ end
 
 events.request_servers.Event:Connect(new_server)
 new_server()
-
-table.foreach(cts, print)
 
 return server

@@ -14,8 +14,10 @@ return ecr.name({
 	Name = ecr.component() :: string,
 	Components = ecr.component() :: { [number]: string },
 
-	Scheduler = ecr.component() :: { ecr.Entity }, -- contain systems
+	Scheduler = ecr.tag(), -- contain systems
 	Registry = ecr.tag(),
+
+	Systems = ecr.component() :: { number },
 
 	Requester = ecr.component() :: Player,
 	SelectedRegistry = ecr.component() :: ecr.Entity,
