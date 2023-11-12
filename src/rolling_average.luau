@@ -13,7 +13,7 @@ function rolling_average.new(max: number?)
 	function self:average()
 		local total = 0
 
-		for _, n in n do
+		for _, n in self.values do
 			total += n
 		end
 

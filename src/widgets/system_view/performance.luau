@@ -184,7 +184,7 @@ return function(
 			text {
 				text = function()
 					heartbeat()
-					return `budget: {transform(budget())}\tmax: {transform(min())}\tmin: {transform(max())}\taverage: {transform(
+					return `budget: {transform(budget())}\tmax: {transform(max())}\tmin: {transform(min())}\taverage: {transform(
 						time:average()
 					)}`
 				end,
