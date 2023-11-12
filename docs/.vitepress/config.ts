@@ -8,7 +8,7 @@ export default defineConfig({
 
     description: "A ECR debugging and profiling library",
     base: "/gorp/",
-    head: [["link", { rel: "icon", href: "/public/favicon.svg" }]],
+    head: [["link", { rel: "icon", href: "/favicon.svg" }]],
     ignoreDeadLinks: true,
 
     themeConfig: {
