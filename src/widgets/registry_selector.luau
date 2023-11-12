@@ -64,7 +64,7 @@ local function entry(props: {
 	}
 end
 
-return function()
+local function registry_selector()
 	local query = source("")
 	local total_entries = source(0)
 	local stored_widgets = {}
@@ -258,6 +258,21 @@ return function()
 
 				Visible = function() return #state.custom_widgets() > 0 end,
 			},
+
+			button {
+				text = "Close All Widgets",
+
+				activated = function()
+					for _, destroy in state.widgets do
+						pcall(destroy)
+					end
+					table.clear(state.widgets)
+
+					vide.mount(registry_selector)
+				end,
+			},
 		},
 	}
 end
+
+return registry_selector
