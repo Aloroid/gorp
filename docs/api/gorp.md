@@ -149,7 +149,7 @@ Sets the components that gorp knows of
 -   **Type**
 
 ```lua
-function gorp.compat_set_cts(cts: {[string]: ctype}): () -> ()
+function gorp.compat_set_cts<T>(cts: T & {[string]: ctype}): T
 ```
 
 -   **Details**
