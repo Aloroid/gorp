@@ -106,7 +106,7 @@ return function(
 						end,
 						Position = function()
 							return UDim2.fromScale(
-								1 / #time.values * (key - 1),
+								1 - 1 / #time.values * (key - 1),
 								1
 							)
 						end,
