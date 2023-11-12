@@ -98,6 +98,8 @@ return function(props: props)
 					return UDim2.fromOffset(x_size() + 6, y_size() + 6)
 				end,
 
+				Active = true,
+
 				create "Frame" {
 
 					Size = UDim2.fromScale(1, 1),
