@@ -18,6 +18,7 @@ local scheduler_view = require(script.Parent.scheduler_view)
 local create = vide.create
 local source = vide.source
 local values = vide.values
+local cleanup = vide.cleanup
 
 local SERVER = "rbxasset://textures/debugger/breakpoints/server.png"
 local CLIENT = "rbxasset://textures/debugger/breakpoints/client.png"
@@ -68,6 +69,23 @@ local function registry_selector()
 	local query = source("")
 	local total_entries = source(0)
 	local stored_widgets = {}
+
+	local server_registries =
+		source(remotes.get_server_registries:InvokeServer())
+	local server_schedulers =
+		source(remotes.get_server_schedulers:InvokeServer())
+
+	cleanup(
+		remotes.updated_server_registries.OnClientEvent:Connect(
+			function(new) server_registries(new) end
+		)
+	)
+
+	cleanup(
+		remotes.updated_server_schedulers.OnClientEvent:Connect(
+			function(new) server_schedulers(new) end
+		)
+	)
 
 	return widget {
 
@@ -134,37 +152,33 @@ local function registry_selector()
 					}
 				end),
 
-				values(
-					source(remotes.get_server_registries:InvokeServer()),
-					function(value, key)
-						total_entries(total_entries() + 1)
-						return entry {
-							value = { name = value },
-							key = key,
-							image = SERVER,
-							visible = function()
-								return not not string.match(
-									string.lower(value),
-									string.lower(query())
-								)
-							end,
-							activated = function()
-								if stored_widgets[`server_reg:{value}`] then
-									local ok = pcall(
-										stored_widgets[`server_reg:{value}`]
-									)
-									if ok then return end
-								end
+				values(server_registries, function(value, key)
+					total_entries(total_entries() + 1)
+					return entry {
+						value = { name = value },
+						key = key,
+						image = SERVER,
+						visible = function()
+							return not not string.match(
+								string.lower(value),
+								string.lower(query())
+							)
+						end,
+						activated = function()
+							if stored_widgets[`server_reg:{value}`] then
+								local ok =
+									pcall(stored_widgets[`server_reg:{value}`])
+								if ok then return end
+							end
 
-								stored_widgets[`server_reg:{value}`] = vide.mount(
-									function()
-										return entity_server_view(value, key())
-									end
-								)
-							end,
-						}
-					end
-				),
+							stored_widgets[`server_reg:{value}`] = vide.mount(
+								function()
+									return entity_server_view(value, key())
+								end
+							)
+						end,
+					}
+				end),
 			},
 
 			pane {
@@ -197,40 +211,33 @@ local function registry_selector()
 					}
 				end),
 
-				values(
-					source(remotes.get_server_schedulers:InvokeServer()),
-					function(value, key)
-						total_entries(total_entries() + 1)
-						return entry {
-							value = { name = value },
-							key = key,
-							image = SERVER,
-							visible = function()
-								return not not string.match(
-									string.lower(value),
-									string.lower(query())
-								)
-							end,
-							activated = function()
-								if stored_widgets[`server_sch:{value}`] then
-									local ok = pcall(
-										stored_widgets[`server_sch:{value}`]
-									)
-									if ok then return end
-								end
+				values(server_schedulers, function(value, key)
+					total_entries(total_entries() + 1)
+					return entry {
+						value = { name = value },
+						key = key,
+						image = SERVER,
+						visible = function()
+							return not not string.match(
+								string.lower(value),
+								string.lower(query())
+							)
+						end,
+						activated = function()
+							if stored_widgets[`server_sch:{value}`] then
+								local ok =
+									pcall(stored_widgets[`server_sch:{value}`])
+								if ok then return end
+							end
 
-								stored_widgets[`server_sch:{value}`] = vide.mount(
-									function()
-										return scheduler_server_view(
-											value,
-											key()
-										)
-									end
-								)
-							end,
-						}
-					end
-				),
+							stored_widgets[`server_sch:{value}`] = vide.mount(
+								function()
+									return scheduler_server_view(value, key())
+								end
+							)
+						end,
+					}
+				end),
 			},
 
 			pane {

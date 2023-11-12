@@ -1,3 +1,4 @@
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local dynamic_ecs_query = require(script.Parent.Parent.dynamic_ecs_query)
@@ -33,8 +34,10 @@ local whitelisted_datatypes = {
 	"table",
 }
 
+local players_receiving = {}
 local function get_server_registries(player)
 	if not state.can_use_debugger(player) then return {} end
+	players_receiving[player] = true
 
 	local keys = {}
 	for _, entry in state.all_worlds.entries :: any do
@@ -207,6 +210,27 @@ local function get_all_entity_values(player, registry_index, entity)
 
 	return ctypes, values
 end
+
+local old_size = state.all_worlds.size
+RunService.Heartbeat:Connect(function()
+	if old_size == state.all_worlds.size then return end
+
+	local worlds = {}
+
+	for i, entry in state.all_worlds.entries :: any do
+		table.insert(worlds, entry.name)
+	end
+
+	for player in players_receiving do
+		remotes.updated_server_registries:FireClient(player, worlds)
+	end
+
+	old_size = state.all_worlds.size
+end)
+
+Players.PlayerRemoving:Connect(
+	function(player) players_receiving[player] = nil end
+)
 
 return {
 

@@ -13,10 +13,10 @@ local style = require(script.style)
 local vide = require(script.Parent.vide)
 
 -- adds a world to the list of worlds.
-local function add_world(world: rts.Registry, name: string?)
+local function add_world(world: rts.Registry, given_name: string?)
 	local new_worlds = table.clone(state.worlds())
-	local entry =
-		{ world = world, name = name or `Registry #{#new_worlds + 1}` }
+	local name = given_name or `Registry #{#new_worlds + 1}`
+	local entry = { world = world, name = name }
 
 	table.insert(new_worlds, entry)
 
