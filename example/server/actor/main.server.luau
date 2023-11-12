@@ -8,8 +8,6 @@ local world = require(ReplicatedStorage.Shared.registry)
 
 local new = ecr.component(function() return true end)
 
-gorp.server_init(script:GetActor())
-
 gorp.compat_set_cts({ test = new })
 
 for i = 1, 5 do

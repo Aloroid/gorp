@@ -9,7 +9,6 @@ local world = require(ReplicatedStorage.Shared.registry)
 
 print("nightmare")
 local new = ecr.component(function() return true end)
-gorp.server_init()
 gorp.compat_set_cts({ test = new })
 
 for i = 1, 5 do
