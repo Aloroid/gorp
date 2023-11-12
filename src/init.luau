@@ -46,6 +46,12 @@ end
 -- this will be called on both the server and client.
 local function check_if_user_allowed(callback: (player: Player) -> boolean)
 	state.can_use_debugger = callback
+
+	if RunService:IsServer() then
+		remotes.check_if_permission.OnServerInvoke = function(player)
+			return state.can_use_debugger(player)
+		end
+	end
 end
 
 -- spawns a new widget
