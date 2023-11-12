@@ -10,7 +10,8 @@ local active = {}
 local function get_system_performance_data(
 	player: Player,
 	scheduler_id: number,
-	system_id: number
+	system_id: number,
+	raw_scheduler_id: number
 )
 	assert(state.can_use_debugger(player), "cannot use debugger")
 
@@ -58,7 +59,7 @@ local function get_system_performance_data(
 		function()
 			remotes.update_system_performance_data:FireClient(
 				player,
-				scheduler_id,
+				raw_scheduler_id,
 				system_id,
 				system.time.values[1],
 				get_packet()

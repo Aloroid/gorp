@@ -76,10 +76,15 @@ if not actor then
 				remotes.subscribe_scheduler_data,
 				entry.actor,
 				player,
-				entry.index
+				entry.index,
+				scheduler_index
 			)
 		else
-			return scheduler.subscribe_scheduler_data(player, entry.index)
+			return scheduler.subscribe_scheduler_data(
+				player,
+				entry.index,
+				scheduler_index
+			)
 		end
 	end
 
@@ -112,10 +117,17 @@ if not actor then
 				entry.actor,
 				player,
 				entry.index,
-				sys
+				sys,
+
+				index
 			)
 		else
-			return system.get_system_performance_data(player, entry.index, sys)
+			return system.get_system_performance_data(
+				player,
+				entry.index,
+				sys,
+				index
+			)
 		end
 	end
 

@@ -52,6 +52,9 @@ return function(scheduler_index: number, index: number, name: string)
 					-- update code
 					local connection = remotes.update_system_performance_data.OnClientEvent:Connect(
 						function(scheduler_id, system_id, value, queries)
+							if scheduler_id ~= scheduler_index then return end
+							if system_id ~= index then return end
+
 							time:add(value)
 							local new = {}
 

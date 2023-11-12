@@ -98,7 +98,7 @@ return {
 	get_server_schedulers = get_remote_function("get_schedulers") :: Function<(), ({ string })>,
 	subscribe_scheduler_data = get_remote_function("subscribe_scheduler") :: Function<(number), ({ string })>,
 	unsubscribe_scheduler_data = get_remote_function("unsubscribe_scheduler") :: Function<(number)>,
-	update_scheduler_data = get_remote_event("update_scheduler") :: Event<{ string }>,
+	update_scheduler_data = get_remote_event("update_scheduler") :: Event<number, { string }>,
 
 	get_system_performance_data = get_remote_function("get_system_data") :: Function<
 		(number, number),

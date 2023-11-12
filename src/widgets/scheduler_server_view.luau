@@ -5,7 +5,9 @@ local scheduler_view = require(script.Parent.scheduler_view)
 return function(name, index)
 	local scheduler = scheduler.new(`{name} (server)`, true, 1)
 
-	local function update_scheduler(data)
+	local function update_scheduler(update_index, data)
+		if update_index ~= index then return end -- for someone else
+
 		for _, value in data do
 			local name, time = string.unpack("zf", value)
 			scheduler:before(name)
@@ -14,7 +16,10 @@ return function(name, index)
 		scheduler:finish()
 	end
 
-	update_scheduler(remotes.subscribe_scheduler_data:InvokeServer(index))
+	update_scheduler(
+		index,
+		remotes.subscribe_scheduler_data:InvokeServer(index)
+	)
 	local connection =
 		remotes.update_scheduler_data.OnClientEvent:Connect(update_scheduler)
 

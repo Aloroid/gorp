@@ -10,7 +10,11 @@ local state = require(script.Parent.Parent.state)
 
 local subscribed = {}
 
-local function subscribe_scheduler_data(player: Player, index: number)
+local function subscribe_scheduler_data(
+	player: Player,
+	index: number,
+	s_index: number
+)
 	assert(state.can_use_debugger(player))
 	subscribed[player] = subscribed[player] or {}
 
@@ -41,7 +45,11 @@ local function subscribe_scheduler_data(player: Player, index: number)
 			and subscribed[player]
 			and subscribed[player][index] > 0
 		do
-			remotes.update_scheduler_data:FireClient(player, get_packet())
+			remotes.update_scheduler_data:FireClient(
+				player,
+				s_index,
+				get_packet()
+			)
 		end
 		if subscribed[player] == nil then return end
 		subscribed[player][index] = nil
