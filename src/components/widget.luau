@@ -79,7 +79,10 @@ return function(props: props)
 				else Players.LocalPlayer:WaitForChild("PlayerGui"),
 
 			Name = widget_id,
-			Enabled = state.enabled,
+			Enabled = function()
+				return state.enabled()
+					and state.can_use_debugger(Players.LocalPlayer)
+			end,
 
 			DisplayOrder = display_order,
 

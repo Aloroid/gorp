@@ -65,7 +65,7 @@ local function unsubscribe_scheduler_data(player: Player, index: number)
 end
 
 local function get_schedulers(player: Player)
-	assert(state.can_use_debugger(player))
+	if not state.can_use_debugger(player) then return {} end
 
 	local schedulers = {}
 
