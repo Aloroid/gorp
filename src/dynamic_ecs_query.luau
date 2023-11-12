@@ -1,4 +1,5 @@
 --!native
+--!nolint LocalShadow
 --[[
 
 	dynamic_ecs_query allows for dynamically querying and returns a result.

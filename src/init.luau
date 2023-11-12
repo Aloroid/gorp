@@ -166,6 +166,7 @@ return {
 	add_world = add_world,
 	check_if_user_allowed = check_if_user_allowed,
 	spawn_widget = (spawn_widget :: any) :: spawn_widget,
+	scale = state.scale,
 
 	server_init = using_actor,
 

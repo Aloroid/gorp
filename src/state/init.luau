@@ -25,6 +25,8 @@ return vide.root(function()
 
 	return {
 
+		scale = source(1),
+
 		actor = nil :: Actor?,
 		actor_id = nil :: number?,
 

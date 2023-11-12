@@ -140,7 +140,8 @@ return function(props: props)
 						border {},
 
 						MouseButton1Down = function(x, y)
-							offset = absolute_position() - Vector2.new(x, y)
+							offset = (absolute_position() - Vector2.new(x, y))
+								/ state.scale()
 							dragging(true)
 						end,
 
@@ -156,8 +157,8 @@ return function(props: props)
 									return
 								end
 
-								local position =
-									UserInputService:GetMouseLocation()
+								local position = UserInputService:GetMouseLocation()
+									/ state.scale()
 								x_position(position.X + offset.X)
 								y_position(position.Y + offset.Y)
 							end)
@@ -182,7 +183,10 @@ return function(props: props)
 						if resizing() then return end
 
 						local mposition = UserInputService:GetMouseLocation()
+							/ state.scale()
 						local top_inset, bottom_inset = GuiService:GetGuiInset()
+						top_inset /= state.scale()
+						bottom_inset /= state.scale()
 						mposition -= top_inset + bottom_inset
 						local x, y = mposition.X, mposition.Y
 						x -= absolute_position().X
@@ -216,7 +220,10 @@ return function(props: props)
 
 					cleanup(RunService.RenderStepped:Connect(function()
 						local mposition = UserInputService:GetMouseLocation()
+							/ state.scale()
 						local top_inset, bottom_inset = GuiService:GetGuiInset()
+						top_inset /= state.scale()
+						bottom_inset /= state.scale()
 						mposition -= top_inset + bottom_inset
 						local x, y = mposition.X, mposition.Y
 
@@ -269,6 +276,11 @@ return function(props: props)
 						highest_display_order += 1
 					end)),
 				},
+			},
+
+			create "UIScale" {
+
+				Scale = state.scale,
 			},
 		}
 
