@@ -215,7 +215,7 @@ return function(name: string, registry: number)
 		end,
 
 		_ignore_heuristic = true,
-		function(id: number)
+		get_components = function(id: number)
 			local ctypes, values =
 				remotes.get_all_entity_values:InvokeServer(registry, id)
 			local entity = {}

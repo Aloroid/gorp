@@ -130,7 +130,7 @@ type spawn_widget =
 		widget: "entity_client_view",
 		props: {
 			query: vide.Source<string>?,
-			world: { world: rts.Registry, name: string }?,
+			world: { world: rts.Registry, name: string },
 			cleanup: (() -> ())?,
 
 			get_components: ((id: number) -> { number })?,
