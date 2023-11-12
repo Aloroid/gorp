@@ -85,6 +85,7 @@ return function(input: {
 			text_input {
 
 				text = raw_text,
+				placeholder_text = "include: @[ctype] exclude: ![ctype] condition: [ctype]=Vector3(0,0,0)",
 
 				focus_lost = function() unparsed_query(raw_text()) end,
 			},
@@ -165,7 +166,6 @@ return function(input: {
 						end,
 
 						activated = function()
-							--TODO: Allow for editing all the components when clicking the Id
 							if column == 1 then
 								local id = id()
 								local key, ver = ecr.extract(id)
@@ -203,6 +203,14 @@ return function(input: {
 							local id, ctype = id(), ctype()
 							local key, ver = ecr.extract(id)
 							local value = world:try_get(id, ctype)
+							local is_wrapped = not (
+								type(value) == "string"
+								or type(value) == "boolean"
+								or type(value) == "table"
+								or type(value) == "number"
+							) -- indicates if its wrapped
+
+							if is_wrapped then value = { value = value } end
 
 							return vide.mount(function()
 								return json_editor {
@@ -210,14 +218,17 @@ return function(input: {
 									prettify = typeof(value) == "table",
 									text = rbxjson:Encode(value),
 									updated = function(new_value)
-										world:set(
-											id,
-											ctype,
-											rbxjson:Decode(
-												new_value,
-												typeof(value)
-											)
+										local decoded = rbxjson:Decode(
+											new_value,
+											typeof(value)
 										)
+
+										if is_wrapped then
+											assert(decoded.value)
+											world:set(id, ctype, decoded.value)
+										else
+											world:set(id, ctype, decoded)
+										end
 									end,
 								}
 							end)

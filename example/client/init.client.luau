@@ -133,7 +133,7 @@ RunService.Heartbeat:Connect(function()
 	scheduler:finish()
 end)
 
-gorp.register_custom_widget(
+--[[gorp.register_custom_widget(
 	"Guide",
 	"client",
 	function()
@@ -144,3 +144,4 @@ gorp.register_custom_widget(
 		}
 	end
 )
+]]

@@ -7,6 +7,7 @@ local padding = require(script.Parent.Parent.components.padding)
 local pane = require(script.Parent.Parent.components.pane)
 local remotes = require(script.Parent.Parent.remotes)
 local scrolling_frame = require(script.Parent.Parent.components.scrolling_frame)
+local text_input = require(script.Parent.Parent.components.text_input)
 local widget = require(script.Parent.Parent.components.widget)
 
 local entity_client_view = require(script.Parent.entity_client_view)
@@ -25,6 +26,7 @@ local function entry(props: {
 	value: { name: string },
 	key: () -> number,
 	image: string,
+	visible: () -> boolean,
 	activated: () -> (),
 })
 	local value, key, image, activated =
@@ -35,6 +37,8 @@ local function entry(props: {
 
 		layout = {
 			LayoutOrder = key,
+
+			Visible = props.visible,
 		},
 
 		child = {
@@ -61,6 +65,9 @@ local function entry(props: {
 end
 
 return function()
+	local query = source("")
+	local total_entries = source(0)
+
 	return widget {
 
 		title = "View Selector",
@@ -77,6 +84,25 @@ return function()
 				Padding = UDim.new(0, 16),
 			},
 
+			text_input {
+				text = query,
+				placeholder_text = "Search",
+
+				size = UDim2.new(1, 0, 0, 28),
+				text_size = 14,
+
+				layout = {
+
+					Visible = function()
+						return total_entries()
+								+ #state.custom_widgets()
+								+ #state.worlds()
+								+ #state.schedulers()
+							> 5
+					end,
+				},
+			},
+
 			pane {
 				title = "worlds",
 
@@ -87,6 +113,12 @@ return function()
 						value = value,
 						key = key,
 						image = CLIENT,
+						visible = function()
+							return not not string.match(
+								string.lower(value.name),
+								string.lower(query())
+							)
+						end,
 						activated = function()
 							state.current_client_world(value)
 							vide.mount(entity_client_view)
@@ -97,10 +129,17 @@ return function()
 				values(
 					source(remotes.get_server_registries:InvokeServer()),
 					function(value, key)
+						total_entries(total_entries() + 1)
 						return entry {
 							value = { name = value },
 							key = key,
 							image = SERVER,
+							visible = function()
+								return not not string.match(
+									string.lower(value),
+									string.lower(query())
+								)
+							end,
 							activated = function()
 								vide.mount(
 									function()
@@ -123,6 +162,12 @@ return function()
 						value = value,
 						key = key,
 						image = CLIENT,
+						visible = function()
+							return not not string.match(
+								string.lower(value.name),
+								string.lower(query())
+							)
+						end,
 						activated = function()
 							vide.mount(
 								function() return scheduler_view(value) end
@@ -134,10 +179,17 @@ return function()
 				values(
 					source(remotes.get_server_schedulers:InvokeServer()),
 					function(value, key)
+						total_entries(total_entries() + 1)
 						return entry {
 							value = { name = value },
 							key = key,
 							image = SERVER,
+							visible = function()
+								return not not string.match(
+									string.lower(value),
+									string.lower(query())
+								)
+							end,
 							activated = function()
 								vide.mount(
 									function()
@@ -159,7 +211,6 @@ return function()
 				layout {},
 
 				values(state.custom_widgets, function(value, key)
-					--print(value, key())
 					return entry {
 						value = value,
 						key = key,
@@ -167,6 +218,12 @@ return function()
 							then CLIENT
 							elseif value.type == "server" then SERVER
 							else "",
+						visible = function()
+							return not not string.match(
+								string.lower(value.name),
+								string.lower(query())
+							)
+						end,
 						activated = function() vide.mount(value.callback) end,
 					}
 				end),
