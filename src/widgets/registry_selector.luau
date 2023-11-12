@@ -67,6 +67,7 @@ end
 return function()
 	local query = source("")
 	local total_entries = source(0)
+	local stored_widgets = {}
 
 	return widget {
 
@@ -120,8 +121,15 @@ return function()
 							)
 						end,
 						activated = function()
+							if stored_widgets[`client_reg:{value}`] then
+								local ok =
+									pcall(stored_widgets[`client_reg:{value}`])
+								if ok then return end
+							end
+
 							state.current_client_world(value)
-							vide.mount(entity_client_view)
+							stored_widgets[`client_reg:{value}`] =
+								vide.mount(entity_client_view)
 						end,
 					}
 				end),
@@ -141,7 +149,14 @@ return function()
 								)
 							end,
 							activated = function()
-								vide.mount(
+								if stored_widgets[`server_reg:{value}`] then
+									local ok = pcall(
+										stored_widgets[`server_reg:{value}`]
+									)
+									if ok then return end
+								end
+
+								stored_widgets[`server_reg:{value}`] = vide.mount(
 									function()
 										return entity_server_view(value, key())
 									end
@@ -169,7 +184,13 @@ return function()
 							)
 						end,
 						activated = function()
-							vide.mount(
+							if stored_widgets[`client_sch:{value}`] then
+								local ok =
+									pcall(stored_widgets[`client_sch:{value}`])
+								if ok then return end
+							end
+
+							stored_widgets[`client_sch:{value}`] = vide.mount(
 								function() return scheduler_view(value) end
 							)
 						end,
@@ -191,7 +212,14 @@ return function()
 								)
 							end,
 							activated = function()
-								vide.mount(
+								if stored_widgets[`server_sch:{value}`] then
+									local ok = pcall(
+										stored_widgets[`server_sch:{value}`]
+									)
+									if ok then return end
+								end
+
+								stored_widgets[`server_sch:{value}`] = vide.mount(
 									function()
 										return scheduler_server_view(
 											value,

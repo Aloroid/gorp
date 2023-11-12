@@ -48,8 +48,7 @@ local function check_if_user_allowed(callback: (player: Player) -> boolean)
 end
 
 -- spawns a new widget
-type widgets = "entity_client_view" | "registry_selector"
-local function spawn_widget(name: widgets, ...)
+local function spawn_widget(name: string, ...)
 	if state.can_use_debugger(Players.LocalPlayer) == false then return end
 	local widget = (require :: any)(script.widgets:FindFirstChild(name))
 	local packed = { ... }
@@ -58,6 +57,14 @@ local function spawn_widget(name: widgets, ...)
 		function() return widget(unpack(packed)) end,
 		Players.LocalPlayer:WaitForChild("PlayerGui")
 	)
+end
+
+-- clears all the widgets
+local function clear_all()
+	for _, destroy in state.widgets do
+		pcall(destroy)
+	end
+	table.clear(state.widgets)
 end
 
 -- compatibility for ecr versions that didn't have ecr.get_names()
@@ -135,7 +142,7 @@ type spawn_widget =
 
 			get_components: ((id: number) -> { number })?,
 		}
-	) -> ())
+	) -> () -> ())
 	& ((widget: "entity_server_view", name: string, registry: number) -> ())
 	& ((
 		widget: "json_editor",
@@ -145,21 +152,29 @@ type spawn_widget =
 			updated: (text: string) -> (),
 			prettify: boolean,
 		}
-	) -> ())
+	) -> () -> ())
 	& ((
 		widget: "scheduler_view",
 		scheduler: rts.Scheduler,
 		cleanup: (() -> ())?,
 		server_scheduler_id: number?
-	) -> ())
-	& ((widget: "scheduler_server_view", name: string, scheduler: number) -> ())
-	& ((widget: "system_view", scheduler: rts.Scheduler, system: number) -> ())
+	) -> () -> ())
+	& ((
+		widget: "scheduler_server_view",
+		name: string,
+		scheduler: number
+	) -> () -> ())
+	& ((
+		widget: "system_view",
+		scheduler: rts.Scheduler,
+		system: number
+	) -> () -> ())
 	& ((
 		widget: "system_server_view",
 		scheduler_index: number,
 		index: number,
 		name: string
-	) -> ())
+	) -> () -> ())
 
 return {
 
@@ -167,6 +182,7 @@ return {
 	set_check_if_user_allowed = check_if_user_allowed,
 	spawn_widget = (spawn_widget :: any) :: spawn_widget,
 	scale = state.scale,
+	clear_all = clear_all,
 
 	server_init = using_actor,
 

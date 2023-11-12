@@ -71,7 +71,7 @@ return function(props: props)
 	local top
 	local bottom
 
-	return vide.root(function(destroy)
+	local gui, destroy = vide.root(function(destroy)
 		local gui = create "ScreenGui" {
 			Parent = if RunService:IsStudio()
 					and not RunService:IsRunning()
@@ -289,6 +289,12 @@ return function(props: props)
 
 		cleanup(gui)
 
-		return gui
+		return gui, destroy
 	end)
+
+	table.insert(state.widgets, destroy)
+
+	cleanup(destroy)
+
+	return gui
 end
