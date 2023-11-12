@@ -9,6 +9,7 @@ local remotes = require(script.remotes)
 local rts = require(script.rts)
 local scheduler = require(script.scheduler)
 local state = require(script.state)
+local style = require(script.style)
 local vide = require(script.Parent.vide)
 
 -- adds a world to the list of worlds.
@@ -192,6 +193,7 @@ return {
 
 	register_custom_widget = register_custom_widget,
 
+	style = style,
 	state = state,
 	components = {
 

@@ -19,6 +19,7 @@ type Button = {
 
 	text: string | () -> string,
 	alignment: (Enum.TextXAlignment | () -> Enum.TextXAlignment)?,
+	padding: number?,
 
 	layout: {
 		[any]: any,
@@ -81,8 +82,8 @@ local function button(props: Button)
 
 		create "UIPadding" {
 
-			PaddingLeft = UDim.new(0, 6),
-			PaddingRight = UDim.new(0, 6),
+			PaddingLeft = UDim.new(0, props.padding or 6),
+			PaddingRight = UDim.new(0, props.padding or 6),
 		},
 
 		props.layout,

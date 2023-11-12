@@ -9,7 +9,6 @@ local style = require(script.Parent.Parent.style)
 local vide = require(script.Parent.Parent.Parent.vide)
 
 local border = require(script.Parent.border)
-local button = require(script.Parent.button)
 local container = require(script.Parent.container)
 local shadow = require(script.Parent.shadow)
 local text = require(script.Parent.text)
@@ -67,6 +66,9 @@ return function(props: props)
 	local ref = source()
 	local display_order = source(highest_display_order + 1)
 	highest_display_order += 1
+
+	local hover_closed = source(false)
+	local pressed_closed = source(false)
 
 	local top
 	local bottom
@@ -129,16 +131,40 @@ return function(props: props)
 						},
 
 						if closesable ~= false
-							then button {
-								layout = {
-									Position = UDim2.new(1, -4, 0.5, 0),
-									Size = UDim2.fromOffset(16, 16),
-									AnchorPoint = Vector2.new(1, 0.5),
+							then create "TextButton" {
+								Position = UDim2.new(1, 0, 0.5, 0),
+								Size = UDim2.new(0, 44, 1, 0),
+								AnchorPoint = Vector2.new(1, 0.5),
+
+								BackgroundColor3 = vide.spring(
+									function()
+										return if pressed_closed()
+												and hover_closed()
+											then style.close_button_pressed
+											elseif
+												hover_closed()
+											then style.close_button
+											else style.foreground
+									end,
+									0.1
+								),
+
+								create "ImageLabel" {
+
+									Size = UDim2.fromOffset(12, 12),
+									Position = UDim2.fromScale(0.5, 0.5),
+									AnchorPoint = Vector2.new(0.5, 0.5),
+
+									BackgroundTransparency = 1,
+
+									Image = "rbxasset://textures/ui/InspectMenu/x.png",
 								},
 
-								text = "x",
+								Text = "",
 
-								activated = function() destroy() end,
+								actions.hovering(hover_closed),
+								actions.pressed(pressed_closed),
+								Activated = destroy,
 							}
 							else nil,
 
