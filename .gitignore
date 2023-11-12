@@ -8,6 +8,10 @@
 # Packages
 /Packages
 
+**/cache
+**/dist
+docs/node_modules
+
 # Sourcemap
 /sourcemap.json
 
