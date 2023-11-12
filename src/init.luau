@@ -34,7 +34,11 @@ local function add_world(world: rts.Registry, name: string?)
 				return { name = name, index = #new_worlds, actor = actor }
 			end
 		)
+
+		return id
 	end
+
+	return -1
 end
 
 -- allows the user to add a callback which would check if a user can or can't use the debugger.
@@ -45,12 +49,13 @@ end
 
 -- spawns a new widget
 type widgets = "entity_client_view" | "registry_selector"
-local function spawn_widget(name: widgets)
+local function spawn_widget(name: widgets, ...)
 	if state.can_use_debugger(Players.LocalPlayer) == false then return end
 	local widget = (require :: any)(script.widgets:FindFirstChild(name))
+	local packed = { ... }
 
-	vide.mount(
-		function() return widget() end,
+	return vide.mount(
+		function() return widget(unpack(packed)) end,
 		Players.LocalPlayer:WaitForChild("PlayerGui")
 	)
 end
@@ -119,11 +124,48 @@ end
 
 vide.strict = true
 
+type spawn_widget =
+	((widget: "registry_selector") -> ())
+	& ((
+		widget: "entity_client_view",
+		props: {
+			query: vide.Source<string>?,
+			world: { world: rts.Registry, name: string }?,
+			cleanup: (() -> ())?,
+
+			get_components: ((id: number) -> { number })?,
+		}
+	) -> ())
+	& ((widget: "entity_server_view", name: string, registry: number) -> ())
+	& ((
+		widget: "json_editor",
+		props: {
+			name: string,
+			text: string,
+			updated: (text: string) -> (),
+			prettify: boolean,
+		}
+	) -> ())
+	& ((
+		widget: "scheduler_view",
+		scheduler: rts.Scheduler,
+		cleanup: (() -> ())?,
+		server_scheduler_id: number?
+	) -> ())
+	& ((widget: "scheduler_server_view", name: string, scheduler: number) -> ())
+	& ((widget: "system_view", scheduler: rts.Scheduler, system: number) -> ())
+	& ((
+		widget: "system_server_view",
+		scheduler_index: number,
+		index: number,
+		name: string
+	) -> ())
+
 return {
 
 	add_world = add_world,
 	check_if_user_allowed = check_if_user_allowed,
-	spawn_widget = spawn_widget,
+	spawn_widget = (spawn_widget :: any) :: spawn_widget,
 
 	server_init = using_actor,
 
