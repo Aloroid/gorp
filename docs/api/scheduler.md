@@ -34,10 +34,25 @@ function scheduler:skip(name: string): ()
 
 ### scheduler:finish()
 
-Marks the end of the execution and starts the next frame.
+Marks the end of the update loop and starts the next frame in gorp
 
 -   **Type**
 
 ```lua
 function scheduler:finish(): ()
+```
+
+## Example
+
+An example update loop with gorp would look like
+
+```lua
+RunService.Heartbeat:Connect(function()
+
+	scheduler:system("update_velocities", update_velocities)
+	scheduler:system("reconcile_transform", reconcile_transform)
+	scheduler:finish()
+
+end)
+
 ```
