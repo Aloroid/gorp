@@ -81,12 +81,21 @@ local group = world:group(cts.A, cts.B, cts.C, cts.D)
 print("added scheduler")
 local scheduler = gorp.scheduler.new()
 
+local i = 0
+
 RunService.Heartbeat:Connect(function()
 	scheduler:before("double query")
 	for id, transform in world:view(cts.Transform, cts.Name) do
 		world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
 	end
 	scheduler:after()
+
+	i += 1
+	if i % 2 == 0 then
+		scheduler:system("throttled", function() end)
+	else
+		scheduler:skip("throttled")
+	end
 
 	scheduler:before("update position")
 	for id, position, velocity in world:group(cts.Position, cts.Velocity) do

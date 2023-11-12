@@ -55,10 +55,12 @@ return function(
 		heartbeat()
 		local average = time:average()
 
-		return average > 0.004 and 0.010
-			or average > 0.001 and 0.004
-			or average > 0.0006 and 0.001
-			or 0.0006
+		return average > 0.004 and 0.01
+			or average > 0.0015 and 0.005
+			or average > 0.0009 and 0.002
+			or average > 0.0005 and 0.001
+			or average > 0.00015 and 0.0006
+			or 0.00025
 	end)
 	local max = derive(function()
 		heartbeat()

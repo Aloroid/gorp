@@ -64,6 +64,18 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 		end
 	end
 
+	function self:skip<T...>(name: string)
+		i += 1
+		systems[i] = systems[i]
+			or {
+				time = rolling_average.new(max),
+				name = name,
+				_before = {} :: { [() -> ()]: true },
+				_after = {} :: { [() -> ()]: true },
+			}
+		systems[i].name = name
+	end
+
 	-- this should be called after a system runs.
 	-- we'll automatically infer context based on the first call.
 	function self:after(_custom_time: number?)
