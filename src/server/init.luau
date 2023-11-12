@@ -11,8 +11,7 @@ local scheduler = require(script.scheduler)
 local state = require(script.Parent.state)
 local system = require(script.system)
 
-local actor = state.actor
-if not actor then
+if state.actor_id == 1 then
 	local id = 0
 	local function invoke_actor(remote: any, actor: number, ...: any): ...any
 		if remote:IsA("RemoteEvent") then

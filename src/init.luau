@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
+local common_actor_id = require(script.common_actor_id)
 local ecr = require(script.Parent.ecr)
 local group_hook = require(script.group_hook)
 local register_custom_widget = require(script.register_custom_widget)
@@ -91,21 +92,6 @@ local function compat_set_cts<T>(user_cts: T & { [string]: any }): T
 	return user_cts
 end
 
-local function using_actor(actor: Actor?)
-	state.actor = actor
-	state.actor_id = SharedTable.increment(state.actors, "size", 1)
-
-	if RunService:IsServer() then
-		if not actor then
-			remotes.check_if_permission.OnServerInvoke = function(player)
-				return state.can_use_debugger(player)
-			end
-		end
-
-		require(script.server)
-	end
-end
-
 if RunService:IsClient() then
 	-- get server cts
 	local function update_cts(names)
@@ -127,6 +113,16 @@ if RunService:IsClient() then
 		update_cts(remotes.get_server_cts:InvokeServer())
 		remotes.update_server_cts.OnClientEvent:Connect(update_cts)
 	end)
+end
+
+if RunService:IsServer() then
+	if common_actor_id == 1 then
+		remotes.check_if_permission.OnServerInvoke = function(player)
+			return state.can_use_debugger(player)
+		end
+	end
+
+	require(script.server)
 end
 
 vide.strict = true
@@ -183,8 +179,6 @@ return {
 	spawn_widget = (spawn_widget :: any) :: spawn_widget,
 	scale = state.scale,
 	clear_all = clear_all,
-
-	server_init = using_actor,
 
 	compat_set_cts = compat_set_cts,
 	enabled = state.enabled,
