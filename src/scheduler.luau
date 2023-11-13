@@ -6,6 +6,7 @@ local RunService = game:GetService("RunService")
 
 ]]
 
+local config = require(script.Parent.config)
 local no_yield = require(script.Parent.no_yield)
 local rolling_average = require(script.Parent.rolling_average)
 local state = require(script.Parent.state)
@@ -55,12 +56,24 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 	end
 
 	function self:system<T...>(name: string, system: (T...) -> (), ...: T...)
-		self:before(name)
-		local ok, thread, err = no_yield(system, ...)
-		self:after()
+		if config.allow_yielding then
+			self:before(name)
+			local ok, err = xpcall(
+				system :: any,
+				function(err) return debug.traceback(err, 2) end,
+				...
+			)
+			self:after()
 
-		if ok == false and thread and err then
-			warn("system failed:", debug.traceback(thread, err))
+			if ok == false then warn("system failed:", err) end
+		else
+			self:before(name)
+			local ok, thread, err = no_yield(system, ...)
+			self:after()
+
+			if ok == false and thread and err then
+				warn("system failed:", debug.traceback(thread, err))
+			end
 		end
 	end
 

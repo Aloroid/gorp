@@ -40,17 +40,23 @@ end
 
 local scheduler = gorp.scheduler.new()
 
-RunService.Heartbeat:Connect(function()
-	scheduler:before("double query (different actor tho)")
-	for id, transform in world:view(cts.Transform, cts.Name) do
-		world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
-	end
-	scheduler:after()
+gorp.pass_config({
+	allow_yielding = true,
+})
 
-	scheduler:before("single")
-	for id, transform in world:view(cts.Transform) do
-		world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
-	end
-	scheduler:after()
+RunService.Heartbeat:Connect(function()
+	scheduler:system("parallel", function()
+		task.desynchronize()
+		for i = 1, 1000 do
+			math.sin(i)
+		end
+		task.synchronize()
+	end)
+
+	scheduler:system("sine", function()
+		for i = 1, 1000 do
+			math.sin(i)
+		end
+	end)
 	scheduler:finish()
 end)

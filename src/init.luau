@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local common_actor_id = require(script.common_actor_id)
+local config = require(script.config)
 local ecr = require(script.Parent.ecr)
 local group_hook = require(script.group_hook)
 local register_custom_widget = require(script.register_custom_widget)
@@ -99,6 +100,12 @@ local function compat_set_cts<T>(user_cts: T & { [string]: any }): T
 	return user_cts
 end
 
+local function set_config(new_config: { enable_yielding: boolean? })
+	for key, value in new_config :: { [string]: any } do
+		config[key] = value
+	end
+end
+
 if RunService:IsClient() then
 	-- get server cts
 	local function update_cts(names)
@@ -132,7 +139,7 @@ if RunService:IsServer() then
 	require(script.server)
 end
 
-vide.strict = true
+vide.strict = false
 
 type spawn_widget =
 	((widget: "registry_selector") -> ())
@@ -190,6 +197,7 @@ return {
 	compat_set_cts = compat_set_cts,
 	enabled = state.enabled,
 	scheduler = scheduler,
+	pass_config = set_config,
 
 	register_custom_widget = register_custom_widget,
 
