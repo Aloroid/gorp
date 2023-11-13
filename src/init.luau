@@ -139,8 +139,6 @@ if RunService:IsServer() then
 	require(script.server)
 end
 
-vide.strict = false
-
 type spawn_widget =
 	((widget: "registry_selector") -> ())
 	& ((
