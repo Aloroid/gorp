@@ -220,6 +220,7 @@ else
 	)
 
 	bind_actor_to(remotes.update_entities, registry.update_entities)
+	bind_actor_to(remotes.get_all_entity_values, registry.get_all_entity_values)
 end
 
 return {

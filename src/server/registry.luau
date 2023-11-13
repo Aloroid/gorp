@@ -201,10 +201,12 @@ local function get_all_entity_values(player, registry_index, entity)
 
 	local ctypes = {}
 	local values = {}
+	local index = 0
 	for ctype in state.cts.ids() do
 		if world:has(entity, ctype) then
-			table.insert(ctypes, ctype)
-			table.insert(values, world:get(entity, ctype))
+			index += 1
+			ctypes[index] = ctype
+			values[index] = world:get(entity, ctype)
 		end
 	end
 
