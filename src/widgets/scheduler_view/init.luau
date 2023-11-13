@@ -45,7 +45,7 @@ return function(
 
 		local total = 0
 		for i, value in scheduler.systems do
-			if scheduler:is_paused(i) then continue end
+			if scheduler:get_paused(i) then continue end
 			total += value.time:average()
 		end
 		return total
@@ -54,11 +54,11 @@ return function(
 		heartbeat()
 
 		local values = {}
-		local is_completely_paused = #scheduler:get_paused()
+		local is_completely_paused = #scheduler:get_all_paused()
 			== #scheduler.systems
 
 		for i, system in scheduler.systems do
-			if scheduler:is_paused(i) and not is_completely_paused then
+			if scheduler:get_paused(i) and not is_completely_paused then
 				continue
 			end
 			table.insert(
@@ -194,11 +194,11 @@ return function(
 				indexes(systems, function(value, key)
 					local pressed_paused = source(false)
 					local hovering_paused = source(false)
-					local paused = source(scheduler:is_paused(key))
+					local paused = source(scheduler:get_paused(key))
 
 					vide.cleanup(
 						RunService.Heartbeat:Connect(
-							function() paused(scheduler:is_paused(key)) end
+							function() paused(scheduler:get_paused(key)) end
 						)
 					)
 

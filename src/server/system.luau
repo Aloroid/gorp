@@ -79,7 +79,7 @@ local function get_system_performance_data(
 	active[player][scheduler][system_id].disable = hook:enable()
 	active[player][scheduler][system_id].connection = RunService.Heartbeat:Connect(
 		function()
-			if scheduler:is_paused(system_id) then return end
+			if scheduler:get_paused(system_id) then return end
 			remotes.update_system_performance_data:FireClient(
 				player,
 				raw_scheduler_id,

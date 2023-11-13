@@ -30,7 +30,7 @@ local function subscribe_scheduler_data(
 				"zfB",
 				system.name,
 				system.time:average(),
-				if scheduler:is_paused(index) then 255 else 0
+				if scheduler:get_paused(index) then 255 else 0
 			)
 		end
 

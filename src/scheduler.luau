@@ -35,9 +35,9 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 
 	function self:resume(index: number) paused[index] = nil end
 
-	function self:is_paused(index: number) return paused[index] or false end
+	function self:get_paused(index: number) return paused[index] or false end
 
-	function self:get_paused()
+	function self:get_all_paused()
 		local list = {}
 		for index in paused do
 			table.insert(list, index)
@@ -56,7 +56,7 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 	function self:get_system(index: number) return systems[index].name end
 
 	-- this should be called before a systemr runs.
-	function self:before(given_name: string)
+	function self:_before(given_name: string)
 		i += 1
 
 		name = given_name
@@ -87,19 +87,19 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 		end
 
 		if config.allow_yielding then
-			self:before(name)
+			self:_before(name)
 			local ok, err = xpcall(
 				system :: any,
 				function(err) return debug.traceback(err, 2) end,
 				...
 			)
-			self:after()
+			self:_after()
 
 			if ok == false then warn("system failed:", err) end
 		else
-			self:before(name)
+			self:_before(name)
 			local ok, thread, err = no_yield(system, ...)
-			self:after()
+			self:_after()
 
 			if ok == false and thread and err then
 				warn("system failed:", debug.traceback(thread, err))
@@ -121,7 +121,7 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 
 	-- this should be called after a system runs.
 	-- we'll automatically infer context based on the first call.
-	function self:after(_custom_time: number?)
+	function self:_after(_custom_time: number?)
 		systems[i].time:add(_custom_time or os.clock() - begin)
 		for callback in after do
 			callback()
@@ -135,6 +135,9 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 	end
 
 	function self:finish() i = 0 end
+
+	self.before = self._before
+	self.after = self._after
 
 	-- internal
 

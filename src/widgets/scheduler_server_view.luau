@@ -17,8 +17,8 @@ return function(name, index)
 				scheduler:skip(name)
 			else
 				scheduler:resume(index)
-				scheduler:before(name)
-				scheduler:after(time)
+				scheduler:_before(name)
+				scheduler:_after(time)
 			end
 		end
 		scheduler:finish()
