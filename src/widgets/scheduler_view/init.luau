@@ -29,8 +29,9 @@ local function get_color(n: number)
 	return Color3.fromHSV((n - 1) * 0.15 % 1, 1, 1)
 end
 
-local PAUSED = "rbxasset://textures/StudioToolbox/AssetPreview/pause_button.png"
-local RUNNING = "rbxasset://textures/StudioToolbox/AssetPreview/play_button.png"
+local RUNNING =
+	"rbxasset://textures/StudioToolbox/AssetPreview/pause_button.png"
+local PAUSED = "rbxasset://textures/StudioToolbox/AssetPreview/play_button.png"
 
 return function(
 	scheduler: rts.Scheduler,
