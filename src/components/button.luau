@@ -18,6 +18,7 @@ local source = vide.source
 type Button = {
 
 	text: string | () -> string,
+	color: (Color3 | () -> Color3)?,
 	alignment: (Enum.TextXAlignment | () -> Enum.TextXAlignment)?,
 	padding: number?,
 
@@ -72,7 +73,7 @@ local function button(props: Button)
 				BackgroundTransparency = 1,
 
 				Text = props.text,
-				TextColor3 = style.text,
+				TextColor3 = props.color or style.text,
 				TextSize = 16,
 				Font = style.font,
 			},

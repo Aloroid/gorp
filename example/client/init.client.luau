@@ -84,11 +84,11 @@ local scheduler = gorp.scheduler.new()
 local i = 0
 
 RunService.Heartbeat:Connect(function()
-	scheduler:before("double query")
-	for id, transform in world:view(cts.Transform, cts.Name) do
-		world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
-	end
-	scheduler:after()
+	scheduler:system("double query", function()
+		for id, transform in world:view(cts.Transform, cts.Name) do
+			world:set(id, cts.Transform, transform * CFrame.new(0, 1, 0))
+		end
+	end)
 
 	i += 1
 	if i % 2 == 0 then
@@ -97,47 +97,47 @@ RunService.Heartbeat:Connect(function()
 		scheduler:skip("throttled")
 	end
 
-	scheduler:before("update position")
-	for id, position, velocity in world:group(cts.Position, cts.Velocity) do
-		world:set(id, cts.Position, position + velocity)
-	end
-	scheduler:after()
+	scheduler:system("update position", function()
+		for id, position, velocity in world:group(cts.Position, cts.Velocity) do
+			world:set(id, cts.Position, position + velocity)
+		end
+	end)
 
-	scheduler:before("query A")
-	for id in world:view(cts.A) do
-	end
-	scheduler:after()
+	scheduler:system("query A", function()
+		for id in world:view(cts.A) do
+		end
+	end)
 
-	scheduler:before("query AB")
-	for id, transform in world:view(cts.A, cts.B) do
-	end
-	scheduler:after()
+	scheduler:system("query AB", function()
+		for id, transform in world:view(cts.A, cts.B) do
+		end
+	end)
 
-	scheduler:before("view ABCD")
-	for id, transform in world:view(cts.A, cts.B, cts.C, cts.D) do
-	end
-	scheduler:after()
+	scheduler:system("view ABCD", function()
+		for id, transform in world:view(cts.A, cts.B, cts.C, cts.D) do
+		end
+	end)
 
-	scheduler:before("group ABCD")
-	for id, transform in group do
-	end
-	scheduler:after()
+	scheduler:system("group ABCD", function()
+		for id, transform in group do
+		end
+	end)
 
-	scheduler:before("multiple queries")
-	for id in world:view(cts.A) do
-	end
+	scheduler:system("multiple queries", function()
+		for id in world:view(cts.A) do
+		end
 
-	for id, transform in world:view(cts.A, cts.B) do
-	end
+		for id, transform in world:view(cts.A, cts.B) do
+		end
 
-	for id, transform in world:view(cts.A, cts.B, cts.C) do
-	end
-	scheduler:after()
+		for id, transform in world:view(cts.A, cts.B, cts.C) do
+		end
+	end)
 
-	scheduler:before("none")
-	for id in world:view(cts.r) do
-	end
-	scheduler:after()
+	scheduler:system("none", function()
+		for id in world:view(cts.r) do
+		end
+	end)
 
 	scheduler:finish()
 end)

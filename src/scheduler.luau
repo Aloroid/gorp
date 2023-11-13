@@ -29,6 +29,31 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 	local i = 0
 	local before = {} :: { [() -> ()]: true }
 	local after = {} :: { [() -> ()]: true }
+	local paused = {}
+
+	function self:pause(index: number) paused[index] = true end
+
+	function self:resume(index: number) paused[index] = nil end
+
+	function self:is_paused(index: number) return paused[index] or false end
+
+	function self:get_paused()
+		local list = {}
+		for index in paused do
+			table.insert(list, index)
+		end
+		return list
+	end
+
+	function self:get_index(name: string)
+		for i, system in systems :: any do
+			if system.name == name then return i end
+		end
+
+		return nil
+	end
+
+	function self:get_system(index: number) return systems[index].name end
 
 	-- this should be called before a systemr runs.
 	function self:before(given_name: string)
@@ -56,6 +81,11 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 	end
 
 	function self:system<T...>(name: string, system: (T...) -> (), ...: T...)
+		if paused[i + 1] then
+			self:skip(name)
+			return
+		end
+
 		if config.allow_yielding then
 			self:before(name)
 			local ok, err = xpcall(
@@ -141,7 +171,7 @@ function scheduler.new(scheduler_name: string?, hide: boolean?, max: number?)
 	if hide then return self end
 
 	local schedulers = state.schedulers()
-	table.insert(schedulers, self)
+	table.insert(schedulers, self :: any)
 	state.schedulers(schedulers)
 
 	if RunService:IsServer() then

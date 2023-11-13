@@ -7,7 +7,10 @@ local rts = require(script.Parent.Parent.rts)
 local style = require(script.Parent.Parent.style)
 local vide = require(script.Parent.Parent.Parent.vide)
 
+local actions = require(script.Parent.Parent.actions)
+local border = require(script.Parent.Parent.components.border)
 local button = require(script.Parent.Parent.components.button)
+local container = require(script.Parent.Parent.components.container)
 local graph = require(script.graph)
 local padding = require(script.Parent.Parent.components.padding)
 local pane = require(script.Parent.Parent.components.pane)
@@ -26,6 +29,9 @@ local function get_color(n: number)
 	return Color3.fromHSV((n - 1) * 0.15 % 1, 1, 1)
 end
 
+local PAUSED = "rbxasset://textures/StudioToolbox/AssetPreview/pause_button.png"
+local RUNNING = "rbxasset://textures/StudioToolbox/AssetPreview/play_button.png"
+
 return function(
 	scheduler: rts.Scheduler,
 	cleanup: (() -> ())?,
@@ -38,7 +44,8 @@ return function(
 		heartbeat()
 
 		local total = 0
-		for _, value in scheduler.systems do
+		for i, value in scheduler.systems do
+			if scheduler:is_paused(i) then continue end
 			total += value.time:average()
 		end
 		return total
@@ -47,8 +54,13 @@ return function(
 		heartbeat()
 
 		local values = {}
+		local is_completely_paused = #scheduler:get_paused()
+			== #scheduler.systems
 
 		for i, system in scheduler.systems do
+			if scheduler:is_paused(i) and not is_completely_paused then
+				continue
+			end
 			table.insert(
 				values,
 				{ color = get_color(i), value = system.time:average() }
@@ -82,10 +94,57 @@ return function(
 
 			pane {
 
-				text {
-					text = function()
-						return `Run time: {convert_scale(runtime(), "s")}`
-					end,
+				container {
+
+					Size = UDim2.new(1, 0, 0, 24),
+
+					text {
+						text = function()
+							return `Run time: {convert_scale(runtime(), "s")}`
+						end,
+					},
+
+					container {
+						Position = UDim2.fromScale(1, 0),
+						AnchorPoint = Vector2.new(1, 0),
+
+						button {
+							text = "Pause All",
+
+							layout = {
+								Size = UDim2.fromOffset(0, 24),
+								AnchorPoint = Vector2.new(0, 1),
+								AutomaticSize = Enum.AutomaticSize.XY,
+							},
+
+							activated = function()
+								for i in scheduler.systems do
+									scheduler:pause(i)
+								end
+							end,
+						},
+
+						button {
+							text = "Resume All",
+
+							layout = {
+								Size = UDim2.fromOffset(0, 24),
+								AnchorPoint = Vector2.new(0, 1),
+								AutomaticSize = Enum.AutomaticSize.XY,
+							},
+
+							activated = function()
+								for i in scheduler.systems do
+									scheduler:resume(i)
+								end
+							end,
+						},
+
+						layout {
+							HorizontalAlignment = Enum.HorizontalAlignment.Right,
+							FillDirection = Enum.FillDirection.Horizontal,
+						},
+					},
 				},
 
 				graph {
@@ -133,8 +192,23 @@ return function(
 				AutomaticCanvasSize = Enum.AutomaticSize.Y,
 
 				indexes(systems, function(value, key)
+					local pressed_paused = source(false)
+					local hovering_paused = source(false)
+					local paused = source(scheduler:is_paused(key))
+
+					vide.cleanup(
+						RunService.Heartbeat:Connect(
+							function() paused(scheduler:is_paused(key)) end
+						)
+					)
+
 					return button {
 						text = function() return value().name end,
+						color = function()
+							return if paused()
+								then style.sub_text
+								else style.text
+						end,
 
 						child = {
 
@@ -162,12 +236,61 @@ return function(
 						layout = {
 							Size = UDim2.new(1, 0, 0, 30) :: any,
 
+							create "ImageButton" {
+
+								Position = UDim2.fromScale(1, 0.5),
+								Size = UDim2.fromOffset(26, 26),
+								AnchorPoint = Vector2.new(1, 0.5),
+
+								BackgroundColor3 = Color3.new(),
+
+								BackgroundTransparency = vide.spring(
+									function()
+										return pressed_paused() and 0.7 or 1
+									end,
+									0.1,
+									0.5
+								),
+
+								Image = function()
+									return paused() and PAUSED or RUNNING
+								end,
+
+								ImageColor3 = style.text,
+
+								LayoutOrder = -1,
+
+								actions.pressed(pressed_paused),
+								actions.hovering(hovering_paused),
+
+								create "UICorner" {
+									CornerRadius = style.corner_radius,
+								},
+
+								border {
+									Transparency = vide.spring(
+										function()
+											return hovering_paused() and 0 or 1
+										end,
+										0.1
+									),
+								},
+
+								Activated = function()
+									if paused() then
+										scheduler:resume(key)
+									else
+										scheduler:pause(key)
+									end
+								end,
+							} :: any,
+
 							text {
 
 								layout = {
 
 									AutomaticSize = Enum.AutomaticSize.X,
-									Position = UDim2.fromScale(1, 0.5),
+									Position = UDim2.new(1, -32, 0.5, 0),
 									AnchorPoint = Vector2.new(1, 0.5),
 
 									TextColor3 = style.sub_text,

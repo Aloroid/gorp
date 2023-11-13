@@ -26,8 +26,12 @@ local function subscribe_scheduler_data(
 		local values = {}
 
 		for index, system in scheduler.systems do
-			values[index] =
-				string.pack("zf", system.name, system.time:average())
+			values[index] = string.pack(
+				"zfB",
+				system.name,
+				system.time:average(),
+				if scheduler:is_paused(index) then 255 else 0
+			)
 		end
 
 		return values

@@ -133,6 +133,40 @@ if state.actor_id == 1 then
 		end
 	end
 
+	remotes.pause_scheduler_system.OnServerEvent:Connect(
+		function(player, index, sys)
+			local entry = (state.all_schedulers.entries :: any)[index]
+			if entry.actor ~= state.actor_id then
+				return invoke_actor(
+					remotes.pause_scheduler_system,
+					entry.actor,
+					player,
+					entry.index,
+					sys
+				)
+			else
+				return system.pause_system(player, entry.index, sys)
+			end
+		end
+	)
+
+	remotes.resume_scheduler_system.OnServerEvent:Connect(
+		function(player, index, sys)
+			local entry = (state.all_schedulers.entries :: any)[index]
+			if entry.actor ~= state.actor_id then
+				return invoke_actor(
+					remotes.resume_scheduler_system,
+					entry.actor,
+					player,
+					entry.index,
+					sys
+				)
+			else
+				return system.resume_system(player, entry.index, sys)
+			end
+		end
+	)
+
 	remotes.set_query.OnServerInvoke = function(
 		player,
 		query_id,
@@ -240,6 +274,9 @@ else
 
 	bind_actor_to(remotes.update_entities, registry.update_entities)
 	bind_actor_to(remotes.get_all_entity_values, registry.get_all_entity_values)
+
+	bind_actor_to(remotes.pause_scheduler_system, system.pause_system)
+	bind_actor_to(remotes.resume_scheduler_system, system.resume_system)
 end
 
 return {

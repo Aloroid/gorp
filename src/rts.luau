@@ -30,6 +30,17 @@ export type Scheduler = {
 		}
 	},
 
+	pause: (Scheduler, index: number) -> (),
+	resume: (Scheduler, index: number) -> (),
+	get_paused: (Scheduler) -> { number },
+	is_paused: (Scheduler, index: number) -> boolean,
+
+	get_index: (Scheduler, name: string) -> number?,
+	get_system: (Scheduler, index: number) -> string,
+
+	system: <T...>(Scheduler, name: string, system: (T...) -> (), T...) -> (),
+	skip: (Scheduler, name: string) -> (),
+
 	before: (Scheduler, given_name: string) -> (),
 	after: (Scheduler) -> (),
 	finish: (Scheduler) -> (),
