@@ -24,6 +24,7 @@ type props = {
 	widget_id: string?,
 	title: (string | () -> string)?,
 	min_size: Vector2?,
+	size: Vector2?,
 	closeable: boolean?,
 
 	[any]: any,
@@ -35,11 +36,12 @@ local RESIZE_RANGE = 10
 return function(props: props)
 	local widget_id = props.widget_id or props.title or ""
 	local min_size = props.min_size or Vector2.new(100, 100)
+	local base_size = props.size or min_size * 1.5
 	local title = props.title or widget_id or ""
 	local closesable = props.closeable
 
-	local x_size = source(min_size.X * 1.5)
-	local y_size = source(min_size.Y * 1.5)
+	local x_size = source(base_size.X)
+	local y_size = source(base_size.Y)
 	local x_position = source(100)
 	local y_position = source(56)
 
@@ -52,6 +54,7 @@ return function(props: props)
 	props.widget_id = nil
 	props.min_size = nil
 	props.title = nil
+	props.size = nil
 
 	local offset = Vector2.zero
 	local dragging = source(false)

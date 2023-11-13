@@ -96,6 +96,7 @@ local function registry_selector()
 
 		title = "View Selector",
 		min_size = Vector2.new(150, 150),
+		size = Vector2.new(225, 275),
 		closeable = false,
 
 		scrolling_frame {
