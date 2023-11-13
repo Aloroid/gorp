@@ -8,6 +8,66 @@ The scheduler does not currently properly support removing systems.
 
 ## Functions
 
+### scheduler:pause()
+
+Pauses a system that is currently running
+
+-   **Type**
+
+```lua
+function scheduler:pause(index: number): ()
+```
+
+### scheduler:resume()
+
+Resumes a system that is currently paused
+
+-   **Type**
+
+```lua
+function scheduler:resume(index: number): ()
+```
+
+### scheduler:get_paused()
+
+Returns if a system is currently paused or not
+
+-   **Type**
+
+```lua
+function scheduler:get_paused(index: number): boolean
+```
+
+### scheduler:get_all_paused()
+
+Returns a list of indexes for systems that are paused.
+
+-   **Type**
+
+```lua
+function scheduler:get_all_paused(): {number}
+```
+
+### scheduler:get_index()
+
+Gets the index of a system
+
+-   **Type**
+
+```lua
+function scheduler:get_index(name: string): number?
+```
+
+### scheduler:get_system()
+
+Gets the name of a index
+
+-   **Type**
+
+```lua
+function scheduler:get_system(index: number): string
+```
+
 ### scheduler:system()
 
 Runs the given system with the provided arguments
