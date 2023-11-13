@@ -1,3 +1,5 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 --[[
 
 	Binds all things to the remotes
@@ -7,6 +9,7 @@
 local cts = require(script.cts)
 local registry = require(script.registry)
 local remotes = require(script.Parent.remotes)
+local rolling_average = require(script.Parent.rolling_average)
 local scheduler = require(script.scheduler)
 local state = require(script.Parent.state)
 local system = require(script.system)
@@ -187,6 +190,22 @@ if state.actor_id == 1 then
 			end
 		end
 	)
+
+	local average = rolling_average.new(20)
+	local i = 0
+
+	RunService.Heartbeat:Connect(function(dt)
+		average:add(dt)
+
+		i += 1
+
+		if i % 5 ~= 0 then return end
+
+		for _, player in Players:GetPlayers() do
+			if state.can_use_debugger(player) == false then continue end
+			remotes.share_server_fps:FireClient(player, average:average())
+		end
+	end)
 else
 	-- mental sanity is dripping away
 	local function bind_actor_to(remote: any, callback: (...any) -> ...any)

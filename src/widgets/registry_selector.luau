@@ -7,6 +7,8 @@ local padding = require(script.Parent.Parent.components.padding)
 local pane = require(script.Parent.Parent.components.pane)
 local remotes = require(script.Parent.Parent.remotes)
 local scrolling_frame = require(script.Parent.Parent.components.scrolling_frame)
+local style = require(script.Parent.Parent.style)
+local text = require(script.Parent.Parent.components.text)
 local text_input = require(script.Parent.Parent.components.text_input)
 local widget = require(script.Parent.Parent.components.widget)
 
@@ -74,16 +76,19 @@ local function registry_selector()
 		source(remotes.get_server_registries:InvokeServer())
 	local server_schedulers =
 		source(remotes.get_server_schedulers:InvokeServer())
+	local server_average_time = source(1 / 60)
+
+	cleanup(remotes.share_server_fps.OnClientEvent:Connect(server_average_time))
 
 	cleanup(
 		remotes.updated_server_registries.OnClientEvent:Connect(
-			function(new) server_registries(new) end
+			server_registries
 		)
 	)
 
 	cleanup(
 		remotes.updated_server_schedulers.OnClientEvent:Connect(
-			function(new) server_schedulers(new) end
+			server_schedulers
 		)
 	)
 
@@ -277,6 +282,20 @@ local function registry_selector()
 
 					vide.mount(registry_selector)
 				end,
+			},
+
+			text {
+				text = function()
+					return string.format(
+						"Server FPS: %.1f, %.1f ms",
+						1 / server_average_time(),
+						server_average_time() * 1000
+					)
+				end,
+
+				layout = {
+					TextColor3 = style.sub_text,
+				},
 			},
 		},
 	}

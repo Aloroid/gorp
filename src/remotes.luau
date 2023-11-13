@@ -89,6 +89,8 @@ return {
 	get_server_cts = get_remote_function("get_server_cts") :: Function<(), ({ [string]: number })>,
 	update_server_cts = get_remote_event("update_server_cts") :: Event<{ [string]: number }>,
 
+	share_server_fps = get_remote_event("share_server_fps") :: Event<number>,
+
 	updated_server_registries = get_remote_event("updated_server_registries") :: Event<{ string }>,
 	updated_server_schedulers = get_remote_event("updated_server_schedulers") :: Event<{ string }>,
 
