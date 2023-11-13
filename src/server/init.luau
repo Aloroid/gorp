@@ -218,6 +218,8 @@ else
 		remotes.get_system_performance_data,
 		system.get_system_performance_data
 	)
+
+	bind_actor_to(remotes.update_entities, registry.update_entities)
 end
 
 return {
