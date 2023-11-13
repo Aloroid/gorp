@@ -163,8 +163,23 @@ Creates a new [scheduler](scheduler.md)
 -   **Type**
 
 ```lua
-function gorp.scheduler.new(name: string)
+function gorp.scheduler.new(name: string): Scheduler
 ```
+
+### pass_config()
+
+Configures and changes some part of gorp.
+
+-   **Type**
+
+```lua
+function gorp.pass_config(config: {allow_yielding: boolean}): ()
+```
+
+-   **Details**
+
+Current options are:
+`allow_yielding: boolean` Allows systems to yield. The time spent yielding is not ignored by the scheduler.
 
 ### register_custom_widget()
 
