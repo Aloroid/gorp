@@ -1,4 +1,8 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TextService = game:GetService("TextService")
+
 local rbxjson = require(script.Parent.Parent.rbxjson)
+local style = require(ReplicatedStorage.Packages.gorp.style)
 local vide = require(script.Parent.Parent.Parent.vide)
 
 local background = require(script.Parent.Parent.components.background)
@@ -21,10 +25,21 @@ type props = {
 
 return function(props: props)
 	local result = source(props.text)
+	local value = if props.prettify
+		then source(rbxjson:Prettify(props.text))
+		else source(props.text)
+
+	local size = TextService:GetTextSize(
+		(value :: any)(),
+		16,
+		Enum.Font.Code,
+		Vector2.one * math.huge
+	) * 1.1
 
 	return widget {
 		title = "JSON: " .. props.name or "?",
 		min_size = Vector2.new(150, 150),
+		size = size + Vector2.new(32, 64),
 		closeable = true,
 
 		background {
@@ -49,9 +64,7 @@ return function(props: props)
 						Size = UDim2.fromScale(1, 1),
 					},
 
-					text = if props.prettify
-						then source(rbxjson:Prettify(props.text))
-						else source(props.text),
+					text = value,
 					automatic_size = Enum.AutomaticSize.Y,
 					text_y_alignment = Enum.TextYAlignment.Top,
 					multi_line = true,

@@ -13,6 +13,8 @@ return gorp.compat_set_cts(ecr.name({
 	Transform = ecr.component(CFrame.new),
 	Position = ecr.component(Vector3.new),
 	Velocity = primitive(Vector3.new(0, 0, 1)),
+	Raycast = primitive(Vector3.new(0, 1, 0)),
+	Amount = primitive(100),
 
 	Object = ecr.component(
 		function()

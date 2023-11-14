@@ -34,6 +34,7 @@ type ResizeableBar = {
 	sizes: vide.Source<{ vide.Source<number> }>,
 
 	splits: vide.Source<{ vide.Source<number> }>?,
+	base_splits: { number }?,
 }
 
 local function resizeable_bar(props: ResizeableBar)
@@ -61,6 +62,10 @@ local function resizeable_bar(props: ResizeableBar)
 		splits_user(splits)
 		return splits
 	end)
+
+	for i, split in (props.base_splits :: never) or {} do
+		splits()[i](split)
+	end
 
 	local function get_size(index: number)
 		local split_before = splits()[index - 1] or before :: never

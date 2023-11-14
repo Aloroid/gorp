@@ -18,6 +18,7 @@ type Table = {
 	meaning: vide.Source<{ string }>,
 	rows: vide.Source<{ vide.Source<{ any }> }>?,
 	max_rows: vide.Source<number>?,
+	base_sizes: { number }?,
 
 	item_size: number?,
 
@@ -45,6 +46,16 @@ return function(props: Table)
 
 	local sizes = source({})
 	local splits = source({})
+
+	-- update splits
+	local base_splits = {}
+	if props.base_sizes then
+		local n = 0
+		for i = 1, #props.base_sizes - 1 do
+			n += props.base_sizes[i]
+			table.insert(base_splits, n)
+		end
+	end
 
 	local display = props.display
 		or function(value)
@@ -74,6 +85,7 @@ return function(props: Table)
 			sizes = sizes,
 
 			splits = splits,
+			base_splits = if #base_splits > 0 then base_splits else nil,
 		}),
 
 		scroller {

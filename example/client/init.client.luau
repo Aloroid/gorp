@@ -76,6 +76,11 @@ for i = 1, 10 do
 	world:add(id, cts.Object)
 end
 
+local id = world:create()
+world:set(id, cts.Position, Vector3.new(0, 5, 0))
+world:set(id, cts.Raycast, Vector3.new(0, 10, 0))
+world:set(id, cts.Amount, 100)
+
 local group = world:group(cts.A, cts.B, cts.C, cts.D)
 
 print("added scheduler")
@@ -96,6 +101,16 @@ RunService.Heartbeat:Connect(function()
 	else
 		scheduler:skip("throttled")
 	end
+
+	scheduler:system("raycast", function()
+		for id, origin, direction, amount in
+			world:view(cts.Position, cts.Raycast, cts.Amount)
+		do
+			for i = 1, amount do
+				workspace:Raycast(origin, direction)
+			end
+		end
+	end)
 
 	scheduler:system("update position", function()
 		for id, position, velocity in world:group(cts.Position, cts.Velocity) do

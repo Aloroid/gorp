@@ -119,6 +119,7 @@ return function(input: {
 				end,
 
 				max_rows = function() return #ids() end,
+				base_sizes = { 0.15, 0.85 },
 
 				item_size = 24,
 

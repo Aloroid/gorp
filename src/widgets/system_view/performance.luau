@@ -1,5 +1,4 @@
 --!optimize 2
---!native
 local RunService = game:GetService("RunService")
 
 local border = require(script.Parent.Parent.Parent.components.border)

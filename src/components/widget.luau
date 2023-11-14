@@ -40,8 +40,8 @@ return function(props: props)
 	local title = props.title or widget_id or ""
 	local closesable = props.closeable
 
-	local x_size = source(base_size.X)
-	local y_size = source(base_size.Y)
+	local x_size = source(math.max(min_size.X, base_size.X))
+	local y_size = source(math.max(min_size.Y, base_size.Y))
 	local x_position = source(100)
 	local y_position = source(56)
 
