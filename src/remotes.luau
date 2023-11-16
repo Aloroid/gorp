@@ -124,6 +124,18 @@ return {
 		"stop_flow_system_performance"
 	) :: Event<number, number>,
 
+	register_system_watch_data = get_remote_function(
+		"register_system_watch_data"
+	) :: Function<(number, number), (number)>,
+	start_system_watch_data = get_remote_event("start_system_watch_data") :: Event<number, number>,
+	update_system_watch_data = get_remote_event("update_system_watch_data") :: Event<number, number, number>,
+	stop_system_watch_data = get_remote_event("stop_system_watch_data") :: Event<number, number>,
+	clear_system_watch_data = get_remote_event("clear_system_watch_data") :: Event<number, number>,
+	get_system_watch_logs = get_remote_function("get_system_watch_logs") :: Function<
+		(number, number, number),
+		({ { any } })
+	>,
+
 	get_all_entity_values = get_remote_function("get_all_entity_values") :: Function<
 		(number, number),
 		({ number }, { any })

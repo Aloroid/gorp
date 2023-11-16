@@ -89,6 +89,7 @@ return function(
 
 		title = `Scheduler View: {scheduler.name}`,
 		min_size = Vector2.new(300, 200),
+		size = Vector2.new(450, 400),
 		closeable = true,
 
 		background {

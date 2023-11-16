@@ -1,8 +1,6 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TextService = game:GetService("TextService")
 
 local rbxjson = require(script.Parent.Parent.rbxjson)
-local style = require(ReplicatedStorage.Packages.gorp.style)
 local vide = require(script.Parent.Parent.Parent.vide)
 
 local background = require(script.Parent.Parent.components.background)

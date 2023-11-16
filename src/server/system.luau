@@ -4,6 +4,8 @@ local RunService = game:GetService("RunService")
 local remotes = require(script.Parent.Parent.remotes)
 local state = require(script.Parent.Parent.state)
 local system_query_hook = require(script.Parent.Parent.system_query_hook)
+local system_watch_hook = require(script.Parent.Parent.system_watch_hook)
+local vide = require(script.Parent.Parent.Parent.vide)
 
 local active = {}
 
@@ -93,6 +95,87 @@ local function get_system_performance_data(
 	return system.time.values, get_packet()
 end
 
+local watches = {}
+local watches_associated = {}
+local id = 0
+local function register_system_watch_data(player, scheduler_id: number, index)
+	assert(state.can_use_debugger(player), "cannot use debugger")
+	id += 1
+	local id = id
+	local local_scheduler = (state.all_schedulers :: any).entries[scheduler_id].index
+	local scheduler = state.schedulers()[local_scheduler]
+	local watch = system_watch_hook.new(scheduler, index)
+
+	watches_associated[id] = player
+	watches[id] = {
+		watch = watch,
+		disable = nil :: (() -> ())?,
+		cleanup = vide.mount(function()
+			local prev = 0
+			vide.effect(function()
+				local changes = watch.total_changes()
+				if #changes == prev then return end
+				prev = #changes
+
+				task.spawn(
+					function()
+						remotes.update_system_watch_data:FireClient(
+							player,
+							scheduler_id,
+							id,
+							changes[#changes]
+						)
+					end
+				)
+			end)
+		end),
+	}
+
+	return id
+end
+
+local function start_system_watch_data(player, id)
+	assert(state.can_use_debugger(player), "cannot use debugger")
+
+	local watch = watches[id]
+
+	if watch.disable then watch.disable() end
+
+	watch.disable = watch.watch:enable()
+end
+
+local function stop_system_watch_data(player, id)
+	assert(state.can_use_debugger(player), "cannot use debugger")
+
+	local watch = watches[id]
+
+	print("disabled")
+
+	if watch.disable then
+		watch.disable()
+		watch.disable = nil
+	end
+end
+
+local function clear_system_watch_data(player, id)
+	assert(state.can_use_debugger(player), "cannot use debugger")
+
+	local watch = watches[id]
+
+	if watch.disable then watch.disable() end
+
+	watches[id] = nil
+end
+
+local function get_system_watch_logs(player, id, frame)
+	assert(state.can_use_debugger(player), "cannot use debugger")
+
+	local watch = watches[id]
+
+	print(id, frame, watch.watch.frames()[frame])
+	return watch.watch.frames()[frame]
+end
+
 local function disconnect_all(player: Player) active[player] = nil end
 
 local function disconnect(player: Player, scheduler_id, system)
@@ -100,6 +183,8 @@ local function disconnect(player: Player, scheduler_id, system)
 	--print("disconnected")
 
 	local scheduler = state.schedulers()[scheduler_id]
+
+	if scheduler == nil then return end
 
 	active[player] = active[player] or {}
 	active[player][scheduler] = active[player][scheduler] or {}
@@ -128,4 +213,10 @@ return {
 
 	pause_system = pause_system,
 	resume_system = resume_system,
+
+	register_system_watch_data = register_system_watch_data,
+	start_system_watch_data = start_system_watch_data,
+	stop_system_watch_data = stop_system_watch_data,
+	clear_system_watch_data = clear_system_watch_data,
+	get_system_watch_logs = get_system_watch_logs,
 }

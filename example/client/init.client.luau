@@ -87,6 +87,7 @@ print("added scheduler")
 local scheduler = gorp.scheduler.new()
 
 local i = 0
+local b = 0
 
 RunService.Heartbeat:Connect(function()
 	scheduler:system("double query", function()
@@ -97,7 +98,19 @@ RunService.Heartbeat:Connect(function()
 
 	i += 1
 	if i % 2 == 0 then
-		scheduler:system("throttled", function() end)
+		scheduler:system("throttled", function()
+			if i % 4 == 0 then
+				for id, velocity in world:view(cts.Velocity):exclude(cts.A) do
+					world:remove(id, cts.Velocity)
+					world:set(id, cts.A, true)
+				end
+			else
+				for id in world:view(cts.A, cts.Position):use(cts.A) do
+					world:set(id, cts.Velocity, Vector3.new(0, 0, 1))
+					world:remove(id, cts.A)
+				end
+			end
+		end)
 	else
 		scheduler:skip("throttled")
 	end

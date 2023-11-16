@@ -38,12 +38,18 @@ return vide.root(function()
 		} & SharedTable,
 		all_schedulers = all_schedulers :: {
 			size: number,
-			entries: { { name: string, actor: Actor? } },
+			entries: { { name: string, index: number, actor: Actor? } },
 		} & SharedTable,
 		using_actors = using_actors :: { Actor } & SharedTable,
 
 		cts = cts,
-		worlds = source({} :: { { world: rts.Registry, name: string } }),
+		worlds = source({} :: {
+			{
+				world: rts.Registry,
+				name: string,
+				global_index: number,
+			}
+		}),
 		schedulers = source({} :: { rts.Scheduler }),
 
 		current_client_world = source({} :: { world: rts.Registry, name: string }),

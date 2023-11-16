@@ -133,6 +133,110 @@ if state.actor_id == 1 then
 		end
 	end
 
+	remotes.register_system_watch_data.OnServerInvoke = function(
+		player,
+		index,
+		sys
+	)
+		local entry = (state.all_schedulers.entries :: any)[index]
+		if entry.actor ~= state.actor_id then
+			return invoke_actor(
+				remotes.register_system_watch_data,
+				entry.actor,
+				player,
+				index,
+				sys
+			)
+		else
+			return system.register_system_watch_data(player, index, sys)
+		end
+	end
+
+	remotes.start_system_watch_data.OnServerEvent:Connect(
+		function(player, index, id)
+			local entry = (state.all_schedulers.entries :: any)[index]
+			if entry.actor ~= state.actor_id then
+				return invoke_actor(
+					remotes.start_system_watch_data,
+					entry.actor,
+					player,
+					id
+				)
+			else
+				return system.start_system_watch_data(player, id)
+			end
+		end
+	)
+
+	remotes.stop_system_watch_data.OnServerEvent:Connect(
+		function(player, index, id)
+			local entry = (state.all_schedulers.entries :: any)[index]
+			if entry.actor ~= state.actor_id then
+				return invoke_actor(
+					remotes.stop_flow_system_performance_data,
+					entry.actor,
+					player,
+					id
+				)
+			else
+				return system.stop_system_watch_data(player, id)
+			end
+		end
+	)
+
+	remotes.stop_system_watch_data.OnServerEvent:Connect(
+		function(player, index, id)
+			local entry = (state.all_schedulers.entries :: any)[index]
+			if entry.actor ~= state.actor_id then
+				return invoke_actor(
+					remotes.stop_system_watch_data,
+					entry.actor,
+					player,
+					id
+				)
+			else
+				return system.stop_system_watch_data(player, id)
+			end
+		end
+	)
+
+	remotes.clear_system_watch_data.OnServerEvent:Connect(
+		function(player, index, id)
+			local entry = (state.all_schedulers.entries :: any)[index]
+			if entry.actor ~= state.actor_id then
+				return invoke_actor(
+					remotes.clear_system_watch_data,
+					entry.actor,
+					player,
+					id
+				)
+			else
+				return system.clear_system_watch_data(player, id)
+			end
+		end
+	)
+
+	remotes.get_system_watch_logs.OnServerInvoke = function(
+		player,
+		index,
+		id,
+		frame
+	)
+		local entry = (state.all_schedulers.entries :: any)[index]
+		print(index, id, frame)
+		if entry.actor ~= state.actor_id then
+			return invoke_actor(
+				remotes.get_system_watch_logs,
+				entry.actor,
+				player,
+				id,
+				frame
+			)
+		else
+			return system.get_system_watch_logs(player, id, frame)
+		end
+	end
+
 	remotes.pause_scheduler_system.OnServerEvent:Connect(
 		function(player, index, sys)
 			local entry = (state.all_schedulers.entries :: any)[index]
@@ -277,6 +381,21 @@ else
 
 	bind_actor_to(remotes.pause_scheduler_system, system.pause_system)
 	bind_actor_to(remotes.resume_scheduler_system, system.resume_system)
+
+	bind_actor_to(
+		remotes.register_system_watch_data,
+		system.register_system_watch_data
+	)
+	bind_actor_to(
+		remotes.start_system_watch_data,
+		system.start_system_watch_data
+	)
+	bind_actor_to(remotes.stop_system_watch_data, system.stop_system_watch_data)
+	bind_actor_to(
+		remotes.clear_system_watch_data,
+		system.clear_system_watch_data
+	)
+	bind_actor_to(remotes.get_system_watch_logs, system.get_system_watch_logs)
 end
 
 return {

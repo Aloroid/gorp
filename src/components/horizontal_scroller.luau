@@ -1,6 +1,6 @@
 --[[
 
-	A basic scroller class.
+	A basic horizontal scroller class.
 
 ]]
 
@@ -43,14 +43,14 @@ local function infinite_scrolling_frame(props: infinite_scrolling_frame)
 		local begin = position
 
 		return math.clamp(
-			math.floor(begin.Y / props.item_size) - 2,
+			math.floor(begin.X / props.item_size) - 2,
 			1,
 			math.max(1, max_items())
 		)
 	end)
 
 	local items = derive(
-		function() return math.ceil(absolute_size().Y / props.item_size) + 3 end
+		function() return math.ceil(absolute_size().X / props.item_size) + 3 end
 	)
 
 	local frame = scrolling_frame {
@@ -63,13 +63,16 @@ local function infinite_scrolling_frame(props: infinite_scrolling_frame)
 			if max_items == math.huge then
 				return UDim2.fromOffset(
 					0,
-					canvas_position().Y
-						+ absolute_size().Y
+					canvas_position().X
+						+ absolute_size().X
 						+ props.item_size * 3
 				)
 			end
 
-			return UDim2.fromOffset(0, props.max_items() * props.item_size)
+			return UDim2.fromOffset(
+				(props.max_items() - 1) * props.item_size,
+				0
+			)
 		end,
 
 		BackgroundTransparency = 1,
@@ -94,11 +97,11 @@ local function infinite_scrolling_frame(props: infinite_scrolling_frame)
 
 						Name = function() return tostring(indexes[i]()) end,
 
-						Size = UDim2.new(1, 0, 0, props.item_size),
+						Size = UDim2.new(0, props.item_size, 1, 0),
 						Position = function()
 							return UDim2.fromOffset(
-								0,
-								(indexes[i]() - 1) * props.item_size
+								(indexes[i]() - 1) * props.item_size,
+								0
 							)
 						end,
 

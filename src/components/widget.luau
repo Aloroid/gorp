@@ -27,6 +27,8 @@ type props = {
 	size: Vector2?,
 	closeable: boolean?,
 
+	children: (() -> Instance | { Instance })?,
+
 	[any]: any,
 }
 
@@ -38,6 +40,8 @@ return function(props: props)
 	local min_size = props.min_size or Vector2.new(100, 100)
 	local base_size = props.size or min_size * 1.5
 	local title = props.title or widget_id or ""
+	local children = props.children
+
 	local closesable = props.closeable
 
 	local x_size = source(math.max(min_size.X, base_size.X))
@@ -55,6 +59,7 @@ return function(props: props)
 	props.min_size = nil
 	props.title = nil
 	props.size = nil
+	props.children = nil
 
 	local offset = Vector2.zero
 	local dragging = source(false)
@@ -207,6 +212,7 @@ return function(props: props)
 						Size = function() return UDim2.new(1, 0, 1, -24) end,
 						Position = UDim2.fromOffset(0, 24),
 
+						children,
 						props,
 					},
 

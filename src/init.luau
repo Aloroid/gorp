@@ -17,7 +17,7 @@ local vide = require(script.Parent.vide)
 local function add_world(world: rts.Registry, given_name: string?)
 	local new_worlds = table.clone(state.worlds())
 	local name = given_name or `Registry #{#new_worlds + 1}`
-	local entry = { world = world, name = name }
+	local entry = { world = world, name = name, global_index = -1 }
 
 	table.insert(new_worlds, entry)
 
@@ -37,6 +37,8 @@ local function add_world(world: rts.Registry, given_name: string?)
 				return { name = name, index = #new_worlds, actor = actor }
 			end
 		)
+
+		entry.global_index = id
 
 		return id
 	end
@@ -58,7 +60,7 @@ end
 
 -- spawns a new widget
 local function spawn_widget(name: string, ...)
-	if state.can_use_debugger(Players.LocalPlayer) == false then return end
+	--if state.can_use_debugger(Players.LocalPlayer) == false then return end
 	local widget = (require :: any)(script.widgets:FindFirstChild(name))
 	local packed = { ... }
 
