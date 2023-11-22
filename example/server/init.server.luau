@@ -26,6 +26,8 @@ print("test")
 
 gorp.add_world(world, "reg 1")
 
+world:context():set(cts.Name, "context")
+
 for i = 1, 5 do
 	local thing = world:create()
 	world:add(thing, cts.Name, cts.Transform)

@@ -82,7 +82,7 @@ local function new_hook(scheduler: rts.Scheduler, index: number)
 			if #logs > 0 then
 				table.insert(frames(), logs)
 				frames(frames())
-				print("recorded frame", #frames())
+				--print("recorded frame", #frames())
 				logs = {}
 				total_logs = 0
 			end

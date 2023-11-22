@@ -173,22 +173,6 @@ if state.actor_id == 1 then
 			local entry = (state.all_schedulers.entries :: any)[index]
 			if entry.actor ~= state.actor_id then
 				return invoke_actor(
-					remotes.stop_flow_system_performance_data,
-					entry.actor,
-					player,
-					id
-				)
-			else
-				return system.stop_system_watch_data(player, id)
-			end
-		end
-	)
-
-	remotes.stop_system_watch_data.OnServerEvent:Connect(
-		function(player, index, id)
-			local entry = (state.all_schedulers.entries :: any)[index]
-			if entry.actor ~= state.actor_id then
-				return invoke_actor(
 					remotes.stop_system_watch_data,
 					entry.actor,
 					player,
@@ -223,7 +207,7 @@ if state.actor_id == 1 then
 		frame
 	)
 		local entry = (state.all_schedulers.entries :: any)[index]
-		print(index, id, frame)
+		--print(index, id, frame)
 		if entry.actor ~= state.actor_id then
 			return invoke_actor(
 				remotes.get_system_watch_logs,
@@ -298,7 +282,7 @@ if state.actor_id == 1 then
 		ent
 	)
 		local entry = (state.all_worlds.entries :: any)[reg_index]
-		if entry.actor then
+		if entry.actor ~= state.actor_id then
 			return invoke_actor(
 				remotes.get_all_entity_values,
 				entry.actor,
@@ -314,7 +298,7 @@ if state.actor_id == 1 then
 	remotes.update_entities.OnServerEvent:Connect(
 		function(player, reg_index, changed, removing)
 			local entry = (state.all_worlds.entries :: any)[reg_index]
-			if entry.actor then
+			if entry.actor ~= state.actor_id then
 				invoke_actor(
 					remotes.update_entities,
 					entry.actor,

@@ -23,6 +23,7 @@ local text = require(script.Parent.Parent.Parent.components.text)
 local text_input = require(script.Parent.Parent.Parent.components.text_input)
 
 local create = vide.create
+local effect = vide.effect
 local derive = vide.derive
 local source = vide.source
 local cleanup = vide.cleanup
@@ -58,7 +59,12 @@ return function(
 	local absolute_size = source(Vector2.zero)
 	local hovering_frame = source() :: rts.Source<number?>
 	local prev = 0
-	vide.effect(function()
+
+	effect(function()
+		if recording() == true then frame(0) end
+	end)
+
+	effect(function()
 		local current = vide.untrack(canvas_position)
 		local diff = #changes() * 6 - prev * 6
 		prev = #changes()
@@ -67,6 +73,8 @@ return function(
 	end)
 
 	cleanup(RunService.Heartbeat:Connect(heartbeat))
+
+	vide.cleanup(disable)
 
 	return container {
 
@@ -308,7 +316,5 @@ return function(
 				}
 			end,
 		},
-
-		Destroying = function() disable() end,
 	}
 end

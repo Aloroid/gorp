@@ -149,7 +149,7 @@ local function stop_system_watch_data(player, id)
 
 	local watch = watches[id]
 
-	print("disabled")
+	--print("disabled")
 
 	if watch.disable then
 		watch.disable()

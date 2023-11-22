@@ -1,3 +1,4 @@
+local actions = require(script.Parent.Parent.actions)
 local rts = require(script.Parent.Parent.rts)
 local vide = require(script.Parent.Parent.Parent.vide)
 
@@ -14,11 +15,30 @@ local derive = vide.derive
 return function(scheduler: rts.Scheduler, index: number)
 	local system = scheduler.systems[index]
 
+	-- system watch
+	local hook = system_watch_hook.new(scheduler, index)
+	local frame = source(0)
+	local disable: (() -> ())?
+
+	local recording = source(false)
+	vide.effect(function()
+		if disable then
+			disable()
+			disable = nil
+		end
+
+		if recording() then disable = hook:enable() end
+	end)
+
 	return widget {
 
 		title = system.name,
 		min_size = Vector2.new(230, 200),
 		closeable = true,
+
+		actions.cleanup(function()
+			if disable then disable() end
+		end),
 
 		tabs {
 			{
@@ -36,20 +56,6 @@ return function(scheduler: rts.Scheduler, index: number)
 			{
 				name = "Watch",
 				child = function()
-					local hook = system_watch_hook.new(scheduler, index)
-					local frame = source(0)
-					local disable: (() -> ())?
-
-					local recording = source(false)
-					vide.effect(function()
-						if disable then
-							disable()
-							disable = nil
-						end
-
-						if recording() then disable = hook:enable() end
-					end)
-
 					return watch(
 						hook.total_changes,
 						frame,
@@ -61,9 +67,7 @@ return function(scheduler: rts.Scheduler, index: number)
 							end
 						end),
 						recording,
-						function()
-							if disable then disable() end
-						end
+						function() end
 					)
 				end,
 			},
