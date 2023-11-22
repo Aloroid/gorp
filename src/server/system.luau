@@ -172,7 +172,7 @@ local function get_system_watch_logs(player, id, frame)
 
 	local watch = watches[id]
 
-	print(id, frame, watch.watch.frames()[frame])
+	--print(id, frame, watch.watch.frames()[frame])
 	return watch.watch.frames()[frame]
 end
 
