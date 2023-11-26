@@ -13,3 +13,9 @@
 
 # wally lock files
 /wally.lock
+
+# documentation
+
+docs/.vitepress/dist
+docs/.vitepress/cache
+docs/node_modules

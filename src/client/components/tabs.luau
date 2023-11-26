@@ -21,9 +21,6 @@ export type tabs = {
 local function tabs(tabs: tabs)
 	local selected = source(1)
 	local ref = source()
-	local cleanup = function() end
-
-	vide.cleanup(cleanup)
 
 	return create "Frame" {
 
@@ -38,13 +35,12 @@ local function tabs(tabs: tabs)
 			Size = UDim2.new(1, 0, 1, -19),
 
 			function()
-				cleanup()
 				local current = selected()
-				cleanup = vide.mount(function()
+				vide.cleanup(vide.mount(function()
 					local object = tabs[current].child()
 					vide.cleanup(object)
 					return object
-				end, ref())
+				end, ref()))
 			end,
 
 			border {},

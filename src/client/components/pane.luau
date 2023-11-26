@@ -82,6 +82,8 @@ local function pane(props: props)
 
 			props,
 		},
+
+		Visible = props.Visible,
 	}
 end
 

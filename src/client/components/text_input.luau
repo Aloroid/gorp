@@ -16,6 +16,7 @@ type text_input = {
 
 	size: UDim2?,
 	text: vide.Source<string>,
+	text_size: number?,
 	placeholder_text: (vide.Source<string> | string)?,
 
 	multi_line: boolean?,
@@ -115,12 +116,12 @@ local function text_input(props: text_input)
 			PlaceholderText = props.placeholder_text,
 
 			TextColor3 = style.text,
-			PlaceholderColor3 = style.text,
+			PlaceholderColor3 = style.sub_text,
 			AutomaticSize = props.automatic_size or Enum.AutomaticSize.None,
 
 			ClipsDescendants = true,
 
-			TextSize = 16,
+			TextSize = props.text_size or 16,
 
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextYAlignment = props.text_y_alignment

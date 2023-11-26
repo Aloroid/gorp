@@ -8,7 +8,6 @@ local style = require(script.Parent.Parent.style)
 local vide = require(script.Parent.Parent.Parent.Parent.vide)
 
 local border = require(script.Parent.border)
-local button = require(script.Parent.button)
 local container = require(script.Parent.container)
 local shadow = require(script.Parent.shadow)
 local text = require(script.Parent.text)
@@ -24,7 +23,10 @@ type props = {
 	widget_id: string?,
 	title: (string | () -> string)?,
 	min_size: Vector2?,
+	size: Vector2?,
 	closeable: boolean?,
+
+	children: (() -> Instance | { Instance })?,
 
 	[any]: any,
 }
@@ -35,11 +37,14 @@ local RESIZE_RANGE = 10
 return function(props: props)
 	local widget_id = props.widget_id or props.title or ""
 	local min_size = props.min_size or Vector2.new(100, 100)
+	local base_size = props.size or min_size * 1.5
 	local title = props.title or widget_id or ""
+	local children = props.children
+
 	local closesable = props.closeable
 
-	local x_size = source(min_size.X * 1.5)
-	local y_size = source(min_size.Y * 1.5)
+	local x_size = source(math.max(min_size.X, base_size.X))
+	local y_size = source(math.max(min_size.Y, base_size.Y))
 	local x_position = source(100)
 	local y_position = source(56)
 
@@ -52,6 +57,8 @@ return function(props: props)
 	props.widget_id = nil
 	props.min_size = nil
 	props.title = nil
+	props.size = nil
+	props.children = nil
 
 	local offset = Vector2.zero
 	local dragging = source(false)
@@ -67,10 +74,13 @@ return function(props: props)
 	local display_order = source(highest_display_order + 1)
 	highest_display_order += 1
 
+	local hover_closed = source(false)
+	local pressed_closed = source(false)
+
 	local top
 	local bottom
 
-	return vide.root(function(destroy)
+	local gui, destroy = vide.root(function(destroy)
 		local gui = create "ScreenGui" {
 			Parent = if RunService:IsStudio()
 					and not RunService:IsRunning()
@@ -92,6 +102,8 @@ return function(props: props)
 				Size = function()
 					return UDim2.fromOffset(x_size() + 6, y_size() + 6)
 				end,
+
+				Active = true,
 
 				create "Frame" {
 
@@ -122,23 +134,47 @@ return function(props: props)
 						},
 
 						if closesable ~= false
-							then button {
-								layout = {
-									Position = UDim2.new(1, -4, 0.5, 0),
-									Size = UDim2.fromOffset(16, 16),
-									AnchorPoint = Vector2.new(1, 0.5),
+							then create "TextButton" {
+								Position = UDim2.new(1, 0, 0.5, 0),
+								Size = UDim2.new(0, 44, 1, 0),
+								AnchorPoint = Vector2.new(1, 0.5),
+
+								BackgroundColor3 = vide.spring(
+									function()
+										return if pressed_closed()
+												and hover_closed()
+											then style.close_button_pressed
+											elseif
+												hover_closed()
+											then style.close_button
+											else style.foreground
+									end,
+									0.1
+								),
+
+								create "ImageLabel" {
+
+									Size = UDim2.fromOffset(12, 12),
+									Position = UDim2.fromScale(0.5, 0.5),
+									AnchorPoint = Vector2.new(0.5, 0.5),
+
+									BackgroundTransparency = 1,
+
+									Image = "rbxasset://textures/ui/InspectMenu/x.png",
 								},
 
-								text = "x",
+								Text = "",
 
-								activated = function() destroy() end,
+								actions.hovering(hover_closed),
+								actions.pressed(pressed_closed),
+								Activated = destroy,
 							}
 							else nil,
 
 						border {},
 
 						MouseButton1Down = function(x, y)
-							offset = absolute_position() - Vector2.new(x, y)
+							offset = (absolute_position() - Vector2.new(x, y))
 							dragging(true)
 						end,
 
@@ -170,6 +206,7 @@ return function(props: props)
 						Size = function() return UDim2.new(1, 0, 1, -24) end,
 						Position = UDim2.fromOffset(0, 24),
 
+						children,
 						props,
 					},
 
@@ -272,6 +309,10 @@ return function(props: props)
 
 		cleanup(gui)
 
-		return gui
+		return gui, destroy
 	end)
+
+	cleanup(destroy)
+
+	return gui
 end

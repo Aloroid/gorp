@@ -1,6 +1,6 @@
 --[[
 
-	A basic button class.
+	A basic scroller class.
 
 ]]
 
