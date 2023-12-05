@@ -16,6 +16,8 @@ return gorp.compat_set_cts(ecr.name({
 	Raycast = primitive(Vector3.new(0, 1, 0)),
 	Amount = primitive(100),
 
+	instance = primitive(Instance.new("Folder", workspace)),
+
 	Object = ecr.component(
 		function()
 			return {

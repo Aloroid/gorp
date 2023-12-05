@@ -5,6 +5,7 @@ local common_actor_id = require(script.common_actor_id)
 local config = require(script.config)
 local ecr = require(script.Parent.ecr)
 local group_hook = require(script.group_hook)
+local rbxjson = require(script.rbxjson)
 local register_custom_widget = require(script.register_custom_widget)
 local remotes = require(script.remotes)
 local rts = require(script.rts)
@@ -87,17 +88,20 @@ local function compat_set_cts<T>(user_cts: T & { [string]: any }): T
 
 	for name, id in user_cts :: { [string]: any } do
 		-- replace the server_ctype
+		name = string.lower(name)
+
 		if keys[name] then
-			local ctype = keys[name]
-			local server_ctype = reverse[ctype]
+			local old_ctype = keys[name]
+			local server_ctype = reverse[old_ctype]
 			map[server_ctype] = id
-			ids[ctype] = nil
+			ids[old_ctype] = nil
 		end
 
 		ids[id] = name
 	end
 
 	state.cts.ids(ids)
+	state.cts.map(map)
 
 	return user_cts
 end
@@ -117,6 +121,7 @@ if RunService:IsClient() then
 
 		for name, server_ctype in names do
 			local ctype = if keys[name] then keys[name] else ecr.component()
+
 			map[server_ctype] = ctype
 			ids[ctype] = name
 		end
@@ -198,6 +203,8 @@ return {
 	enabled = state.enabled,
 	scheduler = scheduler,
 	pass_config = set_config,
+
+	add_custom_json_convert = rbxjson.add_method,
 
 	register_custom_widget = register_custom_widget,
 

@@ -17,6 +17,10 @@ print("boop")
 gorp.spawn_widget("registry_selector")
 print("?")
 
+gorp.add_custom_json_convert("Instance", {
+	deconstruct = function(instance: Instance) return instance:GetFullName() end,
+})
+
 UserInputService.InputBegan:Connect(function(input)
 	if input.KeyCode == Enum.KeyCode.F2 then
 		gorp.enabled(not gorp.enabled())

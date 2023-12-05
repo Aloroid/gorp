@@ -18,7 +18,7 @@ end
 
 for i = 1, 5 do
 	local id = world:create()
-	world:add(id, cts.Name, cts.Transform, new)
+	world:add(id, cts.Name, cts.Transform, cts.instance, new)
 	world:set(id, cts.Name, "foo")
 end
 

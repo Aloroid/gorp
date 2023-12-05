@@ -140,8 +140,20 @@ function rbxjson:Decode(json, type)
 
 	return
 end
---[[
-@Velocity @Position
-]]
+
+type JSON = string | number | boolean | { JSON } | { [string]: JSON }
+function rbxjson.add_method<T, U>(
+	type: string,
+	options: {
+		deconstruct: ((value: T) -> U & JSON)?,
+		construct: ((value: U) -> T)?,
+		construct_array: ((...any) -> T)?,
+	}
+)
+	rbxjson.Construct[type] = options.construct or rbxjson.Construct[type]
+	rbxjson.Deconstruct[type] = options.deconstruct or rbxjson.Deconstruct[type]
+	rbxjson.ConstructArray[type] = options.construct_array
+		or rbxjson.ConstructArray[type]
+end
 
 return rbxjson

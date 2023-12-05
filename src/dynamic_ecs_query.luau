@@ -109,7 +109,7 @@ local parse_value = function(query: string)
 
 	local function append()
 		local name = reduce(stored_equal_ctype_name or stream:next_token(1))
-		local ctype = untrack(cts.keys)[name]
+		local ctype = untrack(cts.keys)[string.lower(name)]
 
 		if ctype_type == "include" then
 			if ctype == nil then

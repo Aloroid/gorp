@@ -66,43 +66,29 @@ Returns a function that destroys the widget.
 
 ```lua
 function gorp.spawn_widget(widget: "registry_selector"): () -> ()
-```
 
-```lua
 function gorp.spawn_widget(widget: "entity_client_view", props: {
 	query: vide.Source<string>?,
 	world: {world: ecr.Registry, name: string},
 	cleanup: (() -> ())?,
 	get_components: ((id: number) -> {number})
 }): () -> ()
-```
 
-```lua
 function gorp.spawn_widget(widget: "entity_server_view", name: string, registry: number): () -> ()
-```
 
-```lua
 function gorp.spawn_widget(widget: "json_editor", props: {
 	name: string,
 	text: string,
 	updated: (text: string) -> (),
 	prettify: boolean?
 }): () -> ()
-```
 
-```lua
 function gorp.spawn_widget(widget: "scheduler_view", scheduler: gorp.Scheduler): () -> ()
-```
 
-```lua
 function gorp.spawn_widget(widget: "scheduler_server_view", name: string, scheduler: number): () -> ()
-```
 
-```lua
 function gorp.spawn_widget(widget: "system_view", scheduler: gorp.Scheduler, system: number): () -> ()
-```
 
-```lua
 function gorp.spawn_widget(widget: "system_server_view", scheduler: number, index: number, name: string): () -> ()
 ```
 
@@ -129,6 +115,22 @@ Closes all the widgets
 
 ```lua
 function gorp.clear_all(): ()
+```
+
+### add_custom_json_convert()
+
+Allows you to add a custom function for converting a datatype to JSON
+
+-   **Type**
+
+```lua
+function gorp.add_custom_json_convert(datatype: string,
+	options: {
+		deconstruct: ((value: T) -> U & JSON)?,
+		construct: ((value: U) -> T)?,
+		construct_array: ((...any) -> T)?,
+	}
+): ()
 ```
 
 ### enabled()
