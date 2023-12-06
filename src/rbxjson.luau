@@ -19,7 +19,7 @@ rbxjson.Deconstruct = {
 }
 
 rbxjson.Construct = {
-	Color3 = function(e) return Color3.new(e.R, e.G, e.B) end,
+	Color3 = function(e) return Color3.new(unpack(e)) end,
 
 	CFrame = function(e) return CFrame.new(unpack(e)) end,
 	Vector3 = function(e) return Vector3.new(e.X, e.Y, e.Z) end,
