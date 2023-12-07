@@ -18,7 +18,8 @@ stop_multi_require()
 -- create all the connections necessary
 events.replicate_core_data:connect(function(connector)
 	-- adds the server
-	add_server(connector.from :: number, connector.namespace)
+	print(connector.player)
+	add_server(connector.from :: number, if connector.player then "client" else "server")
 end)
 
 local scheduler = new_scheduler("gorpclient")

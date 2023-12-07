@@ -8,9 +8,17 @@ local updated = ecr.queue(events.replicate_components)
 
 local function replicate_components()
 	for connector, components in updated:iter() do
-		local context = servers[connector.namespace][connector.from]
+		local context = servers[if connector.player then "client" else "server"][connector.from]
+		local ctypes = {}
 
-		registry:set(context, cts.Components, components)
+		-- i have to tonumber this because reasons
+		for key, name in components do
+			ctypes[tonumber(key) :: number] = name
+		end
+
+		print("set components of", connector.from, "to", ctypes)
+
+		registry:set(context, cts.Components, ctypes)
 	end
 end
 

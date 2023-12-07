@@ -8,6 +8,7 @@
 
 return function(value: number, unit: string)
 	local prefixes = {
+		[4] = "P",
 		[3] = "G",
 		[2] = "M",
 		[1] = "k",
@@ -15,6 +16,7 @@ return function(value: number, unit: string)
 		[-1] = "m",
 		[-2] = "u",
 		[-3] = "n",
+		[-4] = "p",
 	}
 
 	local order = 0

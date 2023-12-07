@@ -4,15 +4,16 @@ local registry = require(script.Parent.registry)
 local servers = require(script.Parent.servers)
 
 local function add_local_server(id: number, namespace: string)
+	if servers[namespace][id] then return end
 	local ent = registry:create()
 
 	registry:set(ent, cts.ActorId, id)
 	registry:set(ent, cts.ReplicatedFrom, namespace)
 	registry:set(ent, cts.ServerId, ecr7.context)
 
-	print("created new server")
+	servers[namespace][id] = ent
 
-	servers["client"][id] = ent
+	print("created new server for", id, namespace, servers)
 end
 
 return add_local_server

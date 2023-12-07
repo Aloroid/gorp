@@ -1,5 +1,4 @@
 local cts = require(script.Parent.cts)
-local no_yield = require(script.Parent.no_yield)
 local registry = require(script.Parent.registry)
 local rolling_average = require(script.Parent.Parent.modules.rolling_average)
 local rts = require(script.Parent.Parent.rts)
@@ -50,11 +49,15 @@ local function new_scheduler(name: string, max: number?)
 
 		local system_data = registry:get(system, cts.System)
 
+		-- run the system if its not paused
 		if not registry:has(system, cts.Paused) then
 			for _, callback in system_data.before do
 				callback(name)
 			end
 
+			-- we use xpcall, while we do have a internal no_yield module, i know
+			-- someone who needs to be able to call task.synchronize and task.desynchronize
+			-- so we'll just use xpcall
 			local start = os.clock()
 			local ok, err = xpcall(callback :: any, function(err) return debug.traceback(err, 2) end, ...)
 			local finish = os.clock()

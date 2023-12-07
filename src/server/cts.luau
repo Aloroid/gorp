@@ -16,7 +16,8 @@ return ecr7.name({
 	Scheduler = ecr7.component() :: { ecr7.entity }, -- contain systems
 	Registry = ecr7.component() :: rts.Registry,
 
-	Requester = ecr7.component() :: Player,
+	-- the connector who requested for the given data
+	Requester = ecr7.component() :: rts.connector,
 	SelectedRegistry = ecr7.component() :: ecr7.entity,
 	Query = ecr7.component() :: string,
 
@@ -26,5 +27,6 @@ return ecr7.name({
 	QueryData = ecr7.component() :: rts.QueryData,
 	Paused = ecr7.tag(),
 
+	-- the connector who is connected to this server
 	Receiver = ecr7.component() :: rts.connector,
 })

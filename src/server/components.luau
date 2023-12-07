@@ -1,4 +1,5 @@
 local cts = require(script.Parent.cts)
+local ecr7 = require(script.Parent.Parent.modules.ecr7)
 local registry = require(script.Parent.registry)
 
 registry:context():set(cts.Components, {})
@@ -7,11 +8,11 @@ local cts_names = {}
 
 local function names<T>(components: T & { [string]: any }): T
 	for name, ctype in components :: { [string]: any } do
-		registry:context():get(cts.Components)[ctype] = name
+		registry:get(ecr7.context, cts.Components)[ctype] = name
 		cts_names[name] = ctype
 	end
 
-	local ent = registry:context().entity
+	local ent = ecr7.context
 
 	registry:set(ent, cts.Components, registry:get(ent, cts.Components))
 

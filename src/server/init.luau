@@ -35,9 +35,9 @@ local server = {
 local server_scheduler = scheduler(`gorpserver:{common_actor_id}`)
 
 RunService.Heartbeat:Connect(function()
-	server_scheduler:system("update_receiving_targets", update_receiving_targets)
 	server_scheduler:system("replicate_core", replicate_core)
 	server_scheduler:system("replicate_components", replicate_components)
+	server_scheduler:system("update_receiving_targets", update_receiving_targets)
 	server_scheduler:finish()
 end)
 

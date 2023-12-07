@@ -126,7 +126,10 @@ local function create_event(name: string, do_not_block_traffic: boolean?)
 			remote.actor:Fire(connector, ...)
 		end)
 	else
-		remote.OnClientEvent:Connect(function(...) remote.actor:Fire(...) end)
+		remote.OnClientEvent:Connect(function(connector, ...)
+			connector.player = nil
+			remote.actor:Fire(connector, ...)
+		end)
 	end
 
 	return event

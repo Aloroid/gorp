@@ -47,6 +47,7 @@ local function replicate_core()
 
 	-- replicate to other connectors
 	for _, connector in registry:view(cts.Receiver) do
+		print("update core data")
 		events.replicate_core_data:fire(connector, registries, schedulers)
 	end
 end
