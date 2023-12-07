@@ -34,10 +34,7 @@ return function(props: props)
 
 	local connection
 
-	assert(
-		widgets[props.widget_id] == nil,
-		`{props.widget_id} already exists as a widget!`
-	)
+	assert(widgets[props.widget_id] == nil, `{props.widget_id} already exists as a widget!`)
 
 	props.closeable = nil
 	props.widget_id = nil
@@ -122,8 +119,7 @@ return function(props: props)
 				MouseEnter = function()
 					hovering(true)
 					normal = UserInputService.MouseIcon
-					UserInputService.MouseIcon =
-						"rbxasset://textures/StudioUIEditor/icon_resize2.png"
+					UserInputService.MouseIcon = "rbxasset://textures/StudioUIEditor/icon_resize2.png"
 				end,
 
 				MouseLeave = function()
@@ -132,37 +128,25 @@ return function(props: props)
 				end,
 
 				InputBegan = function(input: InputObject)
-					if
-						input.UserInputType ~= Enum.UserInputType.MouseButton1
-					then
-						return
-					end
+					if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
 					local x = input.Position.X
 
 					dragging(true)
 					local begin_x = x
 					local begin_size = x_size()
 
-					connection = RunService.Heartbeat:Connect(
-						function(delta_time)
-							local location = UserInputService:GetMouseLocation()
-							local new = location.X
+					connection = RunService.Heartbeat:Connect(function(delta_time)
+						local location = UserInputService:GetMouseLocation()
+						local new = location.X
 
-							if
-								UserInputService:IsMouseButtonPressed(
-									Enum.UserInputType.MouseButton1
-								) == false
-							then
-								dragging(false)
-								connection:Disconnect()
-								return
-							end
-
-							x_size(
-								math.max(min_size, begin_size + new - begin_x)
-							)
+						if UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) == false then
+							dragging(false)
+							connection:Disconnect()
+							return
 						end
-					)
+
+						x_size(math.max(min_size, begin_size + new - begin_x))
+					end)
 				end,
 			},
 

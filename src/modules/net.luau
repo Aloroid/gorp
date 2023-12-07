@@ -12,20 +12,16 @@ local common_actor_id = require(script.Parent.Parent.common_actor_id)
 local traffic_check = require(script.Parent.traffic_check)
 
 type namespace = "client" | "server"
-type connector = {
-	namespace: "client" | "server",
-	to: number,
+export type connector = {
+	namespace: namespace,
+	to: number?,
 	from: number?,
 	player: Player?,
 }
 
-local function get_remote_event(
-	name: string
-): RemoteEvent & { actor: BindableEvent }
+local function get_remote_event(name: string): RemoteEvent & { actor: BindableEvent }
 	if RunService:IsServer() then
-		return script:FindFirstChild(
-			name
-		) :: RemoteEvent & { actor: BindableEvent }
+		return script:FindFirstChild(name) :: RemoteEvent & { actor: BindableEvent }
 			or (function()
 				local remote = Instance.new("RemoteEvent")
 				remote.Name = name
@@ -37,9 +33,7 @@ local function get_remote_event(
 				return remote :: RemoteEvent & { actor: BindableEvent }
 			end)()
 	else
-		return script:WaitForChild(
-			name
-		) :: RemoteEvent & { actor: BindableEvent }
+		return script:WaitForChild(name) :: RemoteEvent & { actor: BindableEvent }
 	end
 end
 
@@ -83,15 +77,14 @@ local function create_event(name: string, do_not_block_traffic: boolean?)
 	}
 
 	function event:fire(connector: connector, ...)
-		local server_to_server = RunService:IsServer()
-			and connector.namespace == "server"
-		local client_to_client = RunService:IsClient()
-			and connector.namespace ~= "server"
+		local server_to_server = RunService:IsServer() and connector.namespace == "server"
+		local client_to_client = RunService:IsClient() and connector.namespace ~= "server"
 
 		if client_to_client or server_to_server then
 			connector.player = connector.player or Players.LocalPlayer
 			connector.from = common_actor_id
 			remote.actor:Fire(connector, ...)
+			print("fired", name, "by", connector.from)
 		else
 			if RunService:IsServer() then
 				assert(connector.player, "no player specified")
@@ -104,42 +97,36 @@ local function create_event(name: string, do_not_block_traffic: boolean?)
 		end
 	end
 
-	function event:connect(callback: (player: Player?, ...any) -> ())
-		return remote.actor.Event:Connect(
-			function(player: Player, connector: connector, ...)
-				if connector.to ~= common_actor_id then return end
-				if
-					RunService:IsServer()
-					and connector.namespace ~= "server"
-				then
-					return
-				end
-
-				callback(player, ...)
+	function event:connect(callback: (connector: connector, ...any) -> ())
+		return remote.actor.Event:Connect(function(connector: connector, ...)
+			if
+				connector.to ~= common_actor_id and connector.to ~= nil
+				or RunService:IsServer() and connector.namespace ~= "server"
+			then
+				print("ignored packet meant for", connector)
+				return
 			end
-		)
+
+			callback(connector, ...)
+		end)
 	end
 
 	if RunService:IsServer() then
 		-- block all traffic from unverified players
-		remote.OnServerEvent:Connect(
-			function(player: Player, connector: connector, ...)
-				assert(
-					do_not_block_traffic == true
-						or traffic_check.check_player(player),
-					`{player} tried to fire gorp server`
-				)
-				assert(connector.namespace == "server")
+		remote.OnServerEvent:Connect(function(player: Player, connector: connector, ...)
+			assert(
+				do_not_block_traffic == true or traffic_check.check_player(player),
+				`{player} tried to fire gorp server`
+			)
+			assert(connector.namespace == "server")
 
-				connector.player = player
+			connector.player = player
+			print("received packet")
 
-				remote.actor:Fire(player, ...)
-			end
-		)
+			remote.actor:Fire(connector, ...)
+		end)
 	else
-		remote.OnClientEvent:Connect(
-			function(...) remote.actor:Fire(nil, ...) end
-		)
+		remote.OnClientEvent:Connect(function(...) remote.actor:Fire(...) end)
 	end
 
 	return event
@@ -155,25 +142,23 @@ local function create_callback(name: string, do_not_block_traffic: boolean?)
 	local current_callback = function(...) error("did not specify callback") end
 
 	function event:invoke(connector: connector, ...)
-		id += 1
-		local stored = id
+		assert(connector.to, "this function requires a target to send to")
 
-		local server_to_server = RunService:IsServer()
-			and connector.namespace == "server"
-		local client_to_client = RunService:IsClient()
-			and connector.namespace ~= "server"
+		local server_to_server = RunService:IsServer() and connector.namespace == "server"
+		local client_to_client = RunService:IsClient() and connector.namespace ~= "server"
 
 		if client_to_client or server_to_server then
-			local t
-			local connection = remote.result.Event:Connect(
-				function(from: number, to: number, id: number, ...)
-					if from ~= connector.to then return end
-					if to ~= common_actor_id then return end
-					if id ~= stored then return end
+			id += 1
+			local stored = id
 
-					t = { ... }
-				end
-			)
+			local t
+			local connection = remote.result.Event:Connect(function(from: number, to: number, id: number, ...)
+				if from ~= connector.to then return end
+				if to ~= common_actor_id then return end
+				if id ~= stored then return end
+
+				t = { ... }
+			end)
 
 			connector.from = connector.from or common_actor_id
 			remote.actor:Fire(connector, common_actor_id, stored, ...)
@@ -196,17 +181,12 @@ local function create_callback(name: string, do_not_block_traffic: boolean?)
 		end
 	end
 
-	function event:set_callback(
-		callback: (connector: connector, ...any) -> ...any
-	)
-		current_callback = callback
-	end
+	function event:set_callback(callback: (connector: connector, ...any) -> ...any) current_callback = callback end
 
 	if RunService:IsServer() then
 		remote.OnServerInvoke = function(player, connector, ...)
 			assert(
-				do_not_block_traffic == true
-					or traffic_check.check_player(player),
+				do_not_block_traffic == true or traffic_check.check_player(player),
 				`{player} tried to invoke gorp server`
 			)
 
@@ -217,13 +197,11 @@ local function create_callback(name: string, do_not_block_traffic: boolean?)
 		-- not specifying OnClientInvoke for security reasons
 	end
 
-	remote.actor.Event:Connect(
-		function(connector: connector, actor: number, id: number, ...)
-			local results = { current_callback(connector, ...) }
-			connector.from = common_actor_id
-			remote.result:Fire(common_actor_id, actor, id, unpack(results))
-		end
-	)
+	remote.actor.Event:Connect(function(connector: connector, actor: number, id: number, ...)
+		local results = { current_callback(connector, ...) }
+		connector.from = common_actor_id
+		remote.result:Fire(common_actor_id, actor, id, unpack(results))
+	end)
 
 	return event
 end

@@ -1,8 +1,6 @@
 --!nolint LocalUnused
 
-local function fromHSV(h: number, s: number, l: number)
-	return Color3.fromHSV(h / 360, s / 255, l / 255)
-end
+local function fromHSV(h: number, s: number, l: number) return Color3.fromHSV(h / 360, s / 255, l / 255) end
 
 local dark = {
 

@@ -4,11 +4,11 @@ local events = require(script.Parent.Parent.Parent.events)
 local registry = require(script.Parent.Parent.registry)
 local servers = require(script.Parent.Parent.servers)
 
-local updated = ecr.queue(events.replicate_components.Event)
+local updated = ecr.queue(events.replicate_components)
 
 local function replicate_components()
-	for actor_id, components in updated do
-		local context = servers["client"][actor_id]
+	for connector, components in updated:iter() do
+		local context = servers[connector.namespace][connector.from]
 
 		registry:set(context, cts.Components, components)
 	end

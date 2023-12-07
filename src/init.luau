@@ -4,18 +4,21 @@
 
 ]]
 
-local events = require(script.events)
---local server = require(script.server)
+local RunService = game:GetService("RunService")
 
-events.test:set_callback(
-	function(connector, name: string) return `Hello, {name}!` end
-)
+local events = require(script.events)
+local server = require(script.server)
+local stop_multi_require = require(script.modules.stop_multi_require)
 
 return {
 
-	--add_world = server.add_world,
-	--scheduler = server.scheduler,
-	--names = server.names,
+	add_world = server.add_world,
+	scheduler = server.scheduler,
+	names = server.names,
 
-	test_callback = events.test,
+	get_client = function()
+		assert(RunService:IsClient(), "gorp client cannot be received on the server")
+		stop_multi_require("cannot get client twice")
+		return require(script.client)
+	end,
 }

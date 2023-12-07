@@ -48,10 +48,7 @@ return function(props: props)
 	local x_position = source(100)
 	local y_position = source(56)
 
-	assert(
-		widgets[props.widget_id] == nil,
-		`{props.widget_id} already exists as a widget!`
-	)
+	assert(widgets[props.widget_id] == nil, `{props.widget_id} already exists as a widget!`)
 
 	props.closeable = nil
 	props.widget_id = nil
@@ -82,8 +79,7 @@ return function(props: props)
 
 	local gui, destroy = vide.root(function(destroy)
 		local gui = create "ScreenGui" {
-			Parent = if RunService:IsStudio()
-					and not RunService:IsRunning()
+			Parent = if RunService:IsStudio() and not RunService:IsRunning()
 				then game:GetService("CoreGui")
 				else Players.LocalPlayer:WaitForChild("PlayerGui"),
 
@@ -95,13 +91,9 @@ return function(props: props)
 
 			shadow {
 
-				Position = function()
-					return UDim2.fromOffset(x_position(), y_position())
-				end,
+				Position = function() return UDim2.fromOffset(x_position(), y_position()) end,
 
-				Size = function()
-					return UDim2.fromOffset(x_size() + 6, y_size() + 6)
-				end,
+				Size = function() return UDim2.fromOffset(x_size() + 6, y_size() + 6) end,
 
 				Active = true,
 
@@ -141,12 +133,9 @@ return function(props: props)
 
 								BackgroundColor3 = vide.spring(
 									function()
-										return if pressed_closed()
-												and hover_closed()
+										return if pressed_closed() and hover_closed()
 											then style.close_button_pressed
-											elseif
-												hover_closed()
-											then style.close_button
+											elseif hover_closed() then style.close_button
 											else style.foreground
 									end,
 									0.1
@@ -178,24 +167,17 @@ return function(props: props)
 							dragging(true)
 						end,
 
-						actions.cleanup(
-							RunService.RenderStepped:Connect(function()
-								if dragging() == false then return end
-								if
-									not UserInputService:IsMouseButtonPressed(
-										Enum.UserInputType.MouseButton1
-									)
-								then
-									dragging(false)
-									return
-								end
+						actions.cleanup(RunService.RenderStepped:Connect(function()
+							if dragging() == false then return end
+							if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
+								dragging(false)
+								return
+							end
 
-								local position =
-									UserInputService:GetMouseLocation()
-								x_position(position.X + offset.X)
-								y_position(position.Y + offset.Y)
-							end)
-						),
+							local position = UserInputService:GetMouseLocation()
+							x_position(position.X + offset.X)
+							y_position(position.Y + offset.Y)
+						end)),
 
 						ZIndex = 1000,
 					},
@@ -225,10 +207,8 @@ return function(props: props)
 
 						can_resize_top = y < RESIZE_RANGE
 						can_resize_left = x < RESIZE_RANGE
-						can_resize_bottom = y
-							> (absolute_size().Y - RESIZE_RANGE)
-						can_resize_right = x
-							> (absolute_size().X - RESIZE_RANGE)
+						can_resize_bottom = y > (absolute_size().Y - RESIZE_RANGE)
+						can_resize_right = x > (absolute_size().X - RESIZE_RANGE)
 					end,
 
 					MouseLeave = function()
@@ -237,12 +217,7 @@ return function(props: props)
 					end,
 
 					InputBegan = function(input: InputObject)
-						if
-							input.UserInputType
-							~= Enum.UserInputType.MouseButton1
-						then
-							return
-						end
+						if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
 
 						resizing(true)
 						top = absolute_position()
@@ -256,22 +231,13 @@ return function(props: props)
 						local x, y = mposition.X, mposition.Y
 
 						resizing(
-							resizing()
-								and (
-									UserInputService:IsMouseButtonPressed(
-										Enum.UserInputType.MouseButton1
-									)
-								)
+							resizing() and (UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1))
 						)
 
 						if not resizing() then return end
 
-						if can_resize_bottom then
-							y_size(math.max(y - top.Y, min_size.Y))
-						end
-						if can_resize_right then
-							x_size(math.max(x - top.X, min_size.X))
-						end
+						if can_resize_bottom then y_size(math.max(y - top.Y, min_size.Y)) end
+						if can_resize_right then x_size(math.max(x - top.X, min_size.X)) end
 						if can_resize_top then
 							y_size(math.max(bottom.Y - y, min_size.Y))
 							y_position(math.min(y, bottom.Y - min_size.Y))
@@ -283,20 +249,10 @@ return function(props: props)
 					end)),
 
 					cleanup(UserInputService.InputBegan:Connect(function(input)
-						if
-							input.UserInputType
-							~= Enum.UserInputType.MouseButton1
-						then
-							return
-						end
+						if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
 
-						local player_gui = Players.LocalPlayer:WaitForChild(
-							"PlayerGui"
-						) :: PlayerGui
-						local objects = player_gui:GetGuiObjectsAtPosition(
-							input.Position.X,
-							input.Position.Y
-						)
+						local player_gui = Players.LocalPlayer:WaitForChild("PlayerGui") :: PlayerGui
+						local objects = player_gui:GetGuiObjectsAtPosition(input.Position.X, input.Position.Y)
 						if #objects == 0 then return end
 						if not objects[1]:IsDescendantOf(ref()) then return end
 

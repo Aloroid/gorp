@@ -16,10 +16,7 @@ return function(target: ScreenGui)
 		local t = source({})
 
 		for i = 1, 10000 do
-			table.insert(
-				t(),
-				source({ i, Vector3.new(0, i, 0), 100 } :: { any })
-			)
+			table.insert(t(), source({ i, Vector3.new(0, i, 0), 100 } :: { any }))
 		end
 
 		background {
@@ -49,14 +46,9 @@ return function(target: ScreenGui)
 				display = function(value: () -> any, column, row)
 					if column == 2 then
 						local x, y, z =
-							source(tostring(value().X)),
-							source(tostring(value().Y)),
-							source(tostring(value().Z))
+							source(tostring(value().X)), source(tostring(value().Y)), source(tostring(value().Z))
 
-						local function update_vector(
-							text: string,
-							enter: boolean
-						)
+						local function update_vector(text: string, enter: boolean)
 							if tonumber(text) == nil or enter == false then
 								x(tostring(value().X))
 								y(tostring(value().Y))
@@ -66,11 +58,7 @@ return function(target: ScreenGui)
 
 							local row = t()[row()]
 							local clone = table.clone(row())
-							clone[column] = Vector3.new(
-								tonumber(x()),
-								tonumber(y()),
-								tonumber(z())
-							)
+							clone[column] = Vector3.new(tonumber(x()), tonumber(y()), tonumber(z()))
 							row(clone)
 						end
 

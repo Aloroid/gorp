@@ -9,8 +9,22 @@
 				"$ignoreUnknownInstances": true,
 				"$path": "Packages",
 
-				"gorp2": {
+				"gorp": {
 					"$path": "src"
+				}
+			}
+		},
+
+		"ServerScriptService": {
+			"Server": {
+				"$path": "example/server"
+			}
+		},
+
+		"StarterPlayer": {
+			"StarterPlayerScripts": {
+				"Client": {
+					"$path": "example/client"
 				}
 			}
 		}

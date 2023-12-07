@@ -1,3 +1,3 @@
-local ecr = require(script.Parent.Parent.Parent.ecr)
+local ecr7 = require(script.Parent.Parent.modules.ecr7)
 
-return ecr.registry()
+return ecr7.registry()

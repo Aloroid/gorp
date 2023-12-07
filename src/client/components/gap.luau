@@ -20,9 +20,7 @@ local function gap(props: props)
 
 	return create "Frame" {
 
-		Size = function()
-			return UDim2.fromOffset(read(gap) or 4, read(gap) or 4)
-		end,
+		Size = function() return UDim2.fromOffset(read(gap) or 4, read(gap) or 4) end,
 
 		BackgroundTransparency = 1,
 

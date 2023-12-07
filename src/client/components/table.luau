@@ -23,9 +23,7 @@ type Table = {
 
 	layout: { [any]: any }?,
 
-	display: (
-		(value: () -> any, column: number, row: () -> number) -> Instance
-	)?,
+	display: ((value: () -> any, column: number, row: () -> number) -> Instance)?,
 }
 
 return function(props: Table)
@@ -80,9 +78,7 @@ return function(props: Table)
 
 			child = function(row_index)
 				local row = derive(function()
-					if rows == nil and max_rows ~= nil then
-						return table.create(#meaning(), true)
-					end
+					if rows == nil and max_rows ~= nil then return table.create(#meaning(), true) end
 					assert(rows ~= nil, "rows is nil")
 					local value = rows()[row_index()]
 					return value and value() or {}

@@ -7,4 +7,4 @@ realm = "shared"
 
 [dependencies]
 vide = "centau/vide@0.2"
-ecr = "centau/ecr@0.7"
+ecr = "centau/ecr@0.8"

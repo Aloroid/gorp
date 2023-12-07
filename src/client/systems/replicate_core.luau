@@ -4,10 +4,11 @@ local events = require(script.Parent.Parent.Parent.events)
 local get_entity = require(script.Parent.Parent.get_entity)
 local registry = require(script.Parent.Parent.registry)
 
-local updated = ecr.queue(events.replicate_core_data.Event)
+local replicate_core_data = ecr.queue(events.replicate_core_data)
 
 local function replicate_core()
-	for actor_id, registries, schedulers in updated do
+	for connector, registries, schedulers in replicate_core_data:iter() do
+		local actor_id = connector.from :: number
 		for _, entry in registries do
 			local name, id = entry.name, entry.id
 			local ent = get_entity(actor_id, "client", id)

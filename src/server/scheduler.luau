@@ -12,9 +12,9 @@ local function new_scheduler(name: string, max: number?)
 	local default_name = `Scheduler #{#registry:view(cts.Scheduler) + 1}`
 
 	local entity = registry:create()
-	local system_names: { [string]: rts.Entity } = {}
-	local systems_unused: { [rts.Entity]: true } = {}
-	local used_systems: { rts.Entity } = {}
+	local system_names: { [string]: rts.entity } = {}
+	local systems_unused: { [rts.entity]: true } = {}
+	local used_systems: { rts.entity } = {}
 
 	registry:set(entity, cts.Name, name or default_name)
 	registry:set(entity, cts.Scheduler, {})
@@ -56,17 +56,14 @@ local function new_scheduler(name: string, max: number?)
 			end
 
 			local start = os.clock()
-			local ok, thread = no_yield(callback, ...)
+			local ok, err = xpcall(callback :: any, function(err) return debug.traceback(err, 2) end, ...)
 			local finish = os.clock()
 
 			for _, callback in system_data.after do
 				callback(name)
 			end
 
-			if ok == false then
-				warn(`{name} failed to run:`)
-				warn(debug.traceback(thread))
-			end
+			if ok == false then warn(`{name} failed to run:\n{err}`) end
 
 			local t = finish - start
 
@@ -93,9 +90,7 @@ local function new_scheduler(name: string, max: number?)
 		end
 
 		-- size is different
-		if #used_systems ~= #old_systems then
-			registry:set(entity, cts.Scheduler, used_systems)
-		end
+		if #used_systems ~= #old_systems then registry:set(entity, cts.Scheduler, used_systems) end
 
 		-- create a list for the next iteration for unused systems
 		for i, system in used_systems do

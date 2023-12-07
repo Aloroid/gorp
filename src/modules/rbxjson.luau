@@ -25,9 +25,7 @@ rbxjson.Construct = {
 	Vector3 = function(e) return Vector3.new(e.X, e.Y, e.Z) end,
 	Vector2 = function(e) return Vector3.new(e.X, e.Y) end,
 
-	UDim2 = function(e)
-		return UDim2.new(e.Scale.X, e.Offset.X, e.Scale.Y, e.Offset.Y)
-	end,
+	UDim2 = function(e) return UDim2.new(e.Scale.X, e.Offset.X, e.Scale.Y, e.Offset.Y) end,
 	UDim = function(e) return UDim.new(e.Scale, e.Offset) end,
 }
 
@@ -87,9 +85,7 @@ function rbxjson:Prettify(json_str)
 	for i = 1, #json_str do
 		local char = json_str:sub(i, i)
 
-		if char == '"' and (i == 1 or json_str:sub(i - 1, i - 1) ~= "\\") then
-			in_string = not in_string
-		end
+		if char == '"' and (i == 1 or json_str:sub(i - 1, i - 1) ~= "\\") then in_string = not in_string end
 
 		if not in_string then
 			if char == "{" or char == "[" then
@@ -121,9 +117,7 @@ function rbxjson:Encode(arg: unknown)
 end
 
 function rbxjson:Decode(json, type)
-	local success, result = pcall(
-		function() return HTTPService:JSONDecode(json) end
-	)
+	local success, result = pcall(function() return HTTPService:JSONDecode(json) end)
 	if success and typeof(result) == "table" then
 		return SearchDecode(result)
 	elseif type then

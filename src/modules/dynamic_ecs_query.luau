@@ -50,9 +50,7 @@ local numbers = {
 }
 
 -- removes trailing whitespace
-local function reduce(input: string)
-	return string.gsub(string.gsub(input, "^%s*", ""), "%s*$", "")
-end
+local function reduce(input: string) return string.gsub(string.gsub(input, "^%s*", ""), "%s*$", "") end
 
 local parse_value = function(query: string, cts: { [string]: number })
 	debug.profilebegin("parsing query")
@@ -73,8 +71,7 @@ local parse_value = function(query: string, cts: { [string]: number })
 
 	local stored_equal_ctype_name: string?
 
-	local ctype_type: false | "include" | "exclude" | "equal" | "notequals" =
-		false
+	local ctype_type: false | "include" | "exclude" | "equal" | "notequals" = false
 
 	local is_number = false
 	local is_string: false | "'" | '"' = false
@@ -109,9 +106,7 @@ local parse_value = function(query: string, cts: { [string]: number })
 				croak(`"{name}" is not a component`)
 				return
 			end
-			if already_used[name] then
-				croak(`"{name}" is already used earlier in the query"`)
-			end
+			if already_used[name] then croak(`"{name}" is already used earlier in the query"`) end
 			already_used[name] = true
 			ctype_type = false
 			if not ecr.is_tag(ctype) then
@@ -123,9 +118,7 @@ local parse_value = function(query: string, cts: { [string]: number })
 			table.insert(included, ctype)
 		elseif ctype_type == "exclude" then
 			if ctype == nil then croak(`"{name}" is not a component`) end
-			if already_used[name] then
-				croak(`"{name}" is already used earlier in the query"`)
-			end
+			if already_used[name] then croak(`"{name}" is already used earlier in the query"`) end
 			already_used[name] = true
 			ctype_type = false
 			table.insert(excluded, ctype)
@@ -140,10 +133,7 @@ local parse_value = function(query: string, cts: { [string]: number })
 				return
 			end
 			table.insert(equal, ctype)
-			table.insert(
-				equal_values,
-				function(value: unknown) return parsed_value == value end
-			)
+			table.insert(equal_values, function(value: unknown) return parsed_value == value end)
 
 			already_equals[ctype] = true
 
@@ -164,10 +154,7 @@ local parse_value = function(query: string, cts: { [string]: number })
 				return
 			end
 			table.insert(equal, ctype)
-			table.insert(
-				equal_values,
-				function(value: unknown) return parsed_value ~= value end
-			)
+			table.insert(equal_values, function(value: unknown) return parsed_value ~= value end)
 
 			already_equals[ctype] = true
 
@@ -199,9 +186,7 @@ local parse_value = function(query: string, cts: { [string]: number })
 				stored_equal_ctype_name = stream:token(1)
 				if ctype_type == "include" then append() end
 
-				ctype_type = if ctype_type == "exclude"
-					then "notequals"
-					else "equal"
+				ctype_type = if ctype_type == "exclude" then "notequals" else "equal"
 				func_call = false
 				stream:next_token()
 				continue
@@ -217,11 +202,7 @@ local parse_value = function(query: string, cts: { [string]: number })
 		-- first, we begin with checking if we have to stop with parsing somethinh
 		if ctype_type == "equal" or ctype_type == "notequals" then
 			-- check if we're ending a string here
-			if
-				is_string
-				and is_string == stream:peek()
-				and stream:last() ~= "\\"
-			then
+			if is_string and is_string == stream:peek() and stream:last() ~= "\\" then
 				parsed_value = stream:next_token(1)
 				is_string = false
 				continue
@@ -229,10 +210,7 @@ local parse_value = function(query: string, cts: { [string]: number })
 				continue
 			end
 
-			if
-				stream:peek() == "'"
-				or stream:peek() == '"' and not is_string
-			then
+			if stream:peek() == "'" or stream:peek() == '"' and not is_string then
 				is_string = stream:peek() :: "'" | '"'
 				stream:next_token()
 			end
@@ -268,13 +246,10 @@ local parse_value = function(query: string, cts: { [string]: number })
 					parsed_value = result
 				end
 
-				func_call =
-					table.remove(stack) :: false | { fn: (...any) -> any, tuple: { any } }
+				func_call = table.remove(stack) :: false | { fn: (...any) -> any, tuple: { any } }
 			end
 
-			if table.find(numbers, stream:peek()) and stream:token(1) == "" then
-				is_number = true
-			end
+			if table.find(numbers, stream:peek()) and stream:token(1) == "" then is_number = true end
 
 			if stream:peek() == "(" then
 				local name = reduce(stream:next_token(1))

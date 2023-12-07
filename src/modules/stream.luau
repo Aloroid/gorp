@@ -14,9 +14,7 @@ return function(input: string)
 
 	function self:eof() return column > #input end
 
-	function self:token(n: number?)
-		return string.sub(input, token_begin, column - (n or 0))
-	end
+	function self:token(n: number?) return string.sub(input, token_begin, column - (n or 0)) end
 
 	function self:next_token(n: number?)
 		local token = self:token(n)

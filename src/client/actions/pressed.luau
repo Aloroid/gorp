@@ -20,20 +20,12 @@ return function(callback: ((hovering: boolean) -> ())?)
 		if callback == nil then return end
 
 		object.InputBegan:Connect(function(input)
-			if
-				table.find(allowed_user_input_types, input.UserInputType) == nil
-			then
-				return
-			end
+			if table.find(allowed_user_input_types, input.UserInputType) == nil then return end
 			callback(true)
 		end)
 
 		object.InputEnded:Connect(function(input)
-			if
-				table.find(allowed_user_input_types, input.UserInputType) == nil
-			then
-				return
-			end
+			if table.find(allowed_user_input_types, input.UserInputType) == nil then return end
 			callback(false)
 		end)
 	end)

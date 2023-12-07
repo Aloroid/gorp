@@ -6,7 +6,11 @@
 
 local net = require(script.Parent.modules.net)
 
+export type connector = net.connector
+
 return {
 
-	test = net.create_callback("test", true),
+	replicate_core_data = net.create_event("replicate_core_data"),
+	replicate_components = net.create_event("replicate_components"),
+	request_servers = net.create_event("request_servers"),
 }

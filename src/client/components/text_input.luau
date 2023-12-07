@@ -49,14 +49,8 @@ local function text_input(props: text_input)
 
 		local font = style.font
 		local font_size = 18
-		local cursor_offset = TextService:GetTextSize(
-			text_behind_cursor,
-			font_size,
-			font,
-			Vector2.zero
-		).X
-		local text_width =
-			TextService:GetTextSize(text, font_size, font, Vector2.zero).X
+		local cursor_offset = TextService:GetTextSize(text_behind_cursor, font_size, font, Vector2.zero).X
+		local text_width = TextService:GetTextSize(text, font_size, font, Vector2.zero).X
 
 		local clip_absolute_size = clip_absolute_size() or Vector2.zero
 		local textbox_offset = math.min(untrack(text_offset).X.Offset, 0)
@@ -80,9 +74,7 @@ local function text_input(props: text_input)
 			textbox_offset -= 1
 		end
 
-		if focused() == true then
-			text_offset(UDim2.new(0, textbox_offset, 0, 0))
-		end
+		if focused() == true then text_offset(UDim2.new(0, textbox_offset, 0, 0)) end
 		text_size(UDim2.new(0, math.max(text_width, textbox_width), 1, 0))
 	end)
 
@@ -124,8 +116,7 @@ local function text_input(props: text_input)
 			TextSize = props.text_size or 16,
 
 			TextXAlignment = Enum.TextXAlignment.Left,
-			TextYAlignment = props.text_y_alignment
-				or Enum.TextYAlignment.Center,
+			TextYAlignment = props.text_y_alignment or Enum.TextYAlignment.Center,
 
 			vide.changed("Text", text),
 			vide.changed("CursorPosition", cursor_position),

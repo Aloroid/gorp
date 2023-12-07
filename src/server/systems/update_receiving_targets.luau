@@ -1,9 +1,3 @@
---[[
-
-	this system replicates the components to new connectors
-
-]]
-
 local cts = require(script.Parent.Parent.cts)
 local ecr7 = require(script.Parent.Parent.Parent.modules.ecr7)
 local events = require(script.Parent.Parent.Parent.events)
@@ -12,12 +6,11 @@ local reverse_connector = require(script.Parent.Parent.reverse_connector)
 
 local server_requested = ecr7.queue(events.request_servers)
 
-local function replicate_components()
+local function update_receiving_targets()
 	for connector in server_requested:iter() do
-		for id, components in registry:view(cts.Components):iter() do
-			events.replicate_components:fire(reverse_connector(connector), components)
-		end
+		local id = registry:create()
+		registry:set(id, cts.Receiver, reverse_connector(connector))
 	end
 end
 
-return replicate_components
+return update_receiving_targets

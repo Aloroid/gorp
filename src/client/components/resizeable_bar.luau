@@ -81,10 +81,7 @@ local function resizeable_bar(props: ResizeableBar)
 	end
 
 	effect(function()
-		local new = setmetatable(
-			{},
-			{ __index = function() return source(0) end }
-		)
+		local new = setmetatable({}, { __index = function() return source(0) end })
 
 		for i = 1, total() do
 			min_sizes()[i] = min_sizes()[i] or source(0.01)
@@ -150,9 +147,7 @@ local function resizeable_bar(props: ResizeableBar)
 			local nearest = -1
 			for i, location in splits() do
 				local absolute_x = absolute_size.X * location()
-				if math.abs(x - absolute_x) > MAX_PIXELS_OFFSET then
-					continue
-				end
+				if math.abs(x - absolute_x) > MAX_PIXELS_OFFSET then continue end
 
 				nearest = i
 			end
@@ -168,9 +163,7 @@ local function resizeable_bar(props: ResizeableBar)
 
 			x -= absolute_position().X
 			if down == false then return end
-			down = UserInputService:IsMouseButtonPressed(
-				Enum.UserInputType.MouseButton1
-			) == true
+			down = UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) == true
 
 			local relative = x / absolute_size().X
 			local current = splits()[updating]()

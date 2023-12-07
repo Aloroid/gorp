@@ -50,9 +50,7 @@ end
 function signal.wait<T...>(self: Signal<T...>)
 	local thread = coroutine.running()
 
-	local connection = self:connect(
-		function(...) coroutine.resume(thread, ...) end
-	)
+	local connection = self:connect(function(...) coroutine.resume(thread, ...) end)
 	local packed = { coroutine.yield() }
 	connection:disconnect()
 	return unpack(packed)

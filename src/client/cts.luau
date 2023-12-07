@@ -4,39 +4,39 @@
 
 ]]
 
-local ecr = require(script.Parent.Parent.Parent.ecr)
+local ecr7 = require(script.Parent.Parent.modules.ecr7)
 local rts = require(script.Parent.Parent.rts)
 
-return ecr.name({
+return ecr7.name({
 
 	-- this is all server components
 	-- the name of a scheduler / registry
-	Name = ecr.component() :: string,
-	Components = ecr.component() :: { [number]: string },
+	Name = ecr7.component() :: string,
+	Components = ecr7.component() :: { [number]: string },
 
-	Scheduler = ecr.tag(), -- contain systems
-	Registry = ecr.tag(),
+	Scheduler = ecr7.tag(), -- contain systems
+	Registry = ecr7.tag(),
 
-	Systems = ecr.component() :: { number },
+	Systems = ecr7.component() :: { number },
 
-	Requester = ecr.component() :: Player,
-	SelectedRegistry = ecr.component() :: ecr.Entity,
-	Query = ecr.component() :: string,
+	Requester = ecr7.component() :: Player,
+	SelectedRegistry = ecr7.component() :: ecr7.entity,
+	Query = ecr7.component() :: string,
 
-	System = ecr.component() :: rts.System,
-	Average = ecr.component() :: rts.RollingAverage,
-	Queries = ecr.component() :: { ecr.Entity },
-	QueryData = ecr.component() :: rts.QueryData,
-	Paused = ecr.tag(),
+	System = ecr7.component() :: rts.System,
+	Average = ecr7.component() :: rts.RollingAverage,
+	Queries = ecr7.component() :: { ecr7.entity },
+	QueryData = ecr7.component() :: rts.QueryData,
+	Paused = ecr7.tag(),
 
 	-- this is all client components
 	-- the id of the actor
-	ActorId = ecr.component() :: number,
+	ActorId = ecr7.component() :: number,
 	-- if it's replicated from either the server or the client.
-	ReplicatedFrom = ecr.component() :: "server" | "client",
+	ReplicatedFrom = ecr7.component() :: "server" | "client",
 	-- the id of the entity on that server
-	ServerId = ecr.component() :: number,
+	ServerId = ecr7.component() :: number,
 
-	--context
-	ServerComponents = ecr.component() :: { [number]: any },
+	-- context
+	ServerComponents = ecr7.component() :: { [number]: any },
 })

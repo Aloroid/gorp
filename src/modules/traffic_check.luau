@@ -11,9 +11,7 @@ local RunService = game:GetService("RunService")
 local signal = require(script.Parent.signal)
 
 local check_function = function(player: Player)
-	return player.UserId == game.CreatorId
-			and game.CreatorType == Enum.CreatorType.User
-		or RunService:IsStudio()
+	return player.UserId == game.CreatorId and game.CreatorType == Enum.CreatorType.User or RunService:IsStudio()
 end
 
 local function is_player_permitted(player: Player) return check_function(player) end
@@ -33,11 +31,7 @@ local function check_player(player: Player?)
 	end
 end
 
-local function overwrite_check_function(
-	new_callback: (player: Player) -> boolean
-)
-	check_function = new_callback
-end
+local function overwrite_check_function(new_callback: (player: Player) -> boolean) check_function = new_callback end
 
 return {
 
