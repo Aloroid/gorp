@@ -1,27 +1,18 @@
-local RunService = game:GetService("RunService")
 --[[
 
 	Allows for selecting a widget
 
 ]]
+local RunService = game:GetService("RunService")
 
-local actions = require(script.Parent.Parent.actions)
-local background = require(script.Parent.Parent.components.background)
 local button = require(script.Parent.Parent.components.button)
-local container = require(script.Parent.Parent.components.container)
 local cts = require(script.Parent.Parent.cts)
-local dynamic_ecs_query = require(script.Parent.Parent.Parent.modules.dynamic_ecs_query)
-local ecr7 = require(script.Parent.Parent.Parent.modules.ecr7)
 local gorp_registry = require(script.Parent.gorp_registry)
 local layout = require(script.Parent.Parent.components.layout)
 local padding = require(script.Parent.Parent.components.padding)
 local pane = require(script.Parent.Parent.components.pane)
 local registry = require(script.Parent.Parent.registry)
-local rts = require(script.Parent.Parent.Parent.rts)
 local scrolling_frame = require(script.Parent.Parent.components.scrolling_frame)
-local style = require(script.Parent.Parent.style)
-local text = require(script.Parent.Parent.components.text)
-local text_input = require(script.Parent.Parent.components.text_input)
 local vide = require(script.Parent.Parent.Parent.Parent.vide)
 local widget = require(script.Parent.Parent.components.widget)
 
@@ -113,9 +104,16 @@ return function()
 
 			scrolling_frame {
 
+				AutomaticCanvasSize = Enum.AutomaticSize.Y,
+				CanvasSize = UDim2.new(),
+
 				padding {},
 
+				layout {},
+
 				pane {
+
+					title = "Registries",
 
 					layout {},
 
@@ -129,6 +127,22 @@ return function()
 									registry_id = value().id,
 								}
 							end,
+						}
+					end),
+				},
+
+				pane {
+
+					title = "Schedulers",
+
+					layout {},
+
+					indexes(schedulers, function(value, key)
+						return entry {
+							value = value,
+							key = key,
+							visible = function() return not not string.match(value().name, query()) end,
+							activated = function() end,
 						}
 					end),
 				},

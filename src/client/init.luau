@@ -12,6 +12,7 @@ local gorp_selector = require(script.widgets.gorp_selector)
 local new_scheduler = require(script.Parent.server.scheduler)
 local replicate_components = require(script.systems.replicate_components)
 local replicate_core = require(script.systems.replicate_core)
+local reverse_connector = require(script.Parent.server.reverse_connector)
 local stop_multi_require = require(script.Parent.modules.stop_multi_require)
 local vide = require(script.Parent.Parent.vide)
 
@@ -38,6 +39,11 @@ events.request_servers:fire({
 events.request_servers:fire({
 	namespace = "server",
 })
+
+events.new_server:connect(function(connector)
+	-- request the server who broadcasted this
+	events.request_servers:fire(reverse_connector(connector))
+end)
 
 vide.strict = false
 

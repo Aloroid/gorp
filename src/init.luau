@@ -6,7 +6,6 @@
 
 local RunService = game:GetService("RunService")
 
-local events = require(script.events)
 local server = require(script.server)
 local stop_multi_require = require(script.modules.stop_multi_require)
 

@@ -7,12 +7,6 @@
 local ecr7 = require(script.Parent.Parent.modules.ecr7)
 local rts = require(script.Parent.Parent.rts)
 
-local counter = 0
-local function increment_counter()
-	counter += 1
-	return counter
-end
-
 return ecr7.name({
 
 	-- the name of a scheduler / registry

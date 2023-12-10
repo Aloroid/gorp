@@ -5,14 +5,17 @@
 
 ]]
 
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local common_actor_id = require(script.Parent.common_actor_id)
 local components = require(script.components)
 local cts = require(script.cts)
+local events = require(script.Parent.events)
 local registry = require(script.registry)
 local rts = require(script.Parent.rts)
 local scheduler = require(script.scheduler)
+local traffic_check = require(script.Parent.modules.traffic_check)
 
 local replicate_components = require(script.systems.replicate_components)
 local replicate_core = require(script.systems.replicate_core)
@@ -42,6 +45,28 @@ RunService.Heartbeat:Connect(function()
 	server_scheduler:system("update_receiving_targets", update_receiving_targets)
 	server_scheduler:system("replicate_registry", replicate_registry)
 	server_scheduler:finish()
+end)
+
+task.spawn(function()
+	-- we broadcast the existance of the server to everyone
+	if RunService:IsServer() then
+		for _, player in Players:GetPlayers() do
+			if traffic_check.is_player_permitted(player) == false then continue end
+			local connector = {
+				namespace = "client" :: "client",
+				player = player,
+			}
+
+			events.new_server:fire(connector)
+		end
+	else
+		if traffic_check.is_player_permitted(Players.LocalPlayer) == false then return end
+		local connector = {
+			namespace = "client" :: "client",
+		}
+
+		events.new_server:fire(connector)
+	end
 end)
 
 return server
