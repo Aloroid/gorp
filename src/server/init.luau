@@ -16,6 +16,7 @@ local scheduler = require(script.scheduler)
 
 local replicate_components = require(script.systems.replicate_components)
 local replicate_core = require(script.systems.replicate_core)
+local replicate_registry = require(script.systems.replicate_registry)
 local update_receiving_targets = require(script.systems.update_receiving_targets)
 
 local function add_world(world: rts.Registry, name: string?)
@@ -24,10 +25,11 @@ local function add_world(world: rts.Registry, name: string?)
 
 	registry:set(ent, cts.Name, name or default_name)
 	registry:set(ent, cts.Registry, world)
+	return ent
 end
 
 local server = {
-	add_world = add_world,
+	hook_world = add_world,
 	names = components.names,
 	scheduler = scheduler,
 }
@@ -38,6 +40,7 @@ RunService.Heartbeat:Connect(function()
 	server_scheduler:system("replicate_core", replicate_core)
 	server_scheduler:system("replicate_components", replicate_components)
 	server_scheduler:system("update_receiving_targets", update_receiving_targets)
+	server_scheduler:system("replicate_registry", replicate_registry)
 	server_scheduler:finish()
 end)
 

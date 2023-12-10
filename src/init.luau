@@ -12,7 +12,7 @@ local stop_multi_require = require(script.modules.stop_multi_require)
 
 return {
 
-	add_world = server.add_world,
+	hook_world = server.hook_world,
 	scheduler = server.scheduler,
 	names = server.names,
 

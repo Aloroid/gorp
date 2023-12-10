@@ -16,7 +16,7 @@
 --------------------------------------------------------------------------------
 
 local ID_SIZE_BITS = 53
-local MAX_ENTITIES = 0x000F_FFFF
+local MAX_ENTITIES = 0x0000_FFFF
 local INIT_STORAGE_SIZE = 1
 
 assert(ID_SIZE_BITS <= 53 and ID_SIZE_BITS > 1)
@@ -78,7 +78,7 @@ type HandleMT = {
 	__index: HandleMT,
 
 	destroy: (self: Handle) -> (),
-	orphaned: (self: Handle) -> boolean,
+	has_none: (self: Handle) -> boolean,
 	add: <T...>(self: Handle, T...) -> (),
 	set: <T>(self: Handle, ctype: T, value: T) -> Handle,
 	patch: <T>(self: Handle, ctype: T, patcher: (current: T) -> T) -> (),
@@ -133,7 +133,7 @@ export type Registry = {
 	destroy: (self: Registry, id: entity) -> (),
 	contains: (self: Registry, id: entity) -> boolean,
 
-	orphaned: (self: Registry, id: entity) -> boolean,
+	has_none: (self: Registry, id: entity) -> boolean,
 	add: <T...>(self: Registry, id: entity, T...) -> (),
 	set: <T>(self: Registry, id: entity, ctype: T, value: T) -> (),
 	patch: <T>(self: Registry, id: entity, ctype: T, patcher: (T) -> T) -> (),
@@ -1321,7 +1321,7 @@ local Handle = (function(): HandleMT
 
 	function Handle.destroy(self: Handle) self.registry:destroy(self.entity) end
 
-	function Handle.orphaned(self: Handle): boolean return self.registry:orphaned(self.entity) end
+	function Handle.has_none(self: Handle): boolean return self.registry:has_none(self.entity) end
 
 	function Handle.add<T...>(self: Handle, ...: T...) self.registry:add(self.entity, ...) end
 
@@ -1473,7 +1473,7 @@ local function registry_create(): Registry
 
 	function registry.contains(self: Registry, id: entity): boolean return entity_pool_has(id_pool, id) end
 
-	function registry.orphaned(self: Registry, id: entity): boolean
+	function registry.has_none(self: Registry, id: entity): boolean
 		local key = ID_KEY(id)
 		ASSERT_VALID_ENTITY(key, id)
 

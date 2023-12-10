@@ -9,4 +9,7 @@ gorp.names(ecr.name({ A = A, B = B, C = C, D = D }))
 
 local world = ecr.registry()
 
-gorp.add_world(world, "world")
+gorp.hook_world(world, "world")
+
+local ent = world:create()
+world:set(ent, A, true)

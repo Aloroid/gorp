@@ -36,7 +36,4 @@ return ecr7.name({
 	ReplicatedFrom = ecr7.component() :: "server" | "client",
 	-- the id of the entity on that server
 	ServerId = ecr7.component() :: number,
-
-	-- context
-	ServerComponents = ecr7.component() :: { [number]: any },
 })

@@ -1,7 +1,11 @@
+local dynamic_ecs_query = require(script.Parent.modules.dynamic_ecs_query)
 local ecr = require(script.Parent.Parent.ecr)
 local net = require(script.Parent.modules.net)
 local signal = require(script.Parent.modules.signal)
 local vide = require(script.Parent.Parent.vide)
+
+export type DynamicQuery = dynamic_ecs_query.DynamicQuery
+export type ParsedECSQuery = dynamic_ecs_query.ParsedECSQuery
 
 export type entity = ecr.entity
 export type Connection = ecr.Connection

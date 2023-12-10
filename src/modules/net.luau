@@ -88,8 +88,10 @@ local function create_event(name: string, do_not_block_traffic: boolean?)
 		else
 			if RunService:IsServer() then
 				assert(connector.player, "no player specified")
+				local target = connector.player
 				connector.from = common_actor_id
-				remote:FireClient(connector.player, connector, ...)
+				connector.player = nil
+				remote:FireClient(target, connector, ...)
 			else
 				connector.from = common_actor_id
 				remote:FireServer(connector, ...)
@@ -121,15 +123,11 @@ local function create_event(name: string, do_not_block_traffic: boolean?)
 			assert(connector.namespace == "server")
 
 			connector.player = player
-			print("received packet")
 
 			remote.actor:Fire(connector, ...)
 		end)
 	else
-		remote.OnClientEvent:Connect(function(connector, ...)
-			connector.player = nil
-			remote.actor:Fire(connector, ...)
-		end)
+		remote.OnClientEvent:Connect(function(connector, ...) remote.actor:Fire(connector, ...) end)
 	end
 
 	return event

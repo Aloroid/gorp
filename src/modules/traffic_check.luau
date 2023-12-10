@@ -22,10 +22,8 @@ local function check_player(player: Player?)
 	if not player then return true end
 
 	if is_player_permitted(player) then
-		print("true")
 		return true
 	else
-		print("no")
 		fire(player)
 		return false
 	end

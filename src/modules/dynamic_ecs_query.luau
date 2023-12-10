@@ -1,4 +1,3 @@
---!native
 --[[
 
 	dynamic_ecs_query allows for dynamically querying and returns a result.
@@ -6,13 +5,9 @@
 ]]
 
 local ecr = require(script.Parent.Parent.Parent.ecr)
-local rts = require(script.Parent.Parent.rts)
 local stream = require(script.Parent.stream)
 
-type ParsedECSQuery = {
-	ok: false,
-	err: string,
-} | {
+type ParsedECSQueryOK = {
 	ok: true,
 	included_names: { string },
 	included: { number | any },
@@ -22,11 +17,18 @@ type ParsedECSQuery = {
 	equal_values: { (value: unknown) -> boolean },
 }
 
-export type Query = {
+type ParsedECSQueryNotOK = {
+	ok: false,
+	err: string,
+}
 
-	registry: rts.Registry,
+export type ParsedECSQuery = ParsedECSQueryOK | ParsedECSQueryNotOK
+
+export type DynamicQuery = {
+
+	registry: ecr.Registry,
 	invalidated: boolean,
-	query: ParsedECSQuery,
+	query: ParsedECSQueryOK,
 	ids: { number },
 }
 
@@ -52,7 +54,7 @@ local numbers = {
 -- removes trailing whitespace
 local function reduce(input: string) return string.gsub(string.gsub(input, "^%s*", ""), "%s*$", "") end
 
-local parse_value = function(query: string, cts: { [string]: number })
+local parse_value = function(query: string, cts: { [string]: number }, ecr: any)
 	debug.profilebegin("parsing query")
 	local included = {}
 	local excluded = {}
@@ -278,9 +280,9 @@ local parse_value = function(query: string, cts: { [string]: number })
 		included_names = include_names,
 		included_no_tags = include_no_tags,
 	}
-end :: (query: string) -> ParsedECSQuery
+end :: (query: string, cts: { [string]: number }, ecr: any) -> ParsedECSQuery
 
-local function convert(query: ParsedECSQuery, registry: rts.Registry)
+local function convert(query: ParsedECSQuery, registry: ecr.Registry)
 	if query.ok == false then error(`parsed query is invalid: {query.err}`) end
 
 	return {
@@ -292,7 +294,7 @@ local function convert(query: ParsedECSQuery, registry: rts.Registry)
 end
 
 -- gets the current entity
-local function get_entity_view(query: Query)
+local function get_entity_view(query: DynamicQuery)
 	assert(query.query.ok, "parsed query is invalid")
 
 	if not query.invalidated then return query.ids end
@@ -309,7 +311,7 @@ local function get_entity_view(query: Query)
 end
 
 -- resolves the query and views all the ids inside
-local function resolve_query(query: Query, ignore_heuristic: boolean?)
+local function resolve_query(query: DynamicQuery, ignore_heuristic: boolean?)
 	if query.invalidated == false then return query.ids end
 	assert(query.query.ok)
 
@@ -340,7 +342,7 @@ local function resolve_query(query: Query, ignore_heuristic: boolean?)
 end
 
 -- invalidates the current query, making it require a new View object
-local function invalidate_query(query: Query)
+local function invalidate_query(query: DynamicQuery)
 	query.invalidated = true
 	query.ids = {}
 end
