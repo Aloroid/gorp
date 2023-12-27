@@ -30,6 +30,8 @@ local function add_world<T>(world: T, name: string?): T
 		world = world,
 	}
 
+	events.world_created:fire(entry)
+
 	table.insert(server_state.registries, entry)
 	return world
 end

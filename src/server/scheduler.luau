@@ -1,3 +1,4 @@
+local events = require(script.Parent.events)
 local gorp = require(script.Parent.Parent.gorp)
 local rolling_average = require(script.Parent.Parent.modules.rolling_average)
 local server_state = require(script.Parent.server_state)
@@ -157,6 +158,7 @@ local function new_scheduler(scheduler_name: string, max: number?)
 		used_systems = {}
 	end
 
+	events.scheduler_created:fire(self)
 	table.insert(server_state.schedulers, self)
 
 	return self
