@@ -1,26 +1,28 @@
-local cts = require(script.Parent.Parent.cts)
-local ecr = require(script.Parent.Parent.Parent.Parent.ecr)
-local events = require(script.Parent.Parent.Parent.events)
-local registry = require(script.Parent.Parent.registry)
+local convert_dict = require(script.Parent.Parent.Parent.modules.convert_dict)
+local queue = require(script.Parent.Parent.Parent.modules.queue)
+local remotes = require(script.Parent.Parent.Parent.remotes)
+local reverse_connector = require(script.Parent.Parent.Parent.modules.reverse_connector)
 local servers = require(script.Parent.Parent.servers)
 
-local updated = ecr.queue(events.replicate_components)
+local replicate_components = queue(remotes.replicate_components)
 
-local function replicate_components()
-	for connector, components in updated:iter() do
-		local namespace: "client" | "server" = if connector.player then "client" else "server"
-		local context = servers[namespace][connector.from]
-		local ctypes = {}
+return function()
+	for connector, components in replicate_components:iter() do
+		connector = reverse_connector(connector)
 
-		-- i have to tonumber this because reasons
-		for key, name in components do
-			ctypes[tonumber(key) :: number] = name
+		local namespace = connector.namespace
+		local actor_id = connector.to :: number
+
+		local server = servers[namespace][actor_id]
+
+		local ctypes = convert_dict.deserialize(components) :: { [unknown]: string }
+
+		table.clear(server.ctype_names)
+		table.clear(server.ctypes)
+
+		for ctype, name in ctypes do
+			server.ctype_names[name] = ctype
+			server.ctypes[ctype] = name
 		end
-
-		print("set components of", connector.from, namespace, context, "to", ctypes)
-
-		registry:set(context, cts.Components, ctypes)
 	end
 end
-
-return replicate_components

@@ -1,55 +1,48 @@
---[[
+local active_connectors = require(script.Parent.Parent.active_connectors)
+local events = require(script.Parent.Parent.events)
+local queue = require(script.Parent.Parent.Parent.modules.queue)
+local remotes = require(script.Parent.Parent.Parent.remotes)
+local reverse_connector = require(script.Parent.Parent.Parent.modules.reverse_connector)
+local server_state = require(script.Parent.Parent.server_state)
 
-	this system replicates the registry and scheduler to new connectors.
-	it will also create the 
+local requesting_server_data = queue(remotes.request_servers)
+local scheduler_created = queue(events.scheduler_created)
+local world_added = queue(events.world_created)
 
-]]
-
-local cts = require(script.Parent.Parent.cts)
-local ecr7 = require(script.Parent.Parent.Parent.modules.ecr7)
-local events = require(script.Parent.Parent.Parent.events)
-local registry = require(script.Parent.Parent.registry)
-local reverse_connector = require(script.Parent.Parent.reverse_connector)
-
-local scheduler_changed = registry:track(cts.Name, cts.Scheduler)
-local registry_changed = registry:track(cts.Name, cts.Registry)
-local request_server = ecr7.queue(events.request_servers)
-
-local function replicate_core()
+return function()
 	local changed = false
 
-	for _ in scheduler_changed do
+	for _ in scheduler_created do
 		changed = true
 	end
 
-	for _ in registry_changed do
+	for _ in world_added do
 		changed = true
 	end
 
 	local registries = {}
 	local schedulers = {}
 
-	for id, name in registry:view(cts.Name, cts.Registry) do
-		table.insert(registries, { name = name, id = id })
+	for id, entry in server_state.registries do
+		table.insert(registries, { name = entry.name, id = id })
 	end
 
-	for id, name in registry:view(cts.Name, cts.Scheduler) do
-		table.insert(schedulers, { name = name, id = id })
+	for id, entry in server_state.schedulers do
+		table.insert(schedulers, { name = entry.name, id = id })
 	end
 
 	-- replicate to new connectors (if any)
-	for connector in request_server:iter() do
-		print("sending initial data to", connector)
-		events.replicate_core_data:fire(reverse_connector(connector), registries, schedulers)
+	for connector in requesting_server_data:iter() do
+		print("received request")
+		local reverse = reverse_connector(connector)
+		remotes.replicate_core_data:fire(reverse, registries, schedulers)
+		active_connectors.connected[reverse] = true
 	end
 
 	if not changed then return end
 
 	-- replicate to other connectors
-	for _, connector in registry:view(cts.Receiver) do
-		print("update core data")
-		events.replicate_core_data:fire(connector, registries, schedulers)
+	for connector in active_connectors.connected do
+		remotes.replicate_core_data:fire(connector, registries, schedulers)
 	end
 end
-
-return replicate_core

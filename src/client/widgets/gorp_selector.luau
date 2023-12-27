@@ -6,13 +6,13 @@
 local RunService = game:GetService("RunService")
 
 local button = require(script.Parent.Parent.components.button)
-local cts = require(script.Parent.Parent.cts)
 local gorp_registry = require(script.Parent.gorp_registry)
+local gorp_scheduler = require(script.Parent.gorp_scheduler)
 local layout = require(script.Parent.Parent.components.layout)
 local padding = require(script.Parent.Parent.components.padding)
 local pane = require(script.Parent.Parent.components.pane)
-local registry = require(script.Parent.Parent.registry)
 local scrolling_frame = require(script.Parent.Parent.components.scrolling_frame)
+local servers = require(script.Parent.Parent.servers)
 local vide = require(script.Parent.Parent.Parent.Parent.vide)
 local widget = require(script.Parent.Parent.components.widget)
 
@@ -35,7 +35,9 @@ local function entry(props: {
 	local value, key, activated = props.value, props.key, props.activated
 
 	return button {
-		text = function() return value().name end,
+		text = function()
+			return value().name
+		end,
 
 		layout = {
 			LayoutOrder = key,
@@ -69,7 +71,7 @@ local function entry(props: {
 end
 
 return function()
-	vide.root(function(destroy)
+	return vide.root(function(destroy)
 		local registries = source({})
 		local schedulers = source({})
 		local query = source("")
@@ -78,12 +80,18 @@ return function()
 			local new_registries = {}
 			local new_schedulers = {}
 
-			for id, name, from in registry:view(cts.Name, cts.ReplicatedFrom, cts.Registry) do
-				table.insert(new_registries, { name = name, id = id, from = from })
-			end
-
-			for id, name, from in registry:view(cts.Name, cts.ReplicatedFrom, cts.Scheduler) do
-				table.insert(new_schedulers, { name = name, id = id, from = from })
+			for namespace, servers in servers do
+				for actor, server in servers do
+					for id, registry in server.registries do
+						table.insert(new_registries, { id = id, actor = actor, name = registry.name, from = namespace })
+					end
+					for id, scheduler in server.schedulers do
+						table.insert(
+							new_schedulers,
+							{ id = id, actor = actor, name = scheduler.name, from = namespace }
+						)
+					end
+				end
 			end
 
 			registries(new_registries)
@@ -121,11 +129,11 @@ return function()
 						return entry {
 							value = value,
 							key = key,
-							visible = function() return not not string.match(value().name, query()) end,
+							visible = function()
+								return not not string.match(value().name, query())
+							end,
 							activated = function()
-								gorp_registry {
-									registry_id = value().id,
-								}
+								gorp_registry(value().from, value().actor, value().id)
 							end,
 						}
 					end),
@@ -141,8 +149,12 @@ return function()
 						return entry {
 							value = value,
 							key = key,
-							visible = function() return not not string.match(value().name, query()) end,
-							activated = function() end,
+							visible = function()
+								return not not string.match(value().name, query())
+							end,
+							activated = function()
+								gorp_scheduler(value().from, value().actor, value().id)
+							end,
 						}
 					end),
 				},

@@ -19,3 +19,5 @@
 docs/.vitepress/dist
 docs/.vitepress/cache
 docs/node_modules
+
+/local

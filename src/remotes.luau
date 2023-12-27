@@ -18,4 +18,9 @@ return {
 	get_new_replicated_query = net.create_callback("get_new_replicated_query"),
 	stop_replicated_query = net.create_event("stop_query"),
 	replicate_query_data = net.create_event("replicate_query_data"),
+
+	subscribe_scheduler = net.create_callback("subscribe_to_scheduler"),
+	unsubscribe_scheduler = net.create_event("unsubscribe_to_scheduler"),
+	replicate_scheduler = net.create_event("replicate_scheduler"),
+	pause_system = net.create_event("pause_system"),
 }

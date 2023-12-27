@@ -1,22 +1,18 @@
---[[
+local Players = game:GetService("Players")
 
-	When a client requests for a registry, we selectively select the entities to replicate and to not replicate
-
-]]
-
-local cts = require(script.Parent.Parent.cts)
 local dynamic_ecs_query = require(script.Parent.Parent.Parent.modules.dynamic_ecs_query)
-local ecr = require(script.Parent.Parent.Parent.Parent.ecr)
-local ecr7 = require(script.Parent.Parent.Parent.modules.ecr7)
-local events = require(script.Parent.Parent.Parent.events)
-local registry = require(script.Parent.Parent.registry)
-local reverse_connector = require(script.Parent.Parent.reverse_connector)
-local rts = require(script.Parent.Parent.Parent.rts)
+local generic_ecs_layer = require(script.Parent.Parent.Parent.generic_ecs_layer)
+local queue = require(script.Parent.Parent.Parent.modules.queue)
+local remotes = require(script.Parent.Parent.Parent.remotes)
+local reverse_connector = require(script.Parent.Parent.Parent.modules.reverse_connector)
+local server_state = require(script.Parent.Parent.server_state)
 
-local stop_replicated_query = ecr7.queue(events.stop_replicated_query)
+local stop_replicated_query = queue(remotes.stop_replicated_query)
+local player_removing = queue(Players.PlayerRemoving)
 
 local unique_query_id = 0
 local active_queries = {}
+local associated_with = {}
 
 -- whitelisted datatypes that can be sent over network raw.
 local whitelisted_datatypes = {
@@ -55,30 +51,58 @@ local function transform(value: any)
 	end
 end
 
+local function resolve_query(query: dynamic_ecs_query.ParsedECSQuery, world: unknown): { number }
+	assert(query.ok, "query is not valid")
+
+	local included_components = query.included
+	local excluded_components = query.excluded
+	local equal_components = query.equal
+	local equal_values = query.equal_values
+
+	if #included_components == 0 then return {} end
+
+	local view = generic_ecs_layer.query(world, included_components, excluded_components)
+	local ids = {}
+
+	for id in view do
+		local fail = false
+		for i, ctype in equal_components do
+			if not equal_values[i](generic_ecs_layer.get(world, id, ctype)) then
+				fail = true
+				break
+			end
+		end
+		if fail then continue end
+		table.insert(ids, id)
+	end
+
+	return ids
+end
+
 local function generate_update_callback(
-	world: rts.Registry,
-	parsed: dynamic_ecs_query.ParsedECSQuery,
-	connector: events.connector,
-	query_id: number
+	query: dynamic_ecs_query.ParsedECSQuery,
+	connector: remotes.connector,
+	query_id: number,
+	world: unknown
 )
-	assert(parsed.ok)
+	assert(query.ok, "query is not OK")
 
 	local target = reverse_connector(connector)
-	local query = dynamic_ecs_query.convert_ecs_query(parsed, world)
+	print(target, connector, query_id)
 
 	local changed = {}
 	local connections = {}
 	local currently_replicated = {}
 
-	for i, ctype in parsed.included do
+	for i, ctype in query.included do
 		local function add(id)
 			changed[id] = changed[id] or {}
 			changed[id][i] = true
 		end
 
-		local ctype_changed = world:on_change(ctype):connect(add)
+		local disconnect = generic_ecs_layer.on_change(world, ctype, add)
 
-		table.insert(connections, ctype_changed)
+		table.insert(connections, disconnect)
 	end
 
 	local function send_new_packet_to_client()
@@ -89,13 +113,11 @@ local function generate_update_callback(
 		local changing = {} -- entities that has changed values
 		local did_change = false
 
-		for index, ctype in parsed.included do
-			changing[index] = { ctype :: any, {}, {} }
+		for index, ctype in query.included do
+			changing[index] = { server_state.map_ctype_index[ctype] :: any, {}, {} }
 		end
 
-		dynamic_ecs_query.invalidate_query(query)
-
-		for _, id in dynamic_ecs_query.resolve_query(query) do
+		for _, id in resolve_query(query, world) do
 			new_replicated[id] = true
 
 			if currently_replicated[id] then
@@ -105,18 +127,18 @@ local function generate_update_callback(
 
 				for index in changed[id] do
 					did_change = true
-					local ctype = parsed.included[index]
+					local ctype = query.included[index]
 
 					table.insert(changing[index][2], id)
-					table.insert(changing[index][3], transform(world:get(id, ctype)))
+					table.insert(changing[index][3], transform(generic_ecs_layer.get(world, id, ctype)))
 				end
 			else
 				currently_replicated[id] = nil
 				-- a new entity has been added so we add that too
-				for index, ctype in parsed.included do
+				for index, ctype in query.included do
 					did_change = true
 					table.insert(changing[index][2], id)
-					table.insert(changing[index][3], transform(world:get(id, ctype)))
+					table.insert(changing[index][3], transform(generic_ecs_layer.get(world, id, ctype)))
 				end
 			end
 		end
@@ -132,8 +154,8 @@ local function generate_update_callback(
 		table.clear(changed)
 
 		if did_change then
-			--print("sending new packet", changing, removing)
-			events.replicate_query_data:fire(target, query_id, changing, removing)
+			print("sending new packet", changing, removing)
+			remotes.replicate_query_data:fire(target, query_id, changing, removing)
 		end
 
 		debug.profileend()
@@ -143,29 +165,24 @@ local function generate_update_callback(
 	return send_new_packet_to_client
 end
 
-local function replicate_registry()
-	events.get_new_replicated_query:set_callback(function(connector, query: string, world_id: number)
-		-- attempt to find the registry. (might need to optimize this but whatever)
-		local world = registry:try_get(world_id, cts.Registry)
+return function()
+	remotes.get_new_replicated_query:set_callback(function(connector, query: string, world_id: number)
+		-- attempt to find the registry
+		-- when we return -1, it indicates the replicated query is invalid.
+		local entry = server_state.registries[world_id]
 
-		if world == nil then return -1 end
+		if entry == nil then return -1 end
 
-		local map_ctype_to_name = registry:get(ecr7.context, cts.Components)
-		-- convert to keys
-		local map_name_to_ctype = {}
-
-		for ctype, name in map_ctype_to_name do
-			map_name_to_ctype[name] = ctype
-		end
+		local map_name_to_ctype = server_state.ctype_names
 
 		-- parses the query and checks if its valid
-		local parsed = dynamic_ecs_query.parse_ecs_query(query, map_name_to_ctype, ecr)
+		local parsed = dynamic_ecs_query(query, map_name_to_ctype)
 
 		if parsed.ok == false then return -1 end
 
 		unique_query_id += 1
-		active_queries[unique_query_id] = generate_update_callback(world, parsed, connector, unique_query_id)
-		print("returning query")
+		active_queries[unique_query_id] = generate_update_callback(parsed, connector, unique_query_id, entry.world)
+		associated_with[unique_query_id] = connector
 		return unique_query_id
 	end)
 
@@ -173,6 +190,16 @@ local function replicate_registry()
 		-- just nil the active query
 		print("stopped query", query_id)
 		active_queries[query_id] = nil
+		associated_with[query_id] = nil
+	end
+
+	-- whenever a player leaves remove any remaining queries related to them
+	for player in player_removing:iter() do
+		for query_id, connector in associated_with do
+			if connector.player ~= player then continue end
+			associated_with[query_id] = nil
+			active_queries[query_id] = nil
+		end
 	end
 
 	-- go through every active query and call it
@@ -180,5 +207,3 @@ local function replicate_registry()
 		update_callback()
 	end
 end
-
-return replicate_registry

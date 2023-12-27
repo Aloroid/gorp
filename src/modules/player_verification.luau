@@ -7,6 +7,6 @@ return {
 	end,
 
 	punish_player = function(player: Player)
-		task.delay(math.random(20, 60), player.Kick, player, "An unknown error occured. Please rejoin the game.")
+		task.delay(1, player.Kick, player, "An unknown error occured. Please rejoin the game.")
 	end,
 }

@@ -1,31 +1,41 @@
-local cts = require(script.Parent.Parent.cts)
-local ecr = require(script.Parent.Parent.Parent.Parent.ecr)
-local events = require(script.Parent.Parent.Parent.events)
-local get_entity = require(script.Parent.Parent.get_entity)
-local registry = require(script.Parent.Parent.registry)
+local queue = require(script.Parent.Parent.Parent.modules.queue)
+local remotes = require(script.Parent.Parent.Parent.remotes)
+local reverse_connector = require(script.Parent.Parent.Parent.modules.reverse_connector)
+local servers = require(script.Parent.Parent.servers)
 
-local replicate_core_data = ecr.queue(events.replicate_core_data)
+local replicate_core_data = queue(remotes.replicate_core_data)
 
-local function replicate_core()
+return function()
 	for connector, registries, schedulers in replicate_core_data:iter() do
-		local namespace: "client" | "server" = if connector.player then "client" else "server"
-		local actor_id = connector.from :: number
-		for _, entry in registries do
-			local name, id = entry.name, entry.id
-			local ent = get_entity(actor_id, namespace, id)
+		connector = reverse_connector(connector)
 
-			registry:set(ent, cts.Name, name)
-			registry:add(ent, cts.Registry)
+		local namespace = connector.namespace
+		local actor_id = connector.to :: number
+
+		local server = servers[namespace][actor_id]
+
+		-- create a new server
+		if server == nil then
+			print("created server on the client for", namespace, actor_id)
+			server = {
+				actor_id = actor_id,
+
+				ctype_names = {},
+				ctypes = {},
+
+				registries = {},
+				schedulers = {},
+			}
+			servers[namespace][actor_id] = server
+		end
+
+		for _, entry in registries do
+			server.registries[entry.id] = entry
 		end
 
 		for _, entry in schedulers do
-			local name, id = entry.name, entry.id
-			local ent = get_entity(actor_id, namespace, id)
-
-			registry:set(ent, cts.Name, name)
-			registry:add(ent, cts.Scheduler)
+			print("creating scheduler", entry.id, actor_id, namespace)
+			server.schedulers[entry.id] = entry
 		end
 	end
 end
-
-return replicate_core

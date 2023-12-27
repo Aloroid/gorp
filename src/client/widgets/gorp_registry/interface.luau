@@ -8,10 +8,8 @@ local actions = require(script.Parent.Parent.Parent.actions)
 local background = require(script.Parent.Parent.Parent.components.background)
 local container = require(script.Parent.Parent.Parent.components.container)
 local dynamic_ecs_query = require(script.Parent.Parent.Parent.Parent.modules.dynamic_ecs_query)
-local ecr7 = require(script.Parent.Parent.Parent.Parent.modules.ecr7)
 local explorer = require(script.Parent.explorer)
 local layout = require(script.Parent.Parent.Parent.components.layout)
-local rts = require(script.Parent.Parent.Parent.Parent.rts)
 local style = require(script.Parent.Parent.Parent.style)
 local text = require(script.Parent.Parent.Parent.components.text)
 local text_input = require(script.Parent.Parent.Parent.components.text_input)
@@ -31,7 +29,7 @@ return function(props: {
 
 	cts: { [string]: any },
 
-	registry: rts.Registry,
+	world: () -> { () -> { unknown } },
 	registry_name: string?,
 
 	on_cleanup: (() -> ())?,
@@ -41,9 +39,9 @@ return function(props: {
 
 		local unparsed_query = props.query
 		local set_query = props.set_query
-		local parsed_query = derive(
-			function() return dynamic_ecs_query.parse_ecs_query(unparsed_query(), props.cts, ecr7) end
-		)
+		local parsed_query = derive(function()
+			return dynamic_ecs_query(unparsed_query(), props.cts)
+		end)
 
 		cleanup(widget {
 
@@ -61,12 +59,15 @@ return function(props: {
 
 					text = raw_text,
 					placeholder_text = "include: @[ctype] exclude: ![ctype] condition: [ctype]=Vector3(0,0,0)",
-					focus_lost = function() set_query(raw_text()) end,
+					focus_lost = function()
+						set_query(raw_text())
+					end,
 				},
 
 				text {
 					text = function()
-						local result = dynamic_ecs_query.parse_ecs_query(raw_text(), props.cts, ecr7)
+						local result = dynamic_ecs_query(raw_text(), props.cts)
+						print(result, props.cts)
 						return if result.ok == false then result.err else ""
 					end,
 
@@ -80,7 +81,8 @@ return function(props: {
 
 						on_click_field = props.on_click_field,
 						parsed_query = parsed_query,
-						registry = props.registry,
+
+						world = props.world,
 					},
 				},
 			},

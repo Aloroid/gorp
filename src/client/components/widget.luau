@@ -137,9 +137,12 @@ return function(props: props)
 
 		shadow {
 
-			Position = function() return UDim2.fromOffset(x_position(), y_position()) end,
-
-			Size = function() return UDim2.fromOffset(x_size() + 6, y_size() + 6) end,
+			Position = function()
+				return UDim2.fromOffset(x_position(), y_position())
+			end,
+			Size = function()
+				return UDim2.fromOffset(x_size() + 6, y_size() + 6)
+			end,
 
 			Active = true,
 
@@ -177,15 +180,12 @@ return function(props: props)
 							Size = UDim2.new(0, 44, 1, 0),
 							AnchorPoint = Vector2.new(1, 0.5),
 
-							BackgroundColor3 = vide.spring(
-								function()
-									return if pressed_closed() and hover_closed()
-										then style.close_button_pressed
-										elseif hover_closed() then style.close_button
-										else style.foreground
-								end,
-								0.1
-							),
+							BackgroundColor3 = vide.spring(function()
+								return if pressed_closed() and hover_closed()
+									then style.close_button_pressed
+									elseif hover_closed() then style.close_button
+									else style.foreground
+							end, 0.1),
 
 							create "ImageLabel" {
 
@@ -219,7 +219,9 @@ return function(props: props)
 				container {
 					Name = "Container",
 
-					Size = function() return UDim2.new(1, 0, 1, -24) end,
+					Size = function()
+						return UDim2.new(1, 0, 1, -24)
+					end,
 					Position = UDim2.fromOffset(0, 24),
 
 					children,

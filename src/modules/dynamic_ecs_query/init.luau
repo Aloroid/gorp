@@ -1,35 +1,15 @@
---[[
+local stream = require(script.stream)
 
-	dynamic_ecs_query allows for dynamically querying and returns a result.
-
-]]
-
-local ecr = require(script.Parent.Parent.Parent.ecr)
-local stream = require(script.Parent.stream)
-
-type ParsedECSQueryOK = {
+export type ParsedECSQuery = {
+	ok: false,
+	err: string,
+} | {
 	ok: true,
 	included_names: { string },
 	included: { number | any },
-	included_no_tags: { number | any },
-	excluded: { number },
-	equal: { number },
+	excluded: { number | any },
+	equal: { number | any },
 	equal_values: { (value: unknown) -> boolean },
-}
-
-type ParsedECSQueryNotOK = {
-	ok: false,
-	err: string,
-}
-
-export type ParsedECSQuery = ParsedECSQueryOK | ParsedECSQueryNotOK
-
-export type DynamicQuery = {
-
-	registry: ecr.Registry,
-	invalidated: boolean,
-	query: ParsedECSQueryOK,
-	ids: { number },
 }
 
 local functions = {
@@ -52,16 +32,17 @@ local numbers = {
 }
 
 -- removes trailing whitespace
-local function reduce(input: string) return string.gsub(string.gsub(input, "^%s*", ""), "%s*$", "") end
+local function reduce(input: string)
+	return string.gsub(string.gsub(input, "^%s*", ""), "%s*$", "")
+end
 
-local parse_value = function(query: string, cts: { [string]: number }, ecr: any)
+return function(query: string, components: { [string]: unknown }): ParsedECSQuery
 	debug.profilebegin("parsing query")
 	local included = {}
 	local excluded = {}
 	local equal = {}
 	local equal_values = {}
 	local include_names = {}
-	local include_no_tags = {}
 
 	local already_used = {}
 	local already_equals = {}
@@ -101,7 +82,7 @@ local parse_value = function(query: string, cts: { [string]: number }, ecr: any)
 
 	local function append()
 		local name = reduce(stored_equal_ctype_name or stream:next_token(1))
-		local ctype = cts[name]
+		local ctype = components[string.lower(name)]
 
 		if ctype_type == "include" then
 			if ctype == nil then
@@ -111,13 +92,10 @@ local parse_value = function(query: string, cts: { [string]: number }, ecr: any)
 			if already_used[name] then croak(`"{name}" is already used earlier in the query"`) end
 			already_used[name] = true
 			ctype_type = false
-			if not ecr.is_tag(ctype) then
-				table.insert(include_names, name)
-				table.insert(include_no_tags, ctype)
-			end
 
 			if table.find(included, ctype) then return end
 			table.insert(included, ctype)
+			table.insert(include_names, name)
 		elseif ctype_type == "exclude" then
 			if ctype == nil then croak(`"{name}" is not a component`) end
 			if already_used[name] then croak(`"{name}" is already used earlier in the query"`) end
@@ -135,7 +113,9 @@ local parse_value = function(query: string, cts: { [string]: number }, ecr: any)
 				return
 			end
 			table.insert(equal, ctype)
-			table.insert(equal_values, function(value: unknown) return parsed_value == value end)
+			table.insert(equal_values, function(value: unknown)
+				return parsed_value == value
+			end)
 
 			already_equals[ctype] = true
 
@@ -156,7 +136,9 @@ local parse_value = function(query: string, cts: { [string]: number }, ecr: any)
 				return
 			end
 			table.insert(equal, ctype)
-			table.insert(equal_values, function(value: unknown) return parsed_value ~= value end)
+			table.insert(equal_values, function(value: unknown)
+				return parsed_value ~= value
+			end)
 
 			already_equals[ctype] = true
 
@@ -278,81 +260,5 @@ local parse_value = function(query: string, cts: { [string]: number }, ecr: any)
 		equal = equal,
 		equal_values = equal_values,
 		included_names = include_names,
-		included_no_tags = include_no_tags,
-	}
-end :: (query: string, cts: { [string]: number }, ecr: any) -> ParsedECSQuery
-
-local function convert(query: ParsedECSQuery, registry: ecr.Registry)
-	if query.ok == false then error(`parsed query is invalid: {query.err}`) end
-
-	return {
-		registry = registry,
-		invalidated = true,
-		ids = {},
-		query = query,
 	}
 end
-
--- gets the current entity
-local function get_entity_view(query: DynamicQuery)
-	assert(query.query.ok, "parsed query is invalid")
-
-	if not query.invalidated then return query.ids end
-
-	local parsed = query.query
-	local included = parsed.included
-	local excluded = parsed.excluded
-
-	if #parsed.included == 0 then included = { ecr.entity } end
-
-	local view = query.registry:view(unpack(included)):exclude(unpack(excluded))
-	query.invalidated = false
-	return view :: any
-end
-
--- resolves the query and views all the ids inside
-local function resolve_query(query: DynamicQuery, ignore_heuristic: boolean?)
-	if query.invalidated == false then return query.ids end
-	assert(query.query.ok)
-
-	local view = get_entity_view(query)
-	local world = query.registry
-	local equal, equal_values = query.query.equal, query.query.equal_values
-	query.ids = table.create(#view)
-
-	if ignore_heuristic then
-		for id in view do
-			table.insert(query.ids, id)
-		end
-	else
-		for id in view do
-			local fail = false
-			for i, ctype in equal do
-				if not equal_values[i](world:try_get(id, ctype)) then
-					fail = true
-					break
-				end
-			end
-			if fail then continue end
-			table.insert(query.ids, id)
-		end
-	end
-
-	return query.ids
-end
-
--- invalidates the current query, making it require a new View object
-local function invalidate_query(query: DynamicQuery)
-	query.invalidated = true
-	query.ids = {}
-end
-
-return {
-
-	parse_ecs_query = parse_value,
-	convert_ecs_query = convert,
-
-	resolve_query = resolve_query,
-
-	invalidate_query = invalidate_query,
-}

@@ -13,10 +13,10 @@ local source = vide.source
 local indexes = vide.indexes
 local derive = vide.derive
 
-type Table = {
+type Table<T = any> = {
 
 	meaning: vide.Source<{ string }>,
-	rows: vide.Source<{ vide.Source<{ any }> }>?,
+	rows: (() -> { () -> unknown })?,
 	max_rows: vide.Source<number>?,
 	base_sizes: { number }?,
 
@@ -24,10 +24,12 @@ type Table = {
 
 	layout: { [any]: any }?,
 
-	display: ((value: () -> any, column: number, row: () -> number) -> Instance)?,
+	display: ((column: number, row: () -> number) -> Instance)?,
 }
 
-return function(props: Table)
+local none = newproxy() -- symbol
+
+return function<T>(props: Table<T>)
 	local rows = props.rows
 	local meaning = props.meaning
 	local max_rows = props.max_rows
@@ -38,8 +40,7 @@ return function(props: Table)
 		or function()
 			assert(rows, "rows does not exist")
 			local rows = rows()
-			if rows[1] == nil then return 1 end
-			return math.max(1, #rows)
+			return #rows
 		end
 
 	local sizes = source({})
@@ -58,7 +59,9 @@ return function(props: Table)
 	local display = props.display
 		or function(value)
 			return text {
-				text = function() return tostring(value()) end,
+				text = function()
+					return tostring(value())
+				end,
 			}
 		end :: never
 
@@ -90,10 +93,7 @@ return function(props: Table)
 
 			child = function(row_index)
 				local row = derive(function()
-					if rows == nil and max_rows ~= nil then return table.create(#meaning(), true) end
-					assert(rows ~= nil, "rows is nil")
-					local value = rows()[row_index()]
-					return value and value() or {}
+					return table.create(#meaning(), true)
 				end)
 
 				return create "Frame" {
@@ -102,6 +102,7 @@ return function(props: Table)
 					BackgroundColor3 = style.border,
 
 					indexes(row, function(value, index)
+						print("updating child")
 						return container {
 
 							Size = function()
@@ -112,7 +113,7 @@ return function(props: Table)
 							BackgroundColor3 = style.background,
 							BackgroundTransparency = 0,
 
-							display(value, index, row_index),
+							display(index, row_index),
 
 							border {},
 						}

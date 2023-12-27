@@ -14,6 +14,7 @@ type Text = {
 	text: string | () -> string,
 	text_size: number?,
 	font: Enum.Font?,
+	color: Color3? | (() -> Color3)?,
 }
 
 local function text(props: Text)
@@ -27,8 +28,9 @@ local function text(props: Text)
 		BackgroundTransparency = 1,
 
 		Text = props.text,
-		TextColor3 = style.text,
+		TextColor3 = props.color or style.text,
 		TextSize = props.text_size or style.font_size,
+		TextTruncate = Enum.TextTruncate.AtEnd,
 		Font = props.font or style.font,
 
 		actions.hovering(hovering),

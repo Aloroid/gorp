@@ -13,20 +13,6 @@
 					"$path": "src"
 				}
 			}
-		},
-
-		"ServerScriptService": {
-			"Server": {
-				"$path": "example/server"
-			}
-		},
-
-		"StarterPlayer": {
-			"StarterPlayerScripts": {
-				"Client": {
-					"$path": "example/client"
-				}
-			}
 		}
 	}
 }

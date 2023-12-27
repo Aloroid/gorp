@@ -16,7 +16,10 @@ return {
 	names = server.names,
 
 	get_client = function()
-		assert(RunService:IsClient(), "gorp client cannot be received on the server")
+		assert(
+			RunService:IsClient(),
+			"gorp client cannot be received on the server"
+		)
 		stop_multi_require("cannot get client twice")
 		return require(script.client)
 	end,
