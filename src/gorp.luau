@@ -24,8 +24,6 @@ export type Scheduler = {
 		[system]: {
 			index: number,
 			average: RollingAverage,
-			before: { (name: string) -> () },
-			after: { (name: string) -> () },
 		},
 	},
 
@@ -34,6 +32,9 @@ export type Scheduler = {
 	system: <T...>(Scheduler, name: string, callback: (T...) -> (), T...) -> (),
 	skip: (Scheduler, name: string) -> (),
 	finish: (Scheduler) -> (),
+
+	_hook_before: (Scheduler, callback: (system_id: number) -> ()) -> () -> (),
+	_hook_after: (Scheduler, callback: (system_id: number) -> ()) -> () -> (),
 }
 
 export type RollingAverage = {

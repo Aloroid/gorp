@@ -115,7 +115,6 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 			local server_ctype, entities, values = changes[1], changes[2], changes[3]
 			local ctype_index = table.find(parsed.included, server_ctype)
 
-			print("processing new packet", server_ctype, entities, values, ctype_index)
 			if ctype_index == nil then continue end
 
 			for index, entity in entities do

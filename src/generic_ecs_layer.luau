@@ -8,6 +8,7 @@
 
 ]]
 
+local convert_scale = require(script.Parent.modules.convert_scale)
 local ecr = require(script.Parent.Parent.ecr)
 
 type World = any
@@ -49,10 +50,35 @@ return {
 		end
 	end,
 
-	-- UNUSED, might delete later.
-	is_tag = function(world, ctype)
-		return ecr.is_tag(ctype)
-	end,
+	--- system_labels are a collection of functions used to add extra categories and labels to systems.
+	--- These extra labels will then be displayed under the Performance widget of each system.
+	system_labels = {
+		{
+			category = "General Performance",
+
+			capture = function(resume: () -> ())
+				local start = os.clock()
+				resume()
+				local finish = os.clock()
+				return finish - start
+			end,
+
+			decode = function(packet)
+				return {`Last Frame\n{convert_scale(packet, "s")}`}
+			end,
+		},
+		{
+			category = "extra category cuz im booored",
+
+			capture = function(resume: () -> ())
+				return
+			end,
+
+			decode = function(packet)
+				return {"zz", "blankies", "sleep", "tired"}
+			end,
+		},
+	},
 } :: {
 
 	--- This function will be used when displaying the registry.
@@ -66,6 +92,13 @@ return {
 	--- This function should be called to listen for whenever a ctype change happens, and then run the callback.
 	--- It will then return a function that can be used to disconnect the callback
 	on_change: (world: World, component: Component, callback: (id: Entity) -> ()) -> () -> (),
-	--- This function should be called to determine if a component is a tag or not
-	is_tag: (world: World, component: Component) -> boolean,
+
+	system_labels: {
+		{
+			category: string,
+
+			capture: (resume: () -> ()) -> any,
+			decode: (any) -> { string },
+		}
+	},
 }

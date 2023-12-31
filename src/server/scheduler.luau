@@ -18,12 +18,11 @@ local function new_scheduler(scheduler_name: string, max: number?)
 		[gorp.system]: {
 			index: number,
 			average: gorp.RollingAverage,
-			before: { (name: string) -> () },
-			after: { (name: string) -> () },
 		},
-	} =
-		{}
+	} = {}
 	local used_systems: { gorp.system } = {}
+	local hooks_before: { [(id: number) -> ()]: true } = {}
+	local hooks_after: { [(id: number) -> ()]: true } = {}
 	local old_used_systems = {}
 
 	local self = {
@@ -49,9 +48,6 @@ local function new_scheduler(scheduler_name: string, max: number?)
 			index = index,
 
 			average = rolling_average.new(50),
-
-			before = {},
-			after = {},
 		}
 
 		return system_id
@@ -82,8 +78,8 @@ local function new_scheduler(scheduler_name: string, max: number?)
 		if not system_paused[system_id] then
 			local data = system_data[system_id]
 
-			for _, callback in data.before do
-				callback(name)
+			for callback in hooks_before do
+				callback(system_id)
 			end
 
 			-- we use xpcall, while we do have a internal no_yield module, i know
@@ -95,8 +91,8 @@ local function new_scheduler(scheduler_name: string, max: number?)
 			end, ...)
 			local finish = os.clock()
 
-			for _, callback in data.after do
-				callback(name)
+			for callback in hooks_after do
+				callback(system_id)
 			end
 
 			if ok == false then warn(`{name} failed to run:\n{err}`) end
@@ -156,6 +152,20 @@ local function new_scheduler(scheduler_name: string, max: number?)
 
 		old_used_systems = used_systems
 		used_systems = {}
+	end
+
+	function self:_hook_before(callback: (system: number) -> ())
+		hooks_before[callback] = true
+		return function()
+			hooks_before[callback] = nil
+		end
+	end
+
+	function self:_hook_after(callback: (system: number) -> ())
+		hooks_after[callback] = true
+		return function()
+			hooks_after[callback] = nil
+		end
 	end
 
 	events.scheduler_created:fire(self)

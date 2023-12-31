@@ -33,7 +33,7 @@ remotes.request_servers:fire({
 	namespace = "server",
 })
 
-vide.strict = false
+vide.strict = true
 
 return {
 

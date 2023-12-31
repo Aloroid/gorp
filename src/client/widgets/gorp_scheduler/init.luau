@@ -15,6 +15,7 @@ local scrolling_frame = require(script.Parent.Parent.components.scrolling_frame)
 local style = require(script.Parent.Parent.style)
 local text = require(script.Parent.Parent.components.text)
 local widget = require(script.Parent.Parent.components.widget)
+local gorp_system = require(script.Parent.gorp_system)
 
 local create = vide.create
 local source = vide.source
@@ -29,14 +30,6 @@ local RUNNING = "rbxasset://textures/StudioToolbox/AssetPreview/pause_button.png
 local PAUSED = "rbxasset://textures/StudioToolbox/AssetPreview/play_button.png"
 
 type Source<T> = vide.Source<T>
-type SchedulerData = {
-
-	average_times: buffer,
-	paused: buffer,
-	system_order_changes: {
-		[number]: { name: string, old: number, new: number } | { old: number, new: nil },
-	},
-}
 
 --- Reads a bool from a buffer based on an index. This uses indexes starting from 1
 local function get_bool_from_buffer(bools: buffer, index: number): boolean
@@ -65,14 +58,14 @@ local function generate_ui(namespace: "client" | "server", actor_id: number, sch
 	end)
 
 	-- handles replication of the scheduler and updating the internal data structure
-	cleanup(remotes.replicate_scheduler:connect(function(connector, incoming_id: number, packet: SchedulerData)
+	local connection = remotes.replicate_scheduler:connect(function(connector, incoming_id, packet)
 		--if subscription_id == -1 then task.wait() end -- delay a little so it can arrive
 		connector = reverse_connector(connector)
 
-		--print("received packet", connector.to, actor_id, connector.namespace, namespace, incoming_id, subscription_id)
 		if connector.to ~= actor_id then return end
 		if connector.namespace ~= namespace then return end
 		if incoming_id ~= subscription_id then return end
+		--print("received packet", connector.to, actor_id, connector.namespace, namespace, incoming_id, subscription_id)
 
 		local new_pending_scheduler_systems = table.clone(scheduler_systems())
 
@@ -80,16 +73,16 @@ local function generate_ui(namespace: "client" | "server", actor_id: number, sch
 		for _, new_data in packet.system_order_changes do
 			-- We write this to a new table based on the old one.
 			new_pending_scheduler_systems[new_data.old or -1] = nil
-			if new_data.new == nil then continue end
+			if not (new_data :: any).new then continue end
 
 			local old_system_data = scheduler_systems()[new_data.old or -1]
 				or {
-					name = new_data.name,
+					name = (new_data :: any).name,
 					time = source(0),
 					paused = source(false),
 				}
 
-			new_pending_scheduler_systems[new_data.new] = old_system_data
+			new_pending_scheduler_systems[(new_data :: any).new] = old_system_data
 		end
 
 		-- After we've updated the scheduler, we update the paused listings
@@ -106,7 +99,9 @@ local function generate_ui(namespace: "client" | "server", actor_id: number, sch
 
 		if #packet.system_order_changes == 0 then return end
 		scheduler_systems(new_pending_scheduler_systems)
-	end))
+	end)
+
+	cleanup(connection)
 
 	cleanup(function()
 		remotes.unsubscribe_scheduler:fire(connector, subscription_id)
@@ -283,7 +278,14 @@ local function generate_ui(namespace: "client" | "server", actor_id: number, sch
 						},
 					},
 
-					activated = function() end,
+					activated = function()
+						gorp_system {
+							system_name = value().name,
+							scheduler_id = scheduler_id,
+
+							connector = connector
+						}
+					end,
 				}
 			end),
 		},

@@ -20,6 +20,7 @@ local replicate_components = require(script.systems.replicate_components)
 local replicate_core = require(script.systems.replicate_core)
 local replicate_registry = require(script.systems.replicate_registry)
 local replicate_scheduler = require(script.systems.replicate_scheduler)
+local replicate_system = require(script.systems.replicate_system)
 
 --- Adds the given world
 local function add_world<T>(world: T, name: string?): T
@@ -67,6 +68,7 @@ RunService.Heartbeat:Connect(function()
 	server_scheduler:system("replicate_components", replicate_components)
 	server_scheduler:system("replicate_registry", replicate_registry)
 	server_scheduler:system("replicate_scheduler", replicate_scheduler)
+	server_scheduler:system("replicate_system", replicate_system)
 
 	server_scheduler:finish()
 end)

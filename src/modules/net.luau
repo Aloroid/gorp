@@ -19,11 +19,27 @@ export type connector = {
 	player: Player?,
 }
 
-local function get_remote_event(name: string): RemoteEvent & { actor: BindableEvent }
+export type NetEvent<T...> = {
+
+	type: "event",
+
+	fire: (any, connector: connector, T...) -> (),
+	connect: (any, callback: (connector: connector, T...) -> ()) -> RBXScriptConnection,
+}
+
+export type NetCallback<T..., U...> = {
+
+	type: "callback",
+
+	invoke: (any, connector: connector, T...) -> U...,
+	set_callback: (any, callback: (connector: connector, T...) -> U...) -> (),
+}
+
+local function get_remote_event(name: string, unreliable: boolean?): RemoteEvent & { actor: BindableEvent }
 	if RunService:IsServer() then
 		return script:FindFirstChild(name) :: RemoteEvent & { actor: BindableEvent }
 			or (function()
-				local remote = Instance.new("RemoteEvent")
+				local remote = Instance.new(if unreliable then "UnreliableRemoteEvent" else "RemoteEvent")
 				remote.Name = name
 				remote.Parent = script
 
@@ -70,11 +86,11 @@ local function get_remote_function(name: string): RemoteFunction & {
 	end
 end
 
-local function create_event(name: string, do_not_block_traffic: boolean?)
-	local remote = get_remote_event(name)
+local function create_event<T...>(name: string, unreliable: boolean?, do_not_block_traffic: boolean?): NetEvent<T...>
+	local remote = get_remote_event(name, unreliable)
 	local event = {
 		type = "event",
-	}
+	} :: NetEvent<T...>
 
 	function event:fire(connector: connector, ...)
 		local server_to_server = RunService:IsServer() and connector.namespace == "server"
@@ -111,7 +127,7 @@ local function create_event(name: string, do_not_block_traffic: boolean?)
 				connector.to ~= common_actor_id and connector.to ~= nil
 				or RunService:IsServer() and connector.namespace ~= "server"
 			then
-				print("ignored packet meant for", connector)
+				--print("ignored packet meant for", connector)
 				return
 			end
 			assert(
@@ -145,18 +161,18 @@ local function create_event(name: string, do_not_block_traffic: boolean?)
 	return event
 end
 
-local function create_callback(name: string, do_not_block_traffic: boolean?)
+local function create_callback<T..., U...>(name: string, do_not_block_traffic: boolean?): NetCallback<T..., U...>
 	local remote = get_remote_function(name)
-	local event = {
-		type = "event",
-	}
+	local callback = {
+		type = "callback",
+	} :: NetCallback<T..., U...>
 
 	local id = 0
 	local current_callback = function(...)
 		error("did not specify callback")
 	end
 
-	function event:invoke(connector: connector, ...)
+	function callback:invoke(connector: connector, ...: T...): U...
 		assert(connector.to, "this function requires a target to send to")
 
 		local server_to_server = RunService:IsServer() and connector.namespace == "server"
@@ -176,7 +192,7 @@ local function create_callback(name: string, do_not_block_traffic: boolean?)
 
 			local t
 			local connection = remote.result.Event:Connect(function(from: number, to: number, id: number, ...)
-				print(from, to, id, connector.to, common_actor_id, stored)
+				--print(from, to, id, connector.to, common_actor_id, stored)
 				if from ~= connector.to then return end
 				if to ~= common_actor_id then return end
 				if id ~= stored then return end
@@ -202,17 +218,17 @@ local function create_callback(name: string, do_not_block_traffic: boolean?)
 			if RunService:IsServer() then
 				error("unsecure")
 			else
-				print("invoking server", name)
+				--print("invoking server", name)
 				connector.from = common_actor_id
 				local results = { remote:InvokeServer(connector, ...) }
-				print("received results", name)
+				--print("received results", name)
 				return unpack(results)
 			end
 		end
 	end
 
-	function event:set_callback(callback: (connector: connector, ...any) -> ...any)
-		current_callback = callback
+	function callback:set_callback(callback: (connector: connector, T...) -> U...)
+		current_callback = callback :: any
 	end
 
 	if RunService:IsServer() then
@@ -224,9 +240,9 @@ local function create_callback(name: string, do_not_block_traffic: boolean?)
 
 			connector.player = player
 
-			print("invoking server for client", name, player)
-			local results = { event:invoke(connector, ...) }
-			print("received results for", name)
+			--print("invoking server for client", name, player)
+			local results = { callback:invoke(connector, ...) }
+			--print("received results for", name)
 			return unpack(results)
 		end
 		-- not specifying OnClientInvoke for security reasons
@@ -240,7 +256,7 @@ local function create_callback(name: string, do_not_block_traffic: boolean?)
 		remote.result:Fire(common_actor_id, origin, id, unpack(results))
 	end)
 
-	return event
+	return callback
 end
 
 return {
