@@ -16,7 +16,7 @@ return function()
 
 		-- create a new server
 		if server == nil then
-			print("created server on the client for", namespace, actor_id)
+			--print("created server on the client for", namespace, actor_id)
 			server = {
 				actor_id = actor_id,
 
@@ -34,7 +34,7 @@ return function()
 		end
 
 		for _, entry in schedulers do
-			print("creating scheduler", entry.id, actor_id, namespace)
+			--print("creating scheduler", entry.id, actor_id, namespace)
 			server.schedulers[entry.id] = entry
 		end
 	end

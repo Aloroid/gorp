@@ -96,8 +96,6 @@ local function create_event<T...>(name: string, unreliable: boolean?, do_not_blo
 		local server_to_server = RunService:IsServer() and connector.namespace == "server"
 		local client_to_client = RunService:IsClient() and connector.namespace == "client"
 
-		--print("firing", name, "to", connector.namespace, connector.to, client_to_client, common_actor_id)
-
 		if client_to_client or server_to_server then
 			connector = table.clone(connector)
 			connector.player = connector.player or Players.LocalPlayer
@@ -127,7 +125,6 @@ local function create_event<T...>(name: string, unreliable: boolean?, do_not_blo
 				connector.to ~= common_actor_id and connector.to ~= nil
 				or RunService:IsServer() and connector.namespace ~= "server"
 			then
-				--print("ignored packet meant for", connector)
 				return
 			end
 			assert(
@@ -186,18 +183,15 @@ local function create_callback<T..., U...>(name: string, do_not_block_traffic: b
 
 		connector = table.clone(connector)
 		if client_to_client or server_to_server then
-			--print("local invoke", name)
 			id += 1
 			local stored = id
 
 			local t
 			local connection = remote.result.Event:Connect(function(from: number, to: number, id: number, ...)
-				--print(from, to, id, connector.to, common_actor_id, stored)
 				if from ~= connector.to then return end
 				if to ~= common_actor_id then return end
 				if id ~= stored then return end
 
-				--print("received", name)
 				t = { ... }
 			end)
 
@@ -210,7 +204,6 @@ local function create_callback<T..., U...>(name: string, do_not_block_traffic: b
 				task.wait()
 			end
 
-			--print("finished")
 			connection:Disconnect()
 
 			return unpack(t)
@@ -218,10 +211,8 @@ local function create_callback<T..., U...>(name: string, do_not_block_traffic: b
 			if RunService:IsServer() then
 				error("unsecure")
 			else
-				--print("invoking server", name)
 				connector.from = common_actor_id
 				local results = { remote:InvokeServer(connector, ...) }
-				--print("received results", name)
 				return unpack(results)
 			end
 		end
@@ -240,9 +231,7 @@ local function create_callback<T..., U...>(name: string, do_not_block_traffic: b
 
 			connector.player = player
 
-			--print("invoking server for client", name, player)
 			local results = { callback:invoke(connector, ...) }
-			--print("received results for", name)
 			return unpack(results)
 		end
 		-- not specifying OnClientInvoke for security reasons

@@ -56,7 +56,7 @@ end
 local function no_yield<T...>(callback: (T...) -> (), ...: T...): (boolean, thread, string?)
 	assert(is_running == false, "cannot call no_yield inside no_yield")
 	if coroutine.status(thread) == "dead" then generate_thread() end
-	print("omfg")
+	--print("omfg")
 	return result_handler(coroutine.resume(thread, callback, ...))
 end
 

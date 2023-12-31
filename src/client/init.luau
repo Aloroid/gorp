@@ -24,7 +24,7 @@ RunService.Heartbeat:Connect(function()
 	scheduler:finish()
 end)
 
-print("requested for servers")
+--print("requested for servers")
 remotes.request_servers:fire({
 	namespace = "client",
 })

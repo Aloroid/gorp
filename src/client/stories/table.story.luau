@@ -23,7 +23,7 @@ return function(target: ScreenGui)
 			Parent = target,
 
 			button {
-				text = "Print table",
+				text = "--print table",
 
 				activated = function()
 					for _, row in t() do
@@ -31,7 +31,7 @@ return function(target: ScreenGui)
 						for _, value in row() do
 							table.insert(clone, tostring(value))
 						end
-						print(table.concat(clone, ", "))
+						--print(table.concat(clone, ", "))
 					end
 				end,
 			},

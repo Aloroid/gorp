@@ -108,7 +108,7 @@ return function(props: props)
 			},
 
 			indexes(source(system_labels), function(label, index)
-				print("created label for", label())
+				--print("created label for", label())
 
 				local function labels()
 					return label().labels()

@@ -67,7 +67,7 @@ return function(props: {
 				text {
 					text = function()
 						local result = dynamic_ecs_query(raw_text(), props.cts)
-						print(result, props.cts)
+						--print(result, props.cts)
 						return if result.ok == false then result.err else ""
 					end,
 

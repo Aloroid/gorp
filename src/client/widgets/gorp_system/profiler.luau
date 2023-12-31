@@ -19,10 +19,8 @@ return function(props: props)
 		ClipsDescendants = true,
 
 		indexes(props.values, function(value, key)
-			--print(value())
 			return container {
 				Size = function()
-					--print(props.values()[1] / props.max())
 					return UDim2.fromScale(1 / 50, value() / props.max())
 				end,
 				Position = UDim2.fromScale(1 - (key - 1) / 50, 1),

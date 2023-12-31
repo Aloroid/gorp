@@ -111,7 +111,7 @@ return function()
 		if system_id == nil then return -1 end
 
 		unique_subscription_id += 1
-		print("created new subscription", unique_subscription_id, common_actor_id)
+		--print("created new subscription", unique_subscription_id, common_actor_id)
 		active_subscriptions[unique_subscription_id] =
 			generate_update_callback(connector, entry, system_id, unique_subscription_id)
 		associated_with[unique_subscription_id] = connector
@@ -122,7 +122,7 @@ return function()
 	for connector, subscription_id in unsubscribe_system:iter() do
 		-- just nil the active query
 		cleanup_callbacks[subscription_id]()
-		print("stopped subscription", subscription_id)
+		--print("stopped subscription", subscription_id)
 
 		active_subscriptions[subscription_id] = nil
 		associated_with[subscription_id] = nil

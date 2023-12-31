@@ -54,7 +54,7 @@ local function generate_ui(namespace: "client" | "server", actor_id: number, sch
 
 	task.spawn(function()
 		subscription_id = remotes.subscribe_scheduler:invoke(connector, scheduler_id)
-		print("received subscription id", subscription_id)
+		--print("received subscription id", subscription_id)
 	end)
 
 	-- handles replication of the scheduler and updating the internal data structure
@@ -65,7 +65,6 @@ local function generate_ui(namespace: "client" | "server", actor_id: number, sch
 		if connector.to ~= actor_id then return end
 		if connector.namespace ~= namespace then return end
 		if incoming_id ~= subscription_id then return end
-		--print("received packet", connector.to, actor_id, connector.namespace, namespace, incoming_id, subscription_id)
 
 		local new_pending_scheduler_systems = table.clone(scheduler_systems())
 

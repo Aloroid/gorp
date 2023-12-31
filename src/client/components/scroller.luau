@@ -70,7 +70,6 @@ local function infinite_scrolling_frame(props: infinite_scrolling_frame)
 	}
 
 	effect(function()
-		--print(items(), #frames)
 		for i = 0, math.max(math.min(max_items() - 1, items()), #frames) do
 			local index = lowest() + i
 
@@ -94,8 +93,6 @@ local function infinite_scrolling_frame(props: infinite_scrolling_frame)
 
 					return frame
 				end, frame)
-
-				--print("creating for", i)
 			elseif frames[i] and i > math.min(max_items() - 1, items()) then
 				indexes[i] = nil
 				frames[i]()

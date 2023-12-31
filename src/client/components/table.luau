@@ -102,11 +102,10 @@ return function<T>(props: Table<T>)
 					BackgroundColor3 = style.border,
 
 					indexes(row, function(value, index)
-						print("updating child")
+						--print("updating child")
 						return container {
 
 							Size = function()
-								--print("update size row", get_size(index))
 								return UDim2.fromScale(get_size(index), 1)
 							end,
 

@@ -117,7 +117,7 @@ local function new_scheduler(scheduler_name: string, max: number?)
 			return
 		end
 
-		print("skipped", name)
+		--print("skipped", name)
 		systems_unused[system] = nil
 		table.insert(used_systems, system)
 	end

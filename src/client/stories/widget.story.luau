@@ -23,12 +23,6 @@ return function(target: ScreenGui)
 				button {
 					text = "testing this",
 				},
-
-				vide.action(function()
-					print("Hii")
-
-					vide.cleanup(function() print("death!") end)
-				end),
 			},
 		}
 	end, target)

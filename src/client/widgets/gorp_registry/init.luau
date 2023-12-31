@@ -92,7 +92,7 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 			)
 			previous_query_id = server_query_id()
 
-			print("received new query id", server_query_id())
+			--print("received new query id", server_query_id())
 		end)
 	end)
 
@@ -102,7 +102,7 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 
 		if server_query_id() == -1 then task.wait() end -- yield a little so that the other packet gets processed first
 
-		print("received new packet from", connector, query_id, "current query is", server_query_id())
+		--print("received new packet from", connector, query_id, "current query is", server_query_id())
 
 		if namespace ~= inbound_namespace then return end
 		if connector.from ~= actor_id then return end
@@ -122,7 +122,7 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 				local entity = world()[get_entity_index(entity)]
 
 				entity()[ctype_index + 1] = value
-				print(entity())
+				--print(entity())
 				entity(entity())
 			end
 		end
@@ -141,7 +141,7 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 			destroy_entity(entity)
 		end
 
-		print("received replication packet", world())
+		--print("received replication packet", world())
 	end))
 
 	return registry_explorer {

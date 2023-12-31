@@ -88,7 +88,7 @@ local function generate_update_callback(
 	assert(query.ok, "query is not OK")
 
 	local target = reverse_connector(connector)
-	print(target, connector, query_id)
+	--print(target, connector, query_id)
 
 	local changed = {}
 	local connections = {}
@@ -154,7 +154,7 @@ local function generate_update_callback(
 		table.clear(changed)
 
 		if did_change then
-			print("sending new packet", changing, removing)
+			--print("sending new packet", changing, removing)
 			remotes.replicate_query_data:fire(target, query_id, changing, removing)
 		end
 
@@ -188,7 +188,7 @@ return function()
 
 	for connector, query_id in stop_replicated_query:iter() do
 		-- just nil the active query
-		print("stopped query", query_id)
+		--print("stopped query", query_id)
 		active_queries[query_id] = nil
 		associated_with[query_id] = nil
 	end

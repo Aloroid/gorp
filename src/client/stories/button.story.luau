@@ -12,7 +12,7 @@ return function(target: ScreenGui)
 			},
 		}
 
-		vide.effect(function() print("test") end)
+		vide.effect(function() --print("test") end)
 
 		return destroy
 	end)

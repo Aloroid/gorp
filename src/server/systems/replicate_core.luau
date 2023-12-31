@@ -33,7 +33,7 @@ return function()
 
 	-- replicate to new connectors (if any)
 	for connector in requesting_server_data:iter() do
-		print("received request")
+		--print("received request")
 		local reverse = reverse_connector(connector)
 		remotes.replicate_core_data:fire(reverse, registries, schedulers)
 		active_connectors.connected[reverse] = true
