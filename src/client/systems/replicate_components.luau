@@ -15,7 +15,7 @@ return function()
 
 		local server = servers[namespace][actor_id]
 
-		local ctypes = convert_dict.deserialize(components :: any) :: { [unknown]: string }
+		local ctypes = convert_dict.deserialize(components :: any) :: { [number]: string }
 
 		table.clear(server.ctype_names)
 		table.clear(server.ctypes)

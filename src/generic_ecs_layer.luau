@@ -56,28 +56,34 @@ return {
 		{
 			category = "General Performance",
 
-			capture = function(resume: () -> ())
+			capture = function(resume)
 				local start = os.clock()
 				resume()
 				local finish = os.clock()
-				return finish - start
+				local b = buffer.create(4)
+				buffer.writef32(b, 0, finish - start)
+				return b
 			end,
 
 			decode = function(packet)
-				return {`Last Frame\n{convert_scale(packet, "s")}`}
-			end,
+				local s = buffer.readf32(packet, 0)
+				return {`Last Frame\n{convert_scale(s, "s")}`}
+			end
 		},
 		{
-			category = "extra category cuz im booored",
+			category = "View Performance",
 
-			capture = function(resume: () -> ())
-				return
+			capture = function(resume)
+				--FIXME: cyclic require
+				local query_hook = require(script.Parent.query_hook) 
+				return query_hook.capture(resume)
 			end,
 
-			decode = function(packet)
-				return {"zz", "blankies", "sleep", "tired"}
+			decode = function(packet, names)
+				local query_hook = require(script.Parent.query_hook)
+				return query_hook.decode(packet, names)
 			end,
-		},
+		}
 	},
 } :: {
 
@@ -98,7 +104,7 @@ return {
 			category: string,
 
 			capture: (resume: () -> ()) -> any,
-			decode: (any) -> { string },
+			decode: (any, {[number]: string}) -> { string },
 		}
 	},
 }

@@ -25,6 +25,7 @@ local replicate_system_performance = require(script.systems.replicate_system_per
 --- Adds the given world
 local function add_world<T>(world: T, name: string?): T
 	local default_name = `World {#server_state.registries}`
+	world = (table.clone(world :: any) :: any) :: typeof(world)
 
 	local entry = {
 		name = name or default_name,
@@ -54,8 +55,30 @@ local function names<T>(components: T & { [string]: unknown }): T
 	return components
 end
 
+local function get_worlds()
+	local worlds = {}
+	for _,  world in server_state.registries do
+		table.insert(worlds, world.world)
+	end
+	return worlds
+end
+
+local function get_components()
+	return {
+
+		ctype_index = server_state.ctype_index,
+		ctype_names = server_state.ctype_names,
+		map_ctype_index = server_state.map_ctype_index,
+		ctype_index_names = server_state.ctype_index_names,
+		ctypes = server_state.ctypes,
+
+	}
+end
+
 local server = {
 	hook_world = add_world,
+	get_worlds = get_worlds,
+	get_components = get_components,
 	names = names,
 	scheduler = scheduler,
 }

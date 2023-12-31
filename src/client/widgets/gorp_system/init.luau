@@ -2,6 +2,7 @@ local vide = require(script.Parent.Parent.Parent.Parent.vide)
 local generic_ecs_layer = require(script.Parent.Parent.Parent.generic_ecs_layer)
 local reverse_connector = require(script.Parent.Parent.Parent.modules.reverse_connector)
 local remotes = require(script.Parent.Parent.Parent.remotes)
+local servers = require(script.Parent.Parent.servers)
 local interface = require(script.interface)
 
 local source = vide.source
@@ -24,6 +25,8 @@ local function main(destroy, props: props)
 	local scheduler_id = props.scheduler_id
 	local system_name = props.system_name
 
+	local server = servers[connector.namespace][connector.to :: number]
+
 	local system_packets = source({} :: {{runtime: number, labels: {any}, frame: number}})
 	local system_labels = {} :: {
 		{category: string, labels: () -> {string}}
@@ -44,7 +47,7 @@ local function main(destroy, props: props)
 			labels = derive(function()
 				local latest_packet = system_packets()[1]
 				if latest_packet == nil then return {} end
-				return decode(latest_packet.labels[i])
+				return decode(latest_packet.labels[i], server.ctypes)
 			end)
 		}
 	end

@@ -2,8 +2,8 @@ type Server = {
 
 	actor_id: number,
 
-	ctypes: { [unknown]: string },
-	ctype_names: { [string]: unknown },
+	ctypes: { [number]: string },
+	ctype_names: { [string]: number },
 
 	registries: { { name: string, id: number } },
 	schedulers: { { name: string, id: number } },

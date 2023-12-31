@@ -6,6 +6,7 @@
 
 local RunService = game:GetService("RunService")
 
+local generic_ecs_layer = require(script.generic_ecs_layer)
 local server = require(script.server)
 local stop_multi_require = require(script.modules.stop_multi_require)
 
@@ -14,6 +15,10 @@ return {
 	hook_world = server.hook_world,
 	scheduler = server.scheduler,
 	names = server.names,
+	get_worlds = server.get_worlds,
+	get_components = server.get_components,
+
+	ecs_layer = generic_ecs_layer,
 
 	get_client = function()
 		assert(

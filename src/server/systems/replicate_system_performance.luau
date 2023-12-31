@@ -121,6 +121,7 @@ return function()
 
 	for connector, subscription_id in unsubscribe_system:iter() do
 		-- just nil the active query
+		if not active_subscriptions[subscription_id] then continue end
 		cleanup_callbacks[subscription_id]()
 		--print("stopped subscription", subscription_id)
 
