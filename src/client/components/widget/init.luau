@@ -6,11 +6,13 @@ local UserInputService = game:GetService("UserInputService")
 local actions = require(script.Parent.Parent.actions)
 local style = require(script.Parent.Parent.style)
 local vide = require(script.Parent.Parent.Parent.Parent.vide)
+local enabled = require(script.Parent.Parent.enabled)
 
 local border = require(script.Parent.border)
 local container = require(script.Parent.container)
 local shadow = require(script.Parent.shadow)
 local text = require(script.Parent.text)
+local borders = require(script.borders)
 
 local widgets = {}
 
@@ -32,7 +34,7 @@ type props = {
 }
 
 local highest_display_order = 100000
-local RESIZE_RANGE = 10
+local RESIZE_RANGE = 16
 
 return function(props: props)
 	local widget_id = props.widget_id or props.title or ""
@@ -63,10 +65,10 @@ return function(props: props)
 	local absolute_position = source(Vector2.zero)
 	local absolute_size = source(Vector2.zero)
 
-	local can_resize_top = false
-	local can_resize_bottom = false
-	local can_resize_right = false
-	local can_resize_left = false
+	local can_resize_top = source(false)
+	local can_resize_bottom = source(false)
+	local can_resize_right = source(false)
+	local can_resize_left = source(false)
 	local resizing = source(false)
 	local ref = source()
 	local display_order = source(highest_display_order + 1)
@@ -74,27 +76,31 @@ return function(props: props)
 
 	local hover_closed = source(false)
 	local pressed_closed = source(false)
+	local mouse_inside = source(false)
 
 	local top: Vector2
 	local bottom: Vector2
 
-	cleanup(RunService.RenderStepped:Connect(function()
+	cleanup(RunService.Heartbeat:Connect(function()
+		resizing(resizing() and (UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)))
+	end))
+
+	cleanup(UserInputService.InputChanged:Connect(function(input: InputObject)
+		if input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
+		if not resizing() then return end
+
 		local mposition = UserInputService:GetMouseLocation()
 		local top_inset, bottom_inset = GuiService:GetGuiInset()
 		mposition -= top_inset + bottom_inset
 		local x, y = mposition.X, mposition.Y
 
-		resizing(resizing() and (UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)))
-
-		if not resizing() then return end
-
-		if can_resize_bottom then y_size(math.max(y - top.Y, min_size.Y)) end
-		if can_resize_right then x_size(math.max(x - top.X, min_size.X)) end
-		if can_resize_top then
+		if can_resize_bottom() then y_size(math.max(y - top.Y, min_size.Y)) end
+		if can_resize_right() then x_size(math.max(x - top.X, min_size.X)) end
+		if can_resize_top() then
 			y_size(math.max(bottom.Y - y, min_size.Y))
 			y_position(math.min(y, bottom.Y - min_size.Y))
 		end
-		if can_resize_left then
+		if can_resize_left() then
 			x_size(math.max(bottom.X - x, min_size.X))
 			x_position(math.min(x, bottom.X - min_size.X))
 		end
@@ -102,6 +108,10 @@ return function(props: props)
 
 	cleanup(UserInputService.InputBegan:Connect(function(input)
 		if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+
+		resizing(true)
+		top = absolute_position()
+		bottom = absolute_position() + absolute_size()
 
 		local player_gui = Players.LocalPlayer:WaitForChild("PlayerGui") :: PlayerGui
 		local objects = player_gui:GetGuiObjectsAtPosition(input.Position.X, input.Position.Y)
@@ -111,8 +121,9 @@ return function(props: props)
 		display_order(highest_display_order + 1)
 		highest_display_order += 1
 	end))
-
-	cleanup(RunService.RenderStepped:Connect(function()
+	
+	local fast_update = source((nil :: any) :: GuiObject)
+	cleanup(UserInputService.InputChanged:Connect(function(input: InputObject)
 		if dragging() == false then return end
 		if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
 			dragging(false)
@@ -120,8 +131,11 @@ return function(props: props)
 		end
 
 		local position = UserInputService:GetMouseLocation()
-		x_position(position.X + offset.X)
-		y_position(position.Y + offset.Y)
+		vide.batch(function()
+			x_position(position.X + offset.X)
+			y_position(position.Y + offset.Y)
+		end)
+
 	end))
 
 	return create "ScreenGui" {
@@ -132,6 +146,8 @@ return function(props: props)
 		Name = widget_id,
 
 		DisplayOrder = display_order,
+		
+		Enabled = enabled,
 
 		vide.action(ref),
 
@@ -143,6 +159,8 @@ return function(props: props)
 			Size = function()
 				return UDim2.fromOffset(x_size() + 6, y_size() + 6)
 			end,
+
+			vide.action(fast_update),
 
 			Active = true,
 
@@ -216,6 +234,20 @@ return function(props: props)
 					ZIndex = 1000,
 				},
 
+				borders {
+
+					resize_range = RESIZE_RANGE,
+					min_size = min_size,
+
+					can_resize_top = can_resize_top,
+					can_resize_bottom = can_resize_bottom,
+					can_resize_left = can_resize_left,
+					can_resize_right = can_resize_right,
+
+					resizing = resizing
+
+				},
+
 				container {
 					Name = "Container",
 
@@ -241,23 +273,21 @@ return function(props: props)
 					x -= absolute_position().X
 					y -= absolute_position().Y
 
-					can_resize_top = y < RESIZE_RANGE
-					can_resize_left = x < RESIZE_RANGE
-					can_resize_bottom = y > (absolute_size().Y - RESIZE_RANGE)
-					can_resize_right = x > (absolute_size().X - RESIZE_RANGE)
+					can_resize_top(y < RESIZE_RANGE)
+					can_resize_left(x < RESIZE_RANGE)
+					can_resize_bottom(y > (absolute_size().Y - RESIZE_RANGE))
+					can_resize_right(x > (absolute_size().X - RESIZE_RANGE))
+				end,
+
+				MouseEnter = function()
+					mouse_inside(true)
 				end,
 
 				MouseLeave = function()
 					if resizing() then return end
 					if RunService:IsRunning() == false then return end
-				end,
 
-				InputBegan = function(input: InputObject)
-					if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
-
-					resizing(true)
-					top = absolute_position()
-					bottom = absolute_position() + absolute_size()
+					mouse_inside(false)
 				end,
 			},
 		},

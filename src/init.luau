@@ -8,7 +8,7 @@ local RunService = game:GetService("RunService")
 
 local generic_ecs_layer = require(script.generic_ecs_layer)
 local server = require(script.server)
-local stop_multi_require = require(script.modules.stop_multi_require)
+local traffic_check = require(script.modules.traffic_check)
 
 return {
 
@@ -18,6 +18,8 @@ return {
 	get_worlds = server.get_worlds,
 	get_components = server.get_components,
 
+	overwrite_check_function = traffic_check.overwrite_check_function,
+
 	ecs_layer = generic_ecs_layer,
 
 	get_client = function()
@@ -25,7 +27,6 @@ return {
 			RunService:IsClient(),
 			"gorp client cannot be received on the server"
 		)
-		stop_multi_require("cannot get client twice")
 		return require(script.client)
 	end,
 }

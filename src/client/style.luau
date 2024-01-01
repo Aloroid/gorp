@@ -22,6 +22,7 @@ local dark = {
 
 	border = fromHSV(0, 0, 36),
 	border_selected = fromHSV(201, 202, 255),
+	thickness = 1,
 
 	text = fromHSV(0, 0, 240),
 	sub_text = fromHSV(0, 0, 170),
@@ -58,6 +59,7 @@ local azure = {
 
 	border = fromHSV(242, 200, 36),
 	border_selected = fromHSV(201, 202, 255),
+	thickness = 1,
 
 	text = fromHSV(0, 0, 240),
 	sub_text = fromHSV(0, 0, 170),
