@@ -83,7 +83,7 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 		previous_query_id = -1
 		server_query_id(-1)
 
-		task.spawn(function()
+		task.defer(function()
 			-- if the query is invalid, the query_id will be -1. this is for types
 			server_query_id(
 				if parsed.ok == false
