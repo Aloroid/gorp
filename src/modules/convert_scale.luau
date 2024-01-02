@@ -21,12 +21,12 @@ return function(value: number, unit: string)
 
 	local order = 0
 
-	while value >= 1000 do
+	while value >= 1000 and order < 4 do
 		order += 1
 		value /= 1000
 	end
 
-	while value ~= 0 and value < 1 do
+	while value ~= 0 and value < 1 and order > -4 do
 		order -= 1
 		value *= 1000
 	end
