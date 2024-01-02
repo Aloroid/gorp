@@ -104,22 +104,23 @@ local function new_scheduler(scheduler_name: string, max: number?)
 	end
 
 	function self:skip(name: string)
-		local system = system_names[name]
+		i += 1
+		local system_id = system_names[name]
 
-		if system == nil then
+		if system_id == nil then
 			create_system(name, i)
 		else
 			task.spawn(
 				assert,
-				table.find(used_systems, system) == nil,
+				table.find(used_systems, system_id) == nil,
 				`attempted to skip system "{name}" when it already ran. make sure each system has a unique name!`
 			)
-			return
+			if not systems_unused[system_id] then return end
 		end
 
 		--print("skipped", name)
-		systems_unused[system] = nil
-		table.insert(used_systems, system)
+		systems_unused[system_id] = nil
+		table.insert(used_systems, system_id)
 	end
 
 	function self:finish()
