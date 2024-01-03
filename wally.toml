@@ -1,8 +1,22 @@
 [package]
 name = "aloroid/gorp"
 description = "ecr debugger new"
-version = "0.2.0-indev5"
+version = "0.2.0-indev6"
 registry = "https://github.com/UpliftGames/wally-index"
+include = ["src", "default.project.json", "LICENSE", ".luaurc"]
+exclude = [
+	".vscode",
+	"docs",
+	"example",
+	"local",
+	".gitattributes",
+	".gitignore",
+	"aftman.toml",
+	"export.project.json",
+	"README.md",
+	"stylua.toml",
+	"sourcemap.json",
+]
 realm = "shared"
 
 [dependencies]
