@@ -67,15 +67,15 @@ return {
 
 			decode = function(packet)
 				local s = buffer.readf32(packet, 0)
-				return {`Last Frame\n{convert_scale(s, "s")}`}
-			end
+				return { `Last Frame\n{convert_scale(s, "s")}` }
+			end,
 		},
 		{
 			category = "View Performance",
 
 			capture = function(resume)
 				--FIXME: cyclic require
-				local query_hook = require(script.Parent.query_hook) 
+				local query_hook = require(script.Parent.query_hook)
 				return query_hook.capture(resume)
 			end,
 
@@ -83,7 +83,21 @@ return {
 				local query_hook = require(script.Parent.query_hook)
 				return query_hook.decode(packet, names)
 			end,
-		}
+		},
+
+		{
+			category = "Group Performance",
+			capture = function(resume)
+				--FIXME: cyclic require
+				local query_hook = require(script.Parent.group_hook)
+				return query_hook.capture(resume)
+			end,
+
+			decode = function(packet, names)
+				local query_hook = require(script.Parent.group_hook)
+				return query_hook.decode(packet, names)
+			end,
+		},
 	},
 } :: {
 
@@ -104,7 +118,7 @@ return {
 			category: string,
 
 			capture: (resume: () -> ()) -> any,
-			decode: (any, {[number]: string}) -> { string },
+			decode: (any, { [number]: string }) -> { string },
 		}
 	},
 }
