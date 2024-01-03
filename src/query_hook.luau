@@ -1,12 +1,16 @@
-local ecr = require(script.Parent.Parent.ecr)
+--!optimize 2
+--!native
 local convert_scale = require(script.Parent.modules.convert_scale)
+local ecr = require(script.Parent.Parent.ecr)
 local server = require(script.Parent.server)
 
-type StoredViews = {{
-	includes: {number},
-	excludes: {number},
-	_get_stats: () -> {time_to_get_next_entity: number, time_to_perform_query: number, total_entities: number}
-}}
+type StoredViews = {
+	{
+		includes: { number },
+		excludes: { number },
+		_get_stats: () -> { time_to_get_next_entity: number, time_to_perform_query: number, total_entities: number },
+	}
+}
 
 ---- * GENERATED WITH ZAP 0.3.3
 
@@ -67,7 +71,7 @@ local function write_buffer(value)
 end
 
 local function read_buffer()
-	local value;
+	local value
 	value = {}
 	value.includes = {}
 	local len = buffer.readu16(incoming_buff, read(2))
@@ -88,7 +92,6 @@ end
 ----
 
 local function inject_world(world: ecr.Registry, used_views: StoredViews)
-
 	local raw_view = world.view
 
 	local function hooked_view(self: ecr.Registry, ...)
@@ -107,27 +110,31 @@ local function inject_world(world: ecr.Registry, used_views: StoredViews)
 			local begin = os.clock()
 			return function()
 				local start = os.clock()
-				local a,b,c,d,e,f,g,h,i,j,k = iterator()
+				local a, b, c, d, e, f, g, h, i, j, k = iterator()
 				local finish = os.clock()
 				time_to_get_next_entity += finish - start
 				time_to_perform_query += finish - begin
 				begin = finish
 				total_entities += if a then 1 else 0
-				return a,b,c,d,e,f,g,h,i,j,k
+				return a, b, c, d, e, f, g, h, i, j, k
 			end
 		end
 
 		local function get_results()
-			return {time_to_get_next_entity = time_to_get_next_entity, time_to_perform_query = time_to_perform_query, total_entities = total_entities}
+			return {
+				time_to_get_next_entity = time_to_get_next_entity,
+				time_to_perform_query = time_to_perform_query,
+				total_entities = total_entities,
+			}
 		end
 
 		view.iter = iter
 		view_mt.__iter = iter
 		view._get_stats = get_results
-		
+
 		return view
 	end
-	
+
 	-- overwrite the view function
 	world.view = hooked_view :: any
 
@@ -136,11 +143,9 @@ local function inject_world(world: ecr.Registry, used_views: StoredViews)
 	end
 
 	return uninject
-
 end
 
 local function hook(resume: () -> ())
-
 	local stored_views: StoredViews = {}
 	local unhook_callbacks = {}
 
@@ -155,7 +160,7 @@ local function hook(resume: () -> ())
 	for _, callback in unhook_callbacks do
 		callback()
 	end
-	
+
 	local components = server.get_components()
 
 	for _, view in stored_views do
@@ -170,7 +175,7 @@ local function hook(resume: () -> ())
 		for i, ctype in excludes do
 			excludes[i] = components.map_ctype_index[ctype]
 		end
-		
+
 		write_buffer({
 			entities = stats.total_entities,
 			time_next_ent = stats.time_to_get_next_entity,
@@ -178,7 +183,6 @@ local function hook(resume: () -> ())
 			includes = includes,
 			excludes = excludes,
 		})
-
 	end
 
 	local buff = buffer.create(outgoing_used)
@@ -189,14 +193,13 @@ local function hook(resume: () -> ())
 	outgoing_size = 64
 
 	return buff
-
 end
 
 local function scale(n: number)
 	return convert_scale(n, "s")
 end
 
-local function decode(buff: buffer, components: {[number]: string})
+local function decode(buff: buffer, components: { [number]: string })
 	incoming_buff = buff
 	incoming_read = 0
 	local len = buffer.len(buff)
@@ -204,28 +207,28 @@ local function decode(buff: buffer, components: {[number]: string})
 
 	while incoming_read < len do
 		local value = read_buffer()
-		local includes = value.includes :: {string | number}
-		local excludes = value.excludes :: {string | number}
+		local includes = value.includes :: { string | number }
+		local excludes = value.excludes :: { string | number }
 
 		for i, index in includes do
 			includes[i] = components[index :: number]
 		end
 
 		for i, index in excludes do
-			excludes[i] = "!"..components[index :: number]
+			excludes[i] = "!" .. components[index :: number]
 		end
-		
+
 		local str = `{table.concat(includes, ", ")}{if #excludes > 0 then ", " else ""}{table.concat(excludes, ", ")}`
-		local str2 = `{scale(value.time_perform_ent)}\t{scale(value.time_next_ent / value.entities)}/ent\t{value.entities} ent`
-	
+		local str2 =
+			`{scale(value.time_perform_ent)}\t{scale(value.time_next_ent / value.entities)}/ent\t{value.entities} ent`
+
 		table.insert(results, `{str}\n{str2}`)
 	end
 	return results
 end
 
 return {
-	
-	capture = hook,
-	decode = decode
 
+	capture = hook,
+	decode = decode,
 }

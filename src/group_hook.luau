@@ -1,3 +1,5 @@
+--!optimize 2
+--!native
 local convert_scale = require(script.Parent.modules.convert_scale)
 local ecr = require(script.Parent.Parent.ecr)
 local server = require(script.Parent.server)
@@ -84,7 +86,8 @@ local function inject_world(world: ecr.Registry, used_views: StoredViews)
 		local group = raw_group(self, ...) :: any
 		group.includes = { ... }
 		local time_to_get_next_entity = 0
-		local time_to_perform_query = 0
+		local time_to_perform_query_begin = os.clock()
+		local time_to_perform_query_finish = os.clock()
 		local total_entities = 0
 
 		table.insert(used_views, group)
@@ -94,15 +97,13 @@ local function inject_world(world: ecr.Registry, used_views: StoredViews)
 
 		local function iter(self)
 			local iterator = raw_iter(self) :: any
-			local begin = os.clock()
 			return function()
 				local start = os.clock()
 				local a, b, c, d, e, f, g, h, i, j, k = iterator()
 				local finish = os.clock()
 				time_to_get_next_entity += finish - start
-				time_to_perform_query += finish - begin
-				begin = finish
-				total_entities += if a then 1 else 0
+				time_to_perform_query_finish = finish
+				total_entities += a and 1 or 0
 				return a, b, c, d, e, f, g, h, i, j, k
 			end
 		end
@@ -110,7 +111,7 @@ local function inject_world(world: ecr.Registry, used_views: StoredViews)
 		local function get_results()
 			return {
 				time_to_get_next_entity = time_to_get_next_entity,
-				time_to_perform_query = time_to_perform_query,
+				time_to_perform_query = time_to_perform_query_finish - time_to_perform_query_begin,
 				total_entities = total_entities,
 			}
 		end
