@@ -4,15 +4,15 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
 local actions = require(script.Parent.Parent.actions)
+local enabled = require(script.Parent.Parent.enabled)
 local style = require(script.Parent.Parent.style)
 local vide = require(script.Parent.Parent.Parent.Parent.vide)
-local enabled = require(script.Parent.Parent.enabled)
 
 local border = require(script.Parent.border)
+local borders = require(script.borders)
 local container = require(script.Parent.container)
 local shadow = require(script.Parent.shadow)
 local text = require(script.Parent.text)
-local borders = require(script.borders)
 
 local widgets = {}
 
@@ -121,8 +121,7 @@ return function(props: props)
 		display_order(highest_display_order + 1)
 		highest_display_order += 1
 	end))
-	
-	local fast_update = source((nil :: any) :: GuiObject)
+
 	cleanup(UserInputService.InputChanged:Connect(function(input: InputObject)
 		if dragging() == false then return end
 		if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
@@ -135,7 +134,6 @@ return function(props: props)
 			x_position(position.X + offset.X)
 			y_position(position.Y + offset.Y)
 		end)
-
 	end))
 
 	return create "ScreenGui" {
@@ -146,7 +144,7 @@ return function(props: props)
 		Name = widget_id,
 
 		DisplayOrder = display_order,
-		
+
 		Enabled = enabled,
 
 		vide.action(ref),
@@ -159,8 +157,6 @@ return function(props: props)
 			Size = function()
 				return UDim2.fromOffset(x_size() + 6, y_size() + 6)
 			end,
-
-			vide.action(fast_update),
 
 			Active = true,
 
@@ -244,8 +240,7 @@ return function(props: props)
 					can_resize_left = can_resize_left,
 					can_resize_right = can_resize_right,
 
-					resizing = resizing
-
+					resizing = resizing,
 				},
 
 				container {

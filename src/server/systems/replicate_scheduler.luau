@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 
-local common_actor_id = require(script.Parent.Parent.Parent.common_actor_id)
 local gorp = require(script.Parent.Parent.Parent.gorp)
 local queue = require(script.Parent.Parent.Parent.modules.queue)
 local remotes = require(script.Parent.Parent.Parent.remotes)

@@ -1,6 +1,5 @@
 local Players = game:GetService("Players")
 
-local common_actor_id = require(script.Parent.Parent.Parent.common_actor_id)
 local generic_ecs_layer = require(script.Parent.Parent.Parent.generic_ecs_layer)
 local gorp = require(script.Parent.Parent.Parent.gorp)
 local queue = require(script.Parent.Parent.Parent.modules.queue)
@@ -85,13 +84,12 @@ local function generate_update_callback(
 		if system.average:updated() == false then return end
 
 		local latest_time = system.average.values[#system.average.values]
-		
+
 		local b = buffer.create(10)
 		buffer.writeu32(b, 0, subscription_id)
 		buffer.writeu16(b, 4, packet_frame)
 		buffer.writef32(b, 6, latest_time)
 
-		
 		packet_frame += 1
 
 		remotes.replicate_system_times:fire(target, b, packets)

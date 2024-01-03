@@ -27,8 +27,6 @@ type Table<T = any> = {
 	display: ((column: number, row: () -> number) -> Instance)?,
 }
 
-local none = newproxy() -- symbol
-
 return function<T>(props: Table<T>)
 	local rows = props.rows
 	local meaning = props.meaning
