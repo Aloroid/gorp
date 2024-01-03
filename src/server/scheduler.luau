@@ -108,7 +108,7 @@ local function new_scheduler(scheduler_name: string, max: number?)
 		local system_id = system_names[name]
 
 		if system_id == nil then
-			create_system(name, i)
+			system_id = create_system(name, i)
 		else
 			task.spawn(
 				assert,
