@@ -1,7 +1,7 @@
 [package]
 name = "aloroid/gorp"
 description = "ecr debugger new"
-version = "0.2.0-indev6"
+version = "0.2.0-indev7"
 registry = "https://github.com/UpliftGames/wally-index"
 include = ["src", "default.project.json", "LICENSE", ".luaurc"]
 exclude = [

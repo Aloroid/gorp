@@ -10,6 +10,7 @@ local RunService = game:GetService("RunService")
 
 local common_actor_id = require(script.Parent.common_actor_id)
 local events = require(script.events)
+local generic_ecs_layer = require(script.Parent.generic_ecs_layer)
 local remotes = require(script.Parent.remotes)
 local scheduler = require(script.scheduler)
 local server_state = require(script.server_state)
@@ -25,7 +26,7 @@ local replicate_system_performance = require(script.systems.replicate_system_per
 --- Adds the given world
 local function add_world<T>(world: T, name: string?): T
 	local default_name = `World {#server_state.registries}`
-	world = (table.clone(world :: any) :: any) :: typeof(world)
+	world = generic_ecs_layer.on_hook_world(world)
 
 	local entry = {
 		name = name or default_name,
@@ -57,7 +58,7 @@ end
 
 local function get_worlds()
 	local worlds = {}
-	for _,  world in server_state.registries do
+	for _, world in server_state.registries do
 		table.insert(worlds, world.world)
 	end
 	return worlds
@@ -71,7 +72,6 @@ local function get_components()
 		map_ctype_index = server_state.map_ctype_index,
 		ctype_index_names = server_state.ctype_index_names,
 		ctypes = server_state.ctypes,
-
 	}
 end
 
