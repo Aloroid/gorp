@@ -60,6 +60,7 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 		ids[highest_id] = index
 		world()[index] = highest
 		world()[#world()] = nil
+		ids[id] = nil
 
 		world(world())
 	end
