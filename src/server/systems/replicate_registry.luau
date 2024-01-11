@@ -59,8 +59,6 @@ local function resolve_query(query: dynamic_ecs_query.ParsedECSQuery, world: unk
 	local equal_components = query.equal
 	local equal_values = query.equal_values
 
-	if #included_components == 0 then return {} end
-
 	local view = generic_ecs_layer.query(world, included_components, excluded_components)
 	local ids = {}
 
@@ -110,12 +108,16 @@ local function generate_update_callback(
 		local new_replicated = {}
 
 		local removing = {} -- entities to be removed from list
-		local changing = {} -- entities that has changed values
+		local changing = {
+			[1] = { 1 :: any, {}, {} },
+		} -- entities that has changed values
 		local did_change = false
 
 		for index, ctype in query.included do
-			changing[index] = { server_state.map_ctype_index[ctype] :: any, {}, {} }
+			changing[index] = { index :: any, {}, {} }
 		end
+
+		if #query.included == 0 then changing[1] = { 1 :: any, {}, {} } end
 
 		for _, id in resolve_query(query, world) do
 			new_replicated[id] = true
@@ -135,8 +137,14 @@ local function generate_update_callback(
 			else
 				currently_replicated[id] = nil
 				-- a new entity has been added so we add that too
+				did_change = true
+
+				if #query.included == 0 then
+					table.insert(changing[1][2], id)
+					table.insert(changing[1][3], false)
+				end
+
 				for index, ctype in query.included do
-					did_change = true
 					table.insert(changing[index][2], id)
 					table.insert(changing[index][3], transform(generic_ecs_layer.get(world, id, ctype)))
 				end
@@ -154,8 +162,14 @@ local function generate_update_callback(
 		table.clear(changed)
 
 		if did_change then
+			local replicated_changes = {}
+
+			for _, changes in changing do
+				table.insert(replicated_changes, changes)
+			end
+
 			--print("sending new packet", changing, removing)
-			remotes.replicate_query_data:fire(target, query_id, changing, removing)
+			remotes.replicate_query_data:fire(target, query_id, replicated_changes, removing)
 		end
 
 		debug.profileend()

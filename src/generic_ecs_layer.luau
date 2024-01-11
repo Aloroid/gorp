@@ -32,8 +32,12 @@ return {
 
 	--- This function will be used to iterate over a given query.
 	query = function(world, included, excluded)
+		local i = 1
+		local m = 10
 		return function()
-			return nil
+			i += 1
+			if m == i then return nil end
+			return i - 1
 		end
 	end,
 
@@ -62,6 +66,7 @@ return {
 	--- This function will be used to get a value from a component
 	get: (world: World, id: Entity, component: Component) -> unknown?,
 	--- This function will be used to iterate over a given query.
+	--- When no included components or excluded components are given, this function expects to iterate over all the entities in the world.
 	query: (world: World, included: { Component }, excluded: { Component }) -> () -> Entity,
 	--- This function will be used to write a value to the world
 	write: (world: World, id: Entity, component: Component, value: unknown) -> (),

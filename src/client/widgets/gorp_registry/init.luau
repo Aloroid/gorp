@@ -104,6 +104,7 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 		if server_query_id() == -1 then task.wait() end -- yield a little so that the other packet gets processed first
 
 		--print("received new packet from", connector, query_id, "current query is", server_query_id())
+		--print(all_changes)
 
 		if namespace ~= inbound_namespace then return end
 		if connector.from ~= actor_id then return end
@@ -116,14 +117,15 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 			local server_ctype, entities, values = changes[1], changes[2], changes[3]
 			local ctype_index = table.find(parsed.included, server_ctype)
 
-			if ctype_index == nil then continue end
+			if ctype_index == nil and server_ctype ~= 1 then continue end
+			if server_ctype == 1 then ctype_index = 1 end
+			assert(ctype_index)
 
 			for index, entity in entities do
 				local value = values[index]
 				local entity = world()[get_entity_index(entity)]
 
 				entity()[ctype_index + 1] = value
-				--print(entity())
 				entity(entity())
 			end
 		end
