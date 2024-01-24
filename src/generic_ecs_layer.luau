@@ -33,11 +33,11 @@ return {
 	--- This function will be used to iterate over a given query.
 	query = function(world, included, excluded)
 		local i = 1
-		local m = 10
+		local m = 10000
 		return function()
 			i += 1
 			if m == i then return nil end
-			return i - 1
+			return math.random(1, 10000)
 		end
 	end,
 

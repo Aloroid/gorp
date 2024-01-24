@@ -92,6 +92,14 @@ local function create_event<T...>(name: string, unreliable: boolean?, do_not_blo
 		type = "event",
 	} :: NetEvent<T...>
 
+	local connections = {}
+
+	local function local_fire(...)
+		for _, callback in connections :: any do
+			callback(...)
+		end
+	end
+
 	function event:fire(connector: connector, ...)
 		local server_to_server = RunService:IsServer() and connector.namespace == "server"
 		local client_to_client = RunService:IsClient() and connector.namespace == "client"
@@ -100,6 +108,12 @@ local function create_event<T...>(name: string, unreliable: boolean?, do_not_blo
 			connector = table.clone(connector)
 			connector.player = connector.player or Players.LocalPlayer
 			connector.from = common_actor_id
+
+			if connector.to == common_actor_id then
+				local_fire(connector, ...)
+				return
+			end
+
 			remote.actor:Fire(connector, ...)
 		else
 			if RunService:IsServer() then
@@ -120,7 +134,7 @@ local function create_event<T...>(name: string, unreliable: boolean?, do_not_blo
 	end
 
 	function event:connect(callback: (connector: connector, ...any) -> ())
-		return remote.actor.Event:Connect(function(connector: connector, ...)
+		local function on_fire(connector: connector, ...)
 			if
 				connector.to ~= common_actor_id and connector.to ~= nil
 				or RunService:IsServer() and connector.namespace ~= "server"
@@ -131,9 +145,21 @@ local function create_event<T...>(name: string, unreliable: boolean?, do_not_blo
 				do_not_block_traffic == true or traffic_check.check_player(Players.LocalPlayer),
 				`{Players.LocalPlayer} tried to fire gorp server`
 			)
-
 			callback(connector, ...)
-		end)
+		end
+
+		local connection = remote.actor.Event:Connect(on_fire)
+
+		local t = {
+			Disconnect = function()
+				connections[connection] = nil
+				connection:Disconnect()
+			end,
+		}
+
+		connections[connection] = on_fire
+
+		return t :: any
 	end
 
 	if RunService:IsServer() then
@@ -147,11 +173,19 @@ local function create_event<T...>(name: string, unreliable: boolean?, do_not_blo
 
 			connector.player = player
 
-			remote.actor:Fire(connector, ...)
+			if connector.to == common_actor_id then
+				local_fire(connector, ...)
+			else
+				remote.actor:Fire(connector, ...)
+			end
 		end)
 	else
-		remote.OnClientEvent:Connect(function(connector, ...)
-			remote.actor:Fire(connector, ...)
+		remote.OnClientEvent:Connect(function(connector: connector, ...)
+			if connector.to == common_actor_id then
+				local_fire(connector, ...)
+			else
+				remote.actor:Fire(connector, ...)
+			end
 		end)
 	end
 
@@ -165,7 +199,7 @@ local function create_callback<T..., U...>(name: string, do_not_block_traffic: b
 	} :: NetCallback<T..., U...>
 
 	local id = 0
-	local current_callback = function(...)
+	local current_callback = function(connector: connector, ...: T...): U...
 		error("did not specify callback")
 	end
 
@@ -183,6 +217,11 @@ local function create_callback<T..., U...>(name: string, do_not_block_traffic: b
 
 		connector = table.clone(connector)
 		if client_to_client or server_to_server then
+			connector.from = connector.from or common_actor_id
+			connector.player = connector.player or Players.LocalPlayer
+
+			if connector.to == common_actor_id then return current_callback(connector, ...) end
+
 			id += 1
 			local stored = id
 
@@ -194,9 +233,6 @@ local function create_callback<T..., U...>(name: string, do_not_block_traffic: b
 
 				t = { ... }
 			end)
-
-			connector.from = connector.from or common_actor_id
-			connector.player = connector.player or Players.LocalPlayer
 			remote.actor:Fire(connector, common_actor_id, stored, ...)
 
 			-- coroutine.yield breaks stuff

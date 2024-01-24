@@ -13,6 +13,7 @@ local vide = require(script.Parent.Parent.Parent.Parent.vide)
 local source = vide.source
 local derive = vide.derive
 local effect = vide.effect
+local batch = vide.batch
 local cleanup = vide.cleanup
 
 type Source<T> = vide.Source<T>
@@ -72,33 +73,38 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 	effect(function()
 		local query = current_raw_query()
 		local parsed = parsed_query()
+		local received_query_id = -1
 
 		-- kill the query on the server and remove any existing data
 		if previous_query_id ~= -1 then
-			remotes.stop_replicated_query:fire(connector, previous_query_id)
 			table.clear(ids)
-
 			world({})
 		end
 
 		previous_query_id = -1
 		server_query_id(-1)
 
+		cleanup(function()
+			task.wait() -- yield a bit in order to allow query to stop
+			if received_query_id == -1 then return end
+			remotes.stop_replicated_query:fire(connector, received_query_id)
+		end)
+
 		task.defer(function()
 			-- if the query is invalid, the query_id will be -1. this is for types
-			server_query_id(
+			received_query_id = (
 				if parsed.ok == false
 					then -1
 					else remotes.get_new_replicated_query:invoke(connector, query, registry_id)
 			)
+			server_query_id(received_query_id)
 			previous_query_id = server_query_id()
 
 			--print("received new query id", server_query_id())
 		end)
 	end)
 
-	-- updates the internal registry to reflect the current world
-	cleanup(remotes.replicate_query_data:connect(function(connector, query_id, all_changes, destroying)
+	local function replicate_query_data(connector, query_id, all_changes, destroying)
 		local inbound_namespace = connector.player and "client" or "server"
 
 		if server_query_id() == -1 then task.wait() end -- yield a little so that the other packet gets processed first
@@ -145,6 +151,15 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 		end
 
 		--print("received replication packet", world())
+	end
+
+	-- updates the internal registry to reflect the current world
+	cleanup(remotes.replicate_query_data:connect(function(connector, query_id, all_changes, destroying)
+		debug.profilebegin("update registry ui")
+		batch(function()
+			replicate_query_data(connector, query_id, all_changes, destroying)
+		end)
+		debug.profileend()
 	end))
 
 	return registry_explorer {

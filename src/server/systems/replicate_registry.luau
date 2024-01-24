@@ -202,7 +202,6 @@ return function()
 
 	for connector, query_id in stop_replicated_query:iter() do
 		-- just nil the active query
-		--print("stopped query", query_id)
 		active_queries[query_id] = nil
 		associated_with[query_id] = nil
 	end
