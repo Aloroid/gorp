@@ -52,6 +52,11 @@ return function(props: {
 				return world()[row()]()[column]
 			end
 
+			local function id()
+				if world()[row()] == nil then return nil :: any end
+				return world()[row()]()[1]
+			end
+
 			local radius = style.corner_radius
 			local background = style.button
 			style.corner_radius = UDim.new()
@@ -77,7 +82,7 @@ return function(props: {
 
 				activated = function()
 					if on_click_field == nil then return end
-					on_click_field(value(), ctype())
+					on_click_field(id(), ctype())
 				end,
 			}
 
