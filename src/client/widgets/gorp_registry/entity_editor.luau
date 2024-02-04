@@ -39,7 +39,7 @@ return function(props: props)
 			local associated_value = values[index]
 
 			initial_type = typeof(associated_value)
-			text(rbxjson.encode(associated_value))
+			text(rbxjson.prettify(rbxjson.encode(associated_value)))
 			disabled(false)
 		else
 			local dict = {}
@@ -48,7 +48,7 @@ return function(props: props)
 				dict[server.ctypes[ctype]] = values[index]
 			end
 
-			text(rbxjson.encode(dict))
+			text(rbxjson.prettify(rbxjson.encode(dict)))
 			disabled(false)
 		end
 	end)
