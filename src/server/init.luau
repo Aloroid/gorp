@@ -86,6 +86,8 @@ local server = {
 	scheduler = scheduler,
 
 	components = server_state.registered_components,
+	map_ctype_to_index = server_state.map_ctype_index,
+	map_index_to_ctype = server_state.ctype_index,
 }
 
 local server_scheduler = scheduler(`gorpserver:{common_actor_id}`)

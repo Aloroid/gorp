@@ -17,7 +17,10 @@ return {
 	scheduler = server.scheduler,
 	names = server.names,
 	get_worlds = server.get_worlds,
+
 	components = server.components,
+	map_ctype_to_index = server.map_ctype_to_index,
+	map_index_to_ctype = server.map_index_to_ctype,
 
 	overwrite_check_function = traffic_check.overwrite_check_function,
 
