@@ -8,6 +8,10 @@ local net = require(script.Parent.modules.net)
 
 export type connector = net.connector
 
+type Entity = unknown
+type ComponentReference = number
+type Value = unknown
+
 type NetEvent<T...> = net.NetEvent<T...>
 type NetCallback<T..., U...> = net.NetCallback<T..., U...>
 
@@ -38,10 +42,13 @@ return {
 	subscribe_system = net.create_callback("subscribe_system"),
 	unsubscribe_system = net.create_event("unsubscribe_system"),
 	replicate_system_times = net.create_event("replicate_system_times", true),
+
+	get_entity_data = net.create_callback("get_entity_data"),
+	write_entity_data = net.create_event("write_entity_data"),
 } :: {
 
 	replicate_core_data: NetEvent<{ { name: string, id: number } }, { { name: string, id: number } }>,
-	replicate_components: NetEvent<{ [unknown]: unknown }>,
+	replicate_components: NetEvent<{ [ComponentReference]: string }>,
 	request_servers: NetEvent<>,
 	new_server: NetEvent<>,
 
@@ -62,4 +69,7 @@ return {
 	--- Gives us the active subscription_id and the associated system's time that it took to run for the last frame.
 	--- (packet: buffer)
 	replicate_system_times: NetEvent<(buffer, { { any } })>,
+
+	get_entity_data: NetCallback<(number, Entity), ({ ComponentReference }, { Value })>,
+	write_entity_data: NetEvent<(number, Entity, { ComponentReference }, { Value })>,
 }

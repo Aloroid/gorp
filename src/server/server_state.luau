@@ -6,7 +6,7 @@
 
 local gorp = require(script.Parent.Parent.gorp)
 
-local entity = newproxy()
+local entity = "_gorp_long_key_no_one_will_likely_use_❤❤"
 
 return {
 	registries = {} :: { { name: string, world: unknown } },

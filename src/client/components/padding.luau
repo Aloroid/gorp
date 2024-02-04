@@ -3,7 +3,7 @@ local vide = require(script.Parent.Parent.Parent.Parent.vide)
 
 local create = vide.create
 
-local function padding(props)
+local function padding(props: vide.vUIPadding)
 	return create "UIPadding" {
 
 		PaddingTop = style.padding,

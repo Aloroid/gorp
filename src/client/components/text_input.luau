@@ -10,6 +10,8 @@ local padding = require(script.Parent.padding)
 local create = vide.create
 local source = vide.source
 local effect = vide.effect
+local spring = vide.spring
+local read = vide.read
 local untrack = vide.untrack
 
 type text_input = {
@@ -23,11 +25,11 @@ type text_input = {
 	automatic_size: Enum.AutomaticSize?,
 	text_y_alignment: Enum.TextYAlignment?,
 
-	disabled: vide.Source<boolean>?,
+	disabled: (boolean | () -> boolean)?,
 
 	focus_lost: ((text: string, enter_pressed: boolean) -> ())?,
 
-	layout: { [any]: any }?,
+	layout: vide.vFrame?,
 }
 
 local function text_input(props: text_input)
@@ -40,6 +42,8 @@ local function text_input(props: text_input)
 	local text_size = source(UDim2.new())
 	local focused = source(false)
 	local focus_lost = props.focus_lost or function() end :: never
+
+	local disabled = props.disabled
 
 	effect(function()
 		local position = cursor_position()
@@ -90,7 +94,7 @@ local function text_input(props: text_input)
 		vide.changed("AbsoluteSize", clip_absolute_size),
 		AutomaticSize = props.automatic_size or Enum.AutomaticSize.None,
 
-		props.layout,
+		props.layout :: any,
 
 		create "TextBox" {
 
@@ -99,7 +103,9 @@ local function text_input(props: text_input)
 
 			BackgroundTransparency = 1,
 
-			TextEditable = props.disabled,
+			TextEditable = function()
+				return not read(disabled)
+			end,
 
 			MultiLine = props.multi_line or false,
 
@@ -107,7 +113,13 @@ local function text_input(props: text_input)
 			Font = Enum.Font.Code,
 			PlaceholderText = props.placeholder_text,
 
-			TextColor3 = style.text,
+			TextColor3 = spring(function()
+				if read(disabled) then
+					return style.sub_text
+				else
+					return style.text
+				end
+			end),
 			PlaceholderColor3 = style.sub_text,
 			AutomaticSize = props.automatic_size or Enum.AutomaticSize.None,
 
@@ -121,7 +133,9 @@ local function text_input(props: text_input)
 			vide.changed("Text", text),
 			vide.changed("CursorPosition", cursor_position),
 
-			Focused = function() focused(true) end,
+			Focused = function()
+				focused(true)
+			end,
 
 			FocusLost = function(enter)
 				focused(false)

@@ -10,9 +10,6 @@ local RunService = game:GetService("RunService")
 
 local common_actor_id = require(script.Parent.Parent.common_actor_id)
 local traffic_check = require(script.Parent.traffic_check)
-local vide = require(script.Parent.Parent.Parent.vide)
-
-local untrack = vide.untrack
 
 type namespace = "client" | "server"
 export type connector = {

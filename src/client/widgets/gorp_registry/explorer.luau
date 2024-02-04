@@ -6,7 +6,7 @@
 
 local button = require(script.Parent.Parent.Parent.components.button)
 local container = require(script.Parent.Parent.Parent.components.container)
-local custom_data = require(script.Parent.Parent.Parent.Parent.modules.custom_data)
+local custom_data = require(script.Parent.Parent.Parent.Parent.modules.encoders)
 local generic_ecs_layer = require(script.Parent.Parent.Parent.Parent.generic_ecs_layer)
 local gorp = require(script.Parent.Parent.Parent.Parent.gorp)
 local style = require(script.Parent.Parent.Parent.style)
@@ -19,7 +19,7 @@ return function(props: {
 	parsed_query: Source<gorp.ParsedECSQuery>,
 	world: vide.Source<{ vide.Source<{ unknown }> }>,
 
-	on_click_field: ((id: number, ctype: number) -> ())?,
+	on_click_field: ((id: unknown, ctype: number?) -> ())?,
 })
 	local parsed_query = props.parsed_query
 	local world = props.world
@@ -77,7 +77,7 @@ return function(props: {
 
 				activated = function()
 					if on_click_field == nil then return end
-					on_click_field(value()[1] :: number, ctype())
+					on_click_field(value(), ctype())
 				end,
 			}
 

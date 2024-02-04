@@ -14,6 +14,7 @@ local corner = require(script.Parent.corner)
 
 local create = vide.create
 local source = vide.source
+local read = vide.read
 
 type Button = {
 
@@ -23,13 +24,10 @@ type Button = {
 	color: (Color3 | () -> Color3)?,
 	alignment: (Enum.TextXAlignment | () -> Enum.TextXAlignment)?,
 	padding: number?,
+	disabled: (boolean | () -> boolean)?,
 
-	layout: {
-		[any]: any,
-	}?,
-	child: {
-		[any]: any,
-	}?,
+	layout: vide.vTextButton?,
+	child: vide.vFrame?,
 
 	activated: (() -> ())?,
 }
@@ -37,6 +35,7 @@ type Button = {
 local function button(props: Button)
 	local hovering = source(false)
 	local pressed = source(false)
+	local disabled = props.disabled or false
 
 	local background = style.button
 
@@ -45,8 +44,14 @@ local function button(props: Button)
 		Size = UDim2.new(1, 0, 0, 24),
 		AutomaticSize = Enum.AutomaticSize.Y,
 
+		Active = function()
+			return not read(disabled)
+		end,
+
 		BackgroundColor3 = function()
-			if pressed() then
+			if read(disabled) then
+				return style.button_disabled
+			elseif pressed() then
 				return style.button_pressed
 			elseif hovering() then
 				return style.button_hovering
@@ -62,7 +67,15 @@ local function button(props: Button)
 		actions.pressed(pressed),
 
 		corner {},
-		border {},
+		border {
+			Color = function()
+				if read(disabled) then
+					return style.border_disabled
+				else
+					return style.border
+				end
+			end,
+		},
 
 		container {
 
@@ -89,7 +102,7 @@ local function button(props: Button)
 			PaddingRight = UDim.new(0, props.padding or 6),
 		},
 
-		props.layout,
+		props.layout :: any,
 	}
 end
 

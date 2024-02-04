@@ -1,6 +1,8 @@
 --!nolint LocalUnused
 
-local function fromHSV(h: number, s: number, l: number) return Color3.fromHSV(h / 360, s / 255, l / 255) end
+local function fromHSV(h: number, s: number, l: number)
+	return Color3.fromHSV(h / 360, s / 255, l / 255)
+end
 
 local dark = {
 
@@ -15,6 +17,7 @@ local dark = {
 	button = fromHSV(0, 0, 62),
 	button_hovering = fromHSV(0, 0, 70),
 	button_pressed = fromHSV(0, 0, 36),
+	button_disabled = fromHSV(0, 0, 60),
 
 	tab_background = fromHSV(0, 0, 46),
 	tab_hovering = fromHSV(0, 0, 80),
@@ -22,6 +25,7 @@ local dark = {
 
 	border = fromHSV(0, 0, 36),
 	border_selected = fromHSV(201, 202, 255),
+	border_disabled = fromHSV(0, 0, 53),
 	thickness = 1,
 
 	text = fromHSV(0, 0, 240),
@@ -30,6 +34,45 @@ local dark = {
 	font_size = 18,
 
 	scroll_bar = fromHSV(0, 0, 70),
+
+	padding = UDim.new(0, 8),
+
+	corner_radius = UDim.new(0, 4),
+
+	microprofiler_bar_top = Color3.fromRGB(253, 189, 145),
+	microprofiler_bar_bot = Color3.fromRGB(149, 85, 41),
+}
+
+local roses = {
+
+	background = fromHSV(331, 47, 46),
+	foreground = fromHSV(331, 47, 52),
+
+	close_button = fromHSV(331, 47, 70), --fromHSV(354, 236, 232),
+	close_button_pressed = fromHSV(331, 47, 36), --fromHSV(355, 136, 241),
+
+	input = fromHSV(331, 47, 40),
+
+	button = fromHSV(331, 47, 62),
+	button_hovering = fromHSV(331, 47, 70),
+	button_pressed = fromHSV(331, 47, 36),
+	button_disabled = fromHSV(331, 47, 60),
+
+	tab_background = fromHSV(331, 47, 46),
+	tab_hovering = fromHSV(331, 47, 80),
+	tab_selected = fromHSV(331, 47, 36),
+
+	border = fromHSV(331, 47, 36),
+	border_selected = fromHSV(331, 104, 255),
+	border_disabled = fromHSV(331, 47, 53),
+	thickness = 1,
+
+	text = fromHSV(331, 21, 240),
+	sub_text = fromHSV(331, 21, 170),
+	font = Enum.Font.SourceSans,
+	font_size = 18,
+
+	scroll_bar = fromHSV(331, 47, 70),
 
 	padding = UDim.new(0, 8),
 
@@ -109,4 +152,4 @@ local stupid = {
 	microprofiler_bar_bot = Color3.fromRGB(149, 85, 41),
 }
 
-return dark
+return roses

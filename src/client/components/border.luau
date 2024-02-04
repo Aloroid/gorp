@@ -10,7 +10,7 @@ local vide = require(script.Parent.Parent.Parent.Parent.vide)
 
 local create = vide.create
 
-local function corner(props)
+local function corner(props: vide.vUIStroke)
 	return create "UIStroke" {
 
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,

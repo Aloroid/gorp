@@ -17,7 +17,7 @@ local connector_connecting = queue(remotes.request_servers)
 
 return function()
 	local function replicate_components(connector: remotes.connector)
-		remotes.replicate_components:fire(connector, convert_dict.serialize(server_state.ctypes))
+		remotes.replicate_components:fire(connector, convert_dict.serialize(server_state.ctypes) :: any)
 	end
 
 	for connector in connector_connecting:iter() do

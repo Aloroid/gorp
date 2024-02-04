@@ -5,6 +5,7 @@
 ]]
 
 local dynamic_ecs_query = require(script.Parent.Parent.Parent.modules.dynamic_ecs_query)
+local entity_editor = require(script.entity_editor)
 local registry_explorer = require(script.interface)
 local remotes = require(script.Parent.Parent.Parent.remotes)
 local servers = require(script.Parent.Parent.servers)
@@ -184,7 +185,16 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 
 		cts = map_names,
 
-		on_click_field = function() end,
+		on_click_field = function(id, ctype)
+			entity_editor {
+
+				entity = id,
+				ctype = ctype,
+				registry_id = registry_id,
+
+				connector = connector,
+			}
+		end,
 
 		on_cleanup = destroy,
 	}

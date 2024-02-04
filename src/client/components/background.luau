@@ -10,9 +10,7 @@ local vide = require(script.Parent.Parent.Parent.Parent.vide)
 
 local create = vide.create
 
-type Background = { [any]: any }
-
-local function background(props: Background)
+local function background(props: vide.vFrame)
 	return create "Frame" {
 
 		Size = UDim2.fromScale(1, 1),

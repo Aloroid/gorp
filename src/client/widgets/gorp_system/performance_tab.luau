@@ -1,15 +1,15 @@
-local vide = require(script.Parent.Parent.Parent.Parent.Parent.vide)
-local convert_scale = require(script.Parent.Parent.Parent.Parent.modules.convert_scale)
 local background = require(script.Parent.Parent.Parent.components.background)
 local button = require(script.Parent.Parent.Parent.components.button)
 local container = require(script.Parent.Parent.Parent.components.container)
+local convert_scale = require(script.Parent.Parent.Parent.Parent.modules.convert_scale)
 local layout = require(script.Parent.Parent.Parent.components.layout)
 local padding = require(script.Parent.Parent.Parent.components.padding)
 local pane = require(script.Parent.Parent.Parent.components.pane)
-local scrolling_frame = require(script.Parent.Parent.Parent.components.scrolling_frame)
-local text = require(script.Parent.Parent.Parent.components.text)
-local style = require(script.Parent.Parent.Parent.style)
 local profiler = require(script.Parent.profiler)
+local scrolling_frame = require(script.Parent.Parent.Parent.components.scrolling_frame)
+local style = require(script.Parent.Parent.Parent.style)
+local text = require(script.Parent.Parent.Parent.components.text)
+local vide = require(script.Parent.Parent.Parent.Parent.Parent.vide)
 
 local source = vide.source
 local derive = vide.derive
@@ -18,14 +18,15 @@ local indexes = vide.indexes
 type props = {
 
 	system_name: string,
-	system_times: () -> {number},
-	system_labels: {{
-		category: string,
-		labels: () -> {string}
-	}},
+	system_times: () -> { number },
+	system_labels: {
+		{
+			category: string,
+			labels: () -> { string },
+		}
+	},
 
-	destroy: () -> ()
-
+	destroy: () -> (),
 }
 
 local function scale(n: number)
@@ -33,7 +34,6 @@ local function scale(n: number)
 end
 
 return function(props: props)
-
 	local system_times = props.system_times
 	local system_labels = props.system_labels
 
@@ -73,25 +73,25 @@ return function(props: props)
 		pane {
 
 			layout {},
-			
+
 			profiler {
 				max = budget,
-				values = system_times
+				values = system_times,
 			},
 
 			text {
 
 				text = function()
-					return `budget: {scale(budget())}\tmax: {scale(max())}\tmin: {scale(min())}\taverage: {scale(average())}`
+					return `budget: {scale(budget())}\tmax: {scale(max())}\tmin: {scale(min())}\taverage: {scale(
+						average()
+					)}`
 				end,
 
 				layout = {
 					TextWrapped = true,
-					TextXAlignment = Enum.TextXAlignment.Left
-				}
-
-			}
-
+					TextXAlignment = Enum.TextXAlignment.Left,
+				},
+			},
 		},
 
 		scrolling_frame {
@@ -120,15 +120,15 @@ return function(props: props)
 					AutomaticSize = Enum.AutomaticSize.Y,
 
 					layout {},
-					
+
 					text {
 						text = function()
 							return label().category
 						end,
 
 						layout = {
-							LayoutOrder = 0
-						}
+							LayoutOrder = 0,
+						},
 					} :: any,
 
 					indexes(labels, function(label, index)
@@ -140,39 +140,34 @@ return function(props: props)
 							text = function()
 								return splitted()[1]
 							end,
-	
+
 							child = {
-								padding {PaddingLeft = UDim.new(0, 2)}
+								padding { PaddingLeft = UDim.new(0, 2) } :: Instance,
 							},
-	
+
 							layout = {
 								Size = UDim2.new(1, 0, 0, 30),
-	
+
+								LayoutOrder = index,
+
 								text {
-	
+
 									text = function()
 										return splitted()[2] or ""
 									end,
 									text_size = 14,
-	
+
 									layout = {
 										TextColor3 = style.sub_text,
 										Position = UDim2.fromScale(1, 0.5),
 										AnchorPoint = Vector2.new(1, 0.5),
 									},
-								},
-
-								LayoutOrder = index
-	
-							}
+								} :: Instance,
+							},
 						}
-					end)
-
+					end),
 				}
-			end)
-
-		}
-
+			end),
+		},
 	}
-
 end
