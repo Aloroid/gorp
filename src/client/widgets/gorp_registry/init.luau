@@ -13,7 +13,6 @@ local vide = require(script.Parent.Parent.Parent.Parent.vide)
 local source = vide.source
 local derive = vide.derive
 local effect = vide.effect
-local batch = vide.batch
 local cleanup = vide.cleanup
 
 type Source<T> = vide.Source<T>
@@ -45,7 +44,7 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 		world()[index] = source { id }
 		ids[id] = index
 
-		world(world())
+		--world(world())
 
 		return index
 	end
@@ -63,7 +62,7 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 		world()[#world()] = nil
 		ids[id] = nil
 
-		world(world())
+		--world(world())
 	end
 
 	local parsed_query = derive(function()
@@ -106,8 +105,6 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 
 	local function replicate_query_data(connector, query_id, all_changes, destroying)
 		local inbound_namespace = connector.player and "client" or "server"
-
-		if server_query_id() == -1 then task.wait() end -- yield a little so that the other packet gets processed first
 
 		--print("received new packet from", connector, query_id, "current query is", server_query_id())
 		--print(all_changes)
@@ -156,9 +153,22 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 	-- updates the internal registry to reflect the current world
 	cleanup(remotes.replicate_query_data:connect(function(connector, query_id, all_changes, destroying)
 		debug.profilebegin("update registry ui")
-		batch(function()
-			replicate_query_data(connector, query_id, all_changes, destroying)
-		end)
+		local inbound_namespace = connector.player and "client" or "server"
+
+		--print("received new packet from", connector, query_id, "current query is", server_query_id())
+		--print(all_changes)
+
+		if namespace ~= inbound_namespace then return end
+		if connector.from ~= actor_id then return end
+		if server_query_id() == -1 then task.wait() end -- yield a little so that the other packet gets processed first
+		if server_query_id() ~= query_id then return end
+
+		--batch(function()
+		--print("start batch")
+		replicate_query_data(connector, query_id, all_changes, destroying)
+		world(world())
+		--print("end batch")
+		--end)
 		debug.profileend()
 	end))
 
@@ -167,7 +177,6 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 		query = current_raw_query,
 		set_query = function(new_query: string)
 			current_raw_query(new_query)
-			return current_raw_query()
 		end,
 
 		world = world,

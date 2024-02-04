@@ -1,3 +1,4 @@
+local RunService = game:GetService("RunService")
 --[[
 
 	A generic layer for ECS to make implementing support for other ECS modules
@@ -27,7 +28,7 @@ return {
 
 	--- This function will be used to get a value from a component
 	get = function(world, id, ctype)
-		return "no impl"
+		return math.random(1, 1000)
 	end,
 
 	--- This function will be used to iterate over a given query.
@@ -37,7 +38,7 @@ return {
 		return function()
 			i += 1
 			if m == i then return nil end
-			return math.random(1, 10000)
+			return i --math.random(1, 10000)
 		end
 	end,
 

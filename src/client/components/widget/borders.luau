@@ -9,7 +9,6 @@ local vide = require(script.Parent.Parent.Parent.Parent.Parent.vide)
 local create = vide.create
 local source = vide.source
 local spring = vide.spring
-local batch = vide.batch
 local changed = vide.changed
 local cleanup = vide.cleanup
 
@@ -70,11 +69,8 @@ return function(props: props)
 		local top_inset, bottom_inset = GuiService:GetGuiInset()
 		mposition -= top_inset + bottom_inset
 
-		batch(function()
-			if MIN_SIZE.X ~= absolute_size().X or not resizing() then x(mposition.X) end
-
-			if MIN_SIZE.Y ~= absolute_size().Y or not resizing() then y(mposition.Y) end
-		end)
+		if MIN_SIZE.X ~= absolute_size().X or not resizing() then x(mposition.X) end
+		if MIN_SIZE.Y ~= absolute_size().Y or not resizing() then y(mposition.Y) end
 	end))
 
 	cleanup(RunService.RenderStepped:Connect(function()

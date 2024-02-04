@@ -10,6 +10,9 @@ local RunService = game:GetService("RunService")
 
 local common_actor_id = require(script.Parent.Parent.common_actor_id)
 local traffic_check = require(script.Parent.traffic_check)
+local vide = require(script.Parent.Parent.Parent.vide)
+
+local untrack = vide.untrack
 
 type namespace = "client" | "server"
 export type connector = {
@@ -95,8 +98,12 @@ local function create_event<T...>(name: string, unreliable: boolean?, do_not_blo
 	local connections = {}
 
 	local function local_fire(...)
+		local t = { ... }
 		for _, callback in connections :: any do
-			callback(...)
+			-- we have to run this one frame later
+			RunService.Heartbeat:Once(function()
+				callback(unpack(t))
+			end)
 		end
 	end
 

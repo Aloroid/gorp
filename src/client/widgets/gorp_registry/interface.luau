@@ -24,7 +24,7 @@ type Source<T> = vide.Source<T>
 
 return function(props: {
 	query: Source<string>,
-	set_query: (new_query: string) -> string,
+	set_query: (new_query: string) -> (),
 	on_click_field: (id: number, ctype: number) -> (),
 
 	cts: { [string]: any },

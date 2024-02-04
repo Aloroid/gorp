@@ -130,10 +130,8 @@ return function(props: props)
 		end
 
 		local position = UserInputService:GetMouseLocation()
-		vide.batch(function()
-			x_position(position.X + offset.X)
-			y_position(position.Y + offset.Y)
-		end)
+		x_position(position.X + offset.X)
+		y_position(position.Y + offset.Y)
 	end))
 
 	return create "ScreenGui" {
