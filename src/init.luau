@@ -17,7 +17,7 @@ return {
 	scheduler = server.scheduler,
 	names = server.names,
 	get_worlds = server.get_worlds,
-	get_components = server.get_components,
+	components = server.components,
 
 	overwrite_check_function = traffic_check.overwrite_check_function,
 

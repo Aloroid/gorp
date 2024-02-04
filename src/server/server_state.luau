@@ -32,4 +32,7 @@ return {
 	ctype_names = {
 		entity = entity,
 	} :: { [string]: unknown },
+
+	--- The actual list of components shared with the ecs layer
+	registered_components = {},
 }

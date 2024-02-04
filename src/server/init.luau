@@ -51,6 +51,8 @@ local function names<T>(components: T & { [string]: unknown }): T
 		server_state.map_ctype_index[ctype] = index
 		server_state.ctype_index_names[name] = index
 		server_state.ctypes[index] = name
+
+		table.insert(server_state.registered_components, ctype)
 	end
 
 	events.components_updated:fire(true)
@@ -65,7 +67,7 @@ local function get_worlds()
 	return worlds
 end
 
-local function get_components()
+--[[local function get_components()
 	return {
 
 		ctype_index = server_state.ctype_index,
@@ -75,13 +77,15 @@ local function get_components()
 		ctypes = server_state.ctypes,
 	}
 end
+]]
 
 local server = {
 	hook_world = add_world,
 	get_worlds = get_worlds,
-	get_components = get_components,
 	names = names,
 	scheduler = scheduler,
+
+	components = server_state.registered_components,
 }
 
 local server_scheduler = scheduler(`gorpserver:{common_actor_id}`)
