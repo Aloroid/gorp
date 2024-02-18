@@ -34,7 +34,7 @@ type props = {
 }
 
 local highest_display_order = 100000
-local RESIZE_RANGE = 16
+local RESIZE_RANGE = 4
 
 return function(props: props)
 	local widget_id = props.widget_id or props.title or ""
@@ -81,8 +81,15 @@ return function(props: props)
 	local top: Vector2
 	local bottom: Vector2
 
-	cleanup(RunService.Heartbeat:Connect(function()
-		resizing(resizing() and (UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)))
+	cleanup(UserInputService.InputEnded:Connect(function(input)
+		if
+			input.UserInputType ~= Enum.UserInputType.MouseButton1
+			and input.UserInputType ~= Enum.UserInputType.Touch
+		then
+			return
+		end
+		resizing(false)
+		dragging(false)
 	end))
 
 	cleanup(UserInputService.InputChanged:Connect(function(input: InputObject)
@@ -108,8 +115,8 @@ return function(props: props)
 
 	cleanup(UserInputService.InputBegan:Connect(function(input)
 		if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+		if not dragging() then resizing(true) end
 
-		resizing(true)
 		top = absolute_position()
 		bottom = absolute_position() + absolute_size()
 
@@ -239,7 +246,7 @@ return function(props: props)
 					can_resize_right = can_resize_right,
 
 					resizing = resizing,
-				},
+				} :: vide.vFrame,
 
 				container {
 					Name = "Container",
