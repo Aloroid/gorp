@@ -45,7 +45,9 @@ local function resizeable_bar(props: ResizeableBar)
 	local absolute_size = source(Vector2.one)
 	local absolute_position = source(Vector2.one)
 
-	local total = derive(function() return #meaning() end)
+	local total = derive(function()
+		return #meaning()
+	end)
 
 	local old_splits = {}
 	local splits_user = (props.splits :: never) or source({})
@@ -81,13 +83,19 @@ local function resizeable_bar(props: ResizeableBar)
 	end
 
 	effect(function()
-		local new = setmetatable({}, { __index = function() return source(0) end })
+		local new = setmetatable({}, {
+			__index = function()
+				return source(0)
+			end,
+		})
 
 		for i = 1, total() do
 			min_sizes()[i] = min_sizes()[i] or source(0.01)
 
 			cleanup(vide.mount(function()
-				new[i] = derive(function() return get_size(i) end)
+				new[i] = derive(function()
+					return get_size(i)
+				end)
 			end))
 		end
 
@@ -134,7 +142,7 @@ local function resizeable_bar(props: ResizeableBar)
 				border {},
 			}
 			style.corner_radius = store
-			return button
+			return button :: Instance
 		end),
 
 		vide.changed("AbsoluteSize", absolute_size),
@@ -156,7 +164,9 @@ local function resizeable_bar(props: ResizeableBar)
 			updating = nearest
 		end,
 
-		MouseButton1Up = function() down = false end,
+		MouseButton1Up = function()
+			down = false
+		end,
 
 		cleanup(RunService.Heartbeat:Connect(function()
 			local x = UserInputService:GetMouseLocation().X

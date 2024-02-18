@@ -4,6 +4,7 @@ local vide = require(script.Parent.Parent.Parent.Parent.vide)
 
 local background = require(script.Parent.background)
 local border = require(script.Parent.border)
+local container = require(script.Parent.container)
 local layout = require(script.Parent.layout)
 local text = require(script.Parent.text)
 
@@ -14,7 +15,7 @@ local indexes = vide.indexes
 export type tabs = {
 	{
 		name: string,
-		child: () -> Instance,
+		child: (active: () -> boolean) -> Instance,
 	}
 }
 
@@ -32,16 +33,25 @@ local function tabs(tabs: tabs)
 			Name = "Container",
 
 			Position = UDim2.fromOffset(0, 19),
-			Size = UDim2.new(1, 0, 1, -19),
+			Size = UDim2.new(1, 0, 1, -18),
 
-			function()
-				local current = selected()
-				vide.cleanup(vide.mount(function()
-					local object = tabs[current].child()
-					vide.cleanup(object)
-					return object
-				end, ref()))
-			end,
+			indexes(source(tabs), function(value, index)
+				local function is_active()
+					return selected() == index
+				end
+
+				local object = value().child(is_active)
+
+				return container {
+					Name = function()
+						return value().name
+					end,
+
+					Visible = is_active,
+
+					object,
+				} :: Instance
+			end),
 
 			border {},
 			layout {},
@@ -53,13 +63,15 @@ local function tabs(tabs: tabs)
 
 			Size = UDim2.new(1, 0, 0, 18),
 
-			BackgroundTransparency = 1,
+			BackgroundColor3 = style.tab_background,
 
 			create "UIListLayout" {
 				FillDirection = Enum.FillDirection.Horizontal,
 			},
 
-			indexes(source(tabs), function(value, index)
+			indexes(function()
+				return vide.read(tabs)
+			end, function(value, index)
 				local hovering = source(false)
 
 				return create "TextButton" {
@@ -72,7 +84,7 @@ local function tabs(tabs: tabs)
 						elseif hovering then
 							return style.tab_hovering
 						else
-							return style.tab_background
+							return style.tab_button_background
 						end
 					end,
 
@@ -85,7 +97,9 @@ local function tabs(tabs: tabs)
 
 					actions.hovering(hovering),
 
-					MouseButton1Down = function() selected(index) end,
+					MouseButton1Down = function()
+						selected(index)
+					end,
 
 					create "UIPadding" {
 						PaddingLeft = style.padding,
@@ -102,7 +116,7 @@ local function tabs(tabs: tabs)
 						text = value().name,
 						text_size = 14,
 					},
-				}
+				} :: Instance
 			end),
 		},
 	}

@@ -19,6 +19,7 @@ local dark = {
 	button_pressed = fromHSV(0, 0, 36),
 	button_disabled = fromHSV(0, 0, 60),
 
+	tab_button_background = fromHSV(0, 0, 46),
 	tab_background = fromHSV(0, 0, 46),
 	tab_hovering = fromHSV(0, 0, 80),
 	tab_selected = fromHSV(0, 0, 36),
@@ -58,9 +59,10 @@ local roses = {
 	button_pressed = fromHSV(331, 47, 36),
 	button_disabled = fromHSV(331, 47, 60),
 
-	tab_background = fromHSV(331, 47, 46),
+	tab_button_background = fromHSV(331, 47, 46),
 	tab_hovering = fromHSV(331, 47, 80),
 	tab_selected = fromHSV(331, 47, 36),
+	tab_background = fromHSV(331, 47, 40),
 
 	border = fromHSV(331, 47, 36),
 	border_selected = fromHSV(331, 104, 255),

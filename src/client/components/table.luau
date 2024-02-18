@@ -113,7 +113,7 @@ return function<T>(props: Table<T>)
 							display(index, row_index),
 
 							border {},
-						}
+						} :: Instance
 					end),
 
 					create "UIListLayout" {
