@@ -15,9 +15,9 @@ local function encode(value: any, layers: number?)
 
 	local encoder = datatypes[datatype]
 
-	if encoder == nil then return `{datatype}<{encoder(value, layers)}>` end
+	if encoder then return `{datatype}<{encoder(value, layers)}>` end
 
-	return encoder(value)
+	return `{datatype}<{tostring(value)}>`
 end
 
 local function get_key(key: unknown)
@@ -34,6 +34,10 @@ end
 
 primitives.number = function(input: number)
 	return string.format("%.14g", input)
+end
+
+primitives.boolean = function(input: boolean)
+	return tostring(input)
 end
 
 datatypes.Vector3 = function(input: Vector3)
