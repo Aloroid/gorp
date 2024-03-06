@@ -118,8 +118,8 @@ local function widget(namespace: "client" | "server", actor_id: number, registry
 		if not parsed.ok then return end
 
 		for _, changes in all_changes do
-			local server_ctype, entities, values = changes[1], changes[2], changes[3]
-			local ctype_index = table.find(parsed.included, server_ctype)
+			local ctype_index, entities, values = changes[1], changes[2], changes[3]
+			local server_ctype = parsed.included[ctype_index]
 
 			if ctype_index == nil and server_ctype ~= 1 then continue end
 			if server_ctype == 1 then ctype_index = 1 end
