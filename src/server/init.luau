@@ -20,6 +20,7 @@ local remove_active_connectors = require(script.systems.remove_active_connectors
 local replicate_components = require(script.systems.replicate_components)
 local replicate_core = require(script.systems.replicate_core)
 local replicate_entity = require(script.systems.replicate_entity)
+local replicate_fps = require(script.systems.replicate_fps)
 local replicate_registry = require(script.systems.replicate_registry)
 local replicate_scheduler = require(script.systems.replicate_scheduler)
 local replicate_system_performance = require(script.systems.replicate_system_performance)
@@ -92,7 +93,7 @@ local server = {
 
 local server_scheduler = scheduler(`gorpserver:{common_actor_id}`)
 
-RunService.Heartbeat:Connect(function()
+RunService.Heartbeat:Connect(function(dt)
 	server_scheduler:system("remove_active_connectors", remove_active_connectors)
 	server_scheduler:system("replicate_core", replicate_core)
 	server_scheduler:system("replicate_components", replicate_components)
@@ -100,6 +101,7 @@ RunService.Heartbeat:Connect(function()
 	server_scheduler:system("replicate_scheduler", replicate_scheduler)
 	server_scheduler:system("replicate_system_performance", replicate_system_performance)
 	server_scheduler:system("replicate_entity", replicate_entity)
+	if RunService:IsServer() then server_scheduler:system("replicate_fps", replicate_fps, dt) end
 
 	server_scheduler:finish()
 end)

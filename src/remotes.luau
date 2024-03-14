@@ -45,6 +45,8 @@ return {
 
 	get_entity_data = net.create_callback("get_entity_data"),
 	write_entity_data = net.create_event("write_entity_data"),
+
+	replicate_fps = net.create_event("replicate_fps", true),
 } :: {
 
 	replicate_core_data: NetEvent<{ { name: string, id: number } }, { { name: string, id: number } }>,
@@ -72,4 +74,6 @@ return {
 
 	get_entity_data: NetCallback<(number, Entity), ({ ComponentReference }, { Value })>,
 	write_entity_data: NetEvent<(number, Entity, { ComponentReference }, { Value })>,
+
+	replicate_fps: NetEvent<(number, number)>,
 }

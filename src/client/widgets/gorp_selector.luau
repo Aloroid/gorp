@@ -6,13 +6,16 @@
 local RunService = game:GetService("RunService")
 
 local button = require(script.Parent.Parent.components.button)
+local convert_scale = require(script.Parent.Parent.Parent.modules.convert_scale)
 local gorp_registry = require(script.Parent.gorp_registry)
 local gorp_scheduler = require(script.Parent.gorp_scheduler)
 local layout = require(script.Parent.Parent.components.layout)
 local padding = require(script.Parent.Parent.components.padding)
 local pane = require(script.Parent.Parent.components.pane)
+local remotes = require(script.Parent.Parent.Parent.remotes)
 local scrolling_frame = require(script.Parent.Parent.components.scrolling_frame)
 local servers = require(script.Parent.Parent.servers)
+local text = require(script.Parent.Parent.components.text)
 local vide = require(script.Parent.Parent.Parent.Parent.vide)
 local widget = require(script.Parent.Parent.components.widget)
 
@@ -76,6 +79,9 @@ return function()
 		local schedulers = source({})
 		local query = source("")
 
+		local server_fps = source(0)
+		local server_dt = source(0)
+
 		local function update()
 			local new_registries = {}
 			local new_schedulers = {}
@@ -100,6 +106,10 @@ return function()
 
 		update()
 
+		cleanup(remotes.replicate_fps:connect(function(c, fps, dt)
+			server_dt(dt)
+			server_fps(fps)
+		end))
 		cleanup(RunService.Heartbeat:Connect(update))
 
 		cleanup(widget {
@@ -110,7 +120,13 @@ return function()
 
 			--bind_to_close = destroy,
 
+			layout {
+				Padding = UDim.new(0, 2),
+			},
+
 			scrolling_frame {
+
+				Size = UDim2.new(1, 0, 1, -24),
 
 				AutomaticCanvasSize = Enum.AutomaticSize.Y,
 				CanvasSize = UDim2.new(),
@@ -158,6 +174,17 @@ return function()
 						}
 					end),
 				},
+			},
+
+			text {
+
+				text = function()
+					return string.format(
+						"  %.0f server fps\t%s server dt",
+						server_fps(),
+						convert_scale(server_dt(), "s")
+					)
+				end,
 			},
 		})
 	end)
