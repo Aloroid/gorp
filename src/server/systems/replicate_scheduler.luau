@@ -100,11 +100,6 @@ remotes.pause_system:connect(function(connector, scheduler_id: number, system_na
 	if index == nil then return end
 
 	entry.system_paused[index] = if paused then true else nil :: any
-
-	-- manually run update callbacks to notify it paused
-	for query_id, update_callback in active_subscriptions :: any do
-		update_callback()
-	end
 end)
 
 return function()

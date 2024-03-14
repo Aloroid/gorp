@@ -8,6 +8,8 @@ local reverse_connector = require(script.Parent.Parent.Parent.modules.reverse_co
 local servers = require(script.Parent.Parent.servers)
 local vide = require(script.Parent.Parent.Parent.Parent.vide)
 
+local container = require(script.Parent.Parent.components.container)
+local gorp_system = require(script.Parent.gorp_system)
 local graph = require(script.graph)
 local padding = require(script.Parent.Parent.components.padding)
 local pane = require(script.Parent.Parent.components.pane)
@@ -15,10 +17,10 @@ local scrolling_frame = require(script.Parent.Parent.components.scrolling_frame)
 local style = require(script.Parent.Parent.style)
 local text = require(script.Parent.Parent.components.text)
 local widget = require(script.Parent.Parent.components.widget)
-local gorp_system = require(script.Parent.gorp_system)
 
 local create = vide.create
 local source = vide.source
+local batch = vide.batch
 local indexes = vide.indexes
 local cleanup = vide.cleanup
 
@@ -59,6 +61,7 @@ local function generate_ui(namespace: "client" | "server", actor_id: number, sch
 
 	-- handles replication of the scheduler and updating the internal data structure
 	local connection = remotes.replicate_scheduler:connect(function(connector, incoming_id, packet)
+		debug.profilebegin("scheduler update")
 		--if subscription_id == -1 then task.wait() end -- delay a little so it can arrive
 		connector = reverse_connector(connector)
 
@@ -68,36 +71,39 @@ local function generate_ui(namespace: "client" | "server", actor_id: number, sch
 
 		local new_pending_scheduler_systems = table.clone(scheduler_systems())
 
-		-- First we have to update the order of the scheduler
-		for _, new_data in packet.system_order_changes do
-			-- We write this to a new table based on the old one.
-			new_pending_scheduler_systems[new_data.old or -1] = nil
-			if not (new_data :: any).new then continue end
+		batch(function()
+			-- First we have to update the order of the scheduler
+			for _, new_data in packet.system_order_changes do
+				-- We write this to a new table based on the old one.
+				new_pending_scheduler_systems[new_data.old or -1] = nil
+				if not (new_data :: any).new then continue end
 
-			local old_system_data = scheduler_systems()[new_data.old or -1]
-				or {
-					name = (new_data :: any).name,
-					time = source(0),
-					paused = source(false),
-				}
+				local old_system_data = scheduler_systems()[new_data.old or -1]
+					or {
+						name = (new_data :: any).name,
+						time = source(0),
+						paused = source(false),
+					}
 
-			new_pending_scheduler_systems[(new_data :: any).new] = old_system_data
-		end
+				new_pending_scheduler_systems[(new_data :: any).new] = old_system_data
+			end
 
-		-- After we've updated the scheduler, we update the paused listings
-		for i, system in new_pending_scheduler_systems do
-			system.paused(get_bool_from_buffer(packet.paused, i))
-		end
+			-- After we've updated the scheduler, we update the paused listings
+			for i, system in new_pending_scheduler_systems do
+				system.paused(get_bool_from_buffer(packet.paused, i))
+			end
 
-		-- And then we update the average times.
-		for i, system in new_pending_scheduler_systems do
-			if system.paused() then continue end
-			local t = buffer.readf32(packet.average_times, (i - 1) * 4)
-			system.time(t)
-		end
+			-- And then we update the average times.
+			for i, system in new_pending_scheduler_systems do
+				if system.paused() then continue end
+				local t = buffer.readf32(packet.average_times, (i - 1) * 4)
+				system.time(t)
+			end
+		end)
 
 		if #packet.system_order_changes == 0 then return end
 		scheduler_systems(new_pending_scheduler_systems)
+		debug.profileend()
 	end)
 
 	cleanup(connection)
@@ -129,6 +135,57 @@ local function generate_ui(namespace: "client" | "server", actor_id: number, sch
 		pane {
 
 			layout {},
+
+			container {
+
+				Size = UDim2.fromScale(1, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+
+				layout {
+					FillDirection = Enum.FillDirection.Horizontal,
+					VerticalAlignment = Enum.VerticalAlignment.Center,
+				},
+
+				text {
+					text = function()
+						local scheduler_systems = scheduler_systems()
+						local sum = 0
+
+						for k, v in scheduler_systems do
+							if v.paused() then continue end
+							sum += v.time()
+						end
+
+						return `Run Time: {convert_scale(sum, "s")}`
+					end,
+				},
+
+				button {
+					layout = { Size = UDim2.fromScale(0, 1), AutomaticSize = Enum.AutomaticSize.X },
+
+					text = "Pause all",
+					activated = function()
+						local scheduler_system = scheduler_systems()
+
+						for _, system in scheduler_system do
+							remotes.pause_system:fire(connector, scheduler_id, system.name, true)
+						end
+					end,
+				},
+
+				button {
+					layout = { Size = UDim2.fromScale(0, 1), AutomaticSize = Enum.AutomaticSize.X },
+
+					text = "Resume all",
+					activated = function()
+						local scheduler_system = scheduler_systems()
+
+						for _, system in scheduler_system do
+							remotes.pause_system:fire(connector, scheduler_id, system.name, false)
+						end
+					end,
+				},
+			},
 
 			graph {
 
@@ -282,7 +339,7 @@ local function generate_ui(namespace: "client" | "server", actor_id: number, sch
 							system_name = value().name,
 							scheduler_id = scheduler_id,
 
-							connector = connector
+							connector = connector,
 						}
 					end,
 				}
