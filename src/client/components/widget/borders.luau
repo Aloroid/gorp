@@ -2,9 +2,9 @@ local GuiService = game:GetService("GuiService")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-local container = require(script.Parent.Parent.container)
-local style = require(script.Parent.Parent.Parent.style)
-local vide = require(script.Parent.Parent.Parent.Parent.Parent.vide)
+local container = require(script.Parent.Parent.Parent.container)
+local style = require(script.Parent.Parent.Parent.Parent.style)
+local vide = require(script.Parent.Parent.Parent.Parent.Parent.Parent.vide)
 
 local create = vide.create
 local source = vide.source

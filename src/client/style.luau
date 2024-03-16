@@ -154,4 +154,4 @@ local stupid = {
 	microprofiler_bar_bot = Color3.fromRGB(149, 85, 41),
 }
 
-return roses
+return dark

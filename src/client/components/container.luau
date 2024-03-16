@@ -8,9 +8,7 @@ local vide = require(script.Parent.Parent.Parent.Parent.vide)
 
 local create = vide.create
 
-type Container = { [any]: any }
-
-local function container(props: Container)
+local function container(props: vide.vFrame)
 	return create "Frame" {
 
 		Size = UDim2.fromScale(1, 1),

@@ -3,18 +3,15 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
-local actions = require(script.Parent.Parent.actions)
-local enabled = require(script.Parent.Parent.enabled)
-local style = require(script.Parent.Parent.style)
-local vide = require(script.Parent.Parent.Parent.Parent.vide)
+local enabled = require(script.Parent.Parent.Parent.enabled)
+local style = require(script.Parent.Parent.Parent.style)
+local vide = require(script.Parent.Parent.Parent.Parent.Parent.vide)
 
-local border = require(script.Parent.border)
+local border = require(script.Parent.Parent.border)
 local borders = require(script.borders)
-local container = require(script.Parent.container)
-local shadow = require(script.Parent.shadow)
-local text = require(script.Parent.text)
-
-local widgets = {}
+local container = require(script.Parent.Parent.container)
+local shadow = require(script.Parent.Parent.shadow)
+local topbar = require(script.topbar)
 
 local create = vide.create
 local source = vide.source
@@ -22,9 +19,9 @@ local cleanup = vide.cleanup
 
 type props = {
 
-	widget_id: string?,
 	title: (string | () -> string)?,
 	min_size: Vector2?,
+	position: Vector2?,
 	size: Vector2?,
 
 	children: (() -> Instance | { Instance })?,
@@ -37,30 +34,26 @@ local highest_display_order = 100000
 local RESIZE_RANGE = 4
 
 return function(props: props)
-	local widget_id = props.widget_id or props.title or ""
 	local min_size = props.min_size or Vector2.new(100, 100)
 	local base_size = props.size or min_size * 1.5
-	local title = props.title or widget_id or ""
+	local title = props.title or ""
 	local children = props.children
 	local bind_to_close = props.bind_to_close
-
-	local closesable = not not bind_to_close
+	local position = props.position or Vector2.zero
 
 	local x_size = source(math.max(min_size.X, base_size.X))
 	local y_size = source(math.max(min_size.Y, base_size.Y))
-	local x_position = source(100)
-	local y_position = source(56)
+	local x_position = source(position.X or 100)
+	local y_position = source(position.Y or 56)
 
-	assert(widgets[props.widget_id] == nil, `{props.widget_id} already exists as a widget!`)
-
-	props.widget_id = nil
 	props.min_size = nil
 	props.title = nil
 	props.size = nil
 	props.children = nil
+	props.position = nil
 	props.bind_to_close = nil
 
-	local offset = Vector2.zero
+	local offset = source(Vector2.zero)
 	local dragging = source(false)
 	local absolute_position = source(Vector2.zero)
 	local absolute_size = source(Vector2.zero)
@@ -74,8 +67,6 @@ return function(props: props)
 	local display_order = source(highest_display_order + 1)
 	highest_display_order += 1
 
-	local hover_closed = source(false)
-	local pressed_closed = source(false)
 	local mouse_inside = source(false)
 
 	local top: Vector2
@@ -120,7 +111,15 @@ return function(props: props)
 		top = absolute_position()
 		bottom = absolute_position() + absolute_size()
 
-		local player_gui = Players.LocalPlayer:WaitForChild("PlayerGui") :: PlayerGui
+		local player_gui
+		if Players.LocalPlayer and RunService:IsRunning() then
+			player_gui = Players.LocalPlayer:WaitForChild("PlayerGui") :: PlayerGui
+		elseif RunService:IsStudio() and RunService:IsRunning() then
+			player_gui = game:GetService("CoreGui") :: any
+		else
+			return
+		end
+
 		local objects = player_gui:GetGuiObjectsAtPosition(input.Position.X, input.Position.Y)
 		if #objects == 0 then return end
 		if not objects[1]:IsDescendantOf(ref()) then return end
@@ -137,8 +136,8 @@ return function(props: props)
 		end
 
 		local position = UserInputService:GetMouseLocation()
-		x_position(position.X + offset.X)
-		y_position(position.Y + offset.Y)
+		x_position(position.X + offset().X)
+		y_position(position.Y + offset().Y)
 	end))
 
 	return create "ScreenGui" {
@@ -146,7 +145,7 @@ return function(props: props)
 			then game:GetService("CoreGui")
 			else Players.LocalPlayer:WaitForChild("PlayerGui"),
 
-		Name = widget_id,
+		Name = title,
 
 		DisplayOrder = display_order,
 
@@ -172,68 +171,14 @@ return function(props: props)
 				BackgroundColor3 = style.background,
 				ZIndex = 100,
 
-				border {},
-
-				-- Topbar
-				create "TextButton" {
-					Name = "Topbar",
-
-					Size = UDim2.new(1, 0, 0, 24),
-
-					BackgroundColor3 = style.foreground,
-
-					Text = "",
-
-					text {
-						layout = {
-							Size = UDim2.fromScale(1, 1),
-							AnchorPoint = Vector2.zero,
-							Position = UDim2.new(),
-						},
-						text = title or "test",
-					},
-
-					if closesable ~= false
-						then create "TextButton" {
-							Position = UDim2.new(1, 0, 0.5, 0),
-							Size = UDim2.new(0, 44, 1, 0),
-							AnchorPoint = Vector2.new(1, 0.5),
-
-							BackgroundColor3 = vide.spring(function()
-								return if pressed_closed() and hover_closed()
-									then style.close_button_pressed
-									elseif hover_closed() then style.close_button
-									else style.foreground
-							end, 0.1),
-
-							create "ImageLabel" {
-
-								Size = UDim2.fromOffset(12, 12),
-								Position = UDim2.fromScale(0.5, 0.5),
-								AnchorPoint = Vector2.new(0.5, 0.5),
-
-								BackgroundTransparency = 1,
-
-								Image = "rbxasset://textures/ui/InspectMenu/x.png",
-							},
-
-							Text = "",
-
-							actions.hovering(hover_closed),
-							actions.pressed(pressed_closed),
-							Activated = bind_to_close,
-						}
-						else nil,
-
-					border {},
-
-					MouseButton1Down = function(x, y)
-						offset = (absolute_position() - Vector2.new(x, y))
-						dragging(true)
-					end,
-
-					ZIndex = 1000,
+				topbar {
+					title = title,
+					dragging = dragging,
+					offset = offset,
+					bind_to_close = bind_to_close,
 				},
+
+				border {},
 
 				borders {
 
